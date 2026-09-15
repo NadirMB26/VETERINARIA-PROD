@@ -14,7 +14,7 @@ const routes: Routes = [
     children: [
       {
         path: 'dashboard',
-        canActivate: [rolGuard(['administrador', 'recepcionista', 'veterinario'])],
+        canActivate: [rolGuard(['administrador', 'recepcionista'])],
         loadChildren: () => import('./tabs/home/home.module').then(m => m.HomePageModule)
       },
       {

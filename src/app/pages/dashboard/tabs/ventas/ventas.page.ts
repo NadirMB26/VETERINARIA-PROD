@@ -89,6 +89,7 @@ export class VentasPage implements OnInit, OnDestroy {
 
   private productosSub?: Subscription;
   private mascotasSub?: Subscription;
+  private configSub?: Subscription;
 
   private routeParamsSub?: Subscription;
 
@@ -115,7 +116,7 @@ export class VentasPage implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.banners$ = this.bannerSvc.getActivos();
 
-    this.configSvc.getConfiguracion().subscribe(cfg => {
+    this.configSub = this.configSvc.config$.subscribe(cfg => {
       this.configApp = cfg ?? null;
     });
 
@@ -144,6 +145,7 @@ export class VentasPage implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.productosSub?.unsubscribe();
     this.mascotasSub?.unsubscribe();
+    this.configSub?.unsubscribe();
     this.routeParamsSub?.unsubscribe();
   }
 

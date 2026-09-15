@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { AuthService } from 'src/app/core/services/auth.service';
 import { UserService } from 'src/app/core/services/user.service';
 import { ConfiguracionAppService } from 'src/app/core/services/configuracion-app.service';
@@ -11,7 +12,7 @@ import { ConfiguracionApp } from 'src/app/core/models/configuracion-app.model';
   styleUrls: ['./login.page.scss'],
   standalone: false
 })
-export class LoginPage implements OnInit {
+export class LoginPage implements OnInit, OnDestroy {
 
   email:        string  = '';
   password:     string  = '';
@@ -20,6 +21,8 @@ export class LoginPage implements OnInit {
   showPassword: boolean = false;
 
   configuracion: ConfiguracionApp | null = null;
+
+  private configSub?: Subscription;
 
   constructor(
     private authService: AuthService,
@@ -30,10 +33,15 @@ export class LoginPage implements OnInit {
 
   // ── Al cargar la página: verificar si hay usuarios en la BD ───────────────
   async ngOnInit() {
-    this.configSvc.getConfiguracion().subscribe(cfg => {
+    // `config$` ya maneja errores: el login siempre carga aunque falle la lectura.
+    this.configSub = this.configSvc.config$.subscribe(cfg => {
       this.configuracion = cfg ?? null;
     });
     await this.verificarPrimerUso();
+  }
+
+  ngOnDestroy() {
+    this.configSub?.unsubscribe();
   }
 
   private async verificarPrimerUso() {

@@ -17,6 +17,7 @@ export interface PermisosNavegacion {
   esGroomer: boolean;
   esCliente: boolean;
   esStaff: boolean;
+  puedeVerDashboard: boolean;
   puedeVerUsuarios: boolean;
   puedeVerMascotas: boolean;
   puedeVerCitas: boolean;
@@ -40,6 +41,9 @@ export class NavigationService {
 
     return {
       esAdmin, esRecepcionista, esVeterinario, esGroomer, esCliente, esStaff,
+      // El dashboard solo lo ven admin y recepción; el veterinario tiene su
+      // propio inicio (veterinario-home).
+      puedeVerDashboard: esAdmin || esRecepcionista,
       puedeVerUsuarios: esAdmin || (esRecepcionista && !!p['verUsuarios']),
       puedeVerMascotas: esAdmin
         || (esRecepcionista && !!p['verMascotas'])
@@ -60,7 +64,7 @@ export class NavigationService {
     const perm = this.calcularPermisos(rol, privilegios);
 
     return [
-      { label: 'Inicio', icon: 'home-outline', ruta: '/layout/dashboard', seccion: 'General', visible: perm.esStaff },
+      { label: 'Inicio', icon: 'home-outline', ruta: '/layout/dashboard', seccion: 'General', visible: perm.puedeVerDashboard },
       { label: 'Inicio', icon: 'home-outline', ruta: '/layout/cliente-home', seccion: 'General', visible: perm.esCliente },
       { label: 'Diagnosticar Citas', icon: 'home-outline', ruta: '/layout/veterinario-home', seccion: 'General', visible: perm.esVeterinario },
       { label: 'Mis servicios', icon: 'cut-outline', ruta: '/layout/groomer-home', seccion: 'General', visible: perm.puedeVerEstetica },
@@ -82,7 +86,7 @@ export class NavigationService {
     const perm = this.calcularPermisos(rol, privilegios);
 
     return [
-      { tab: 'dashboard', href: '/layout/dashboard', icon: 'home-outline', label: 'Inicio', visible: perm.esStaff },
+      { tab: 'dashboard', href: '/layout/dashboard', icon: 'home-outline', label: 'Inicio', visible: perm.puedeVerDashboard },
       { tab: 'groomer-home', href: '/layout/groomer-home', icon: 'cut-outline', label: 'Servicios', visible: perm.puedeVerEstetica },
       { tab: 'cliente-home', href: '/layout/cliente-home', icon: 'home-outline', label: 'Inicio', visible: perm.esCliente },
       { tab: 'usuarios', href: '/layout/usuarios', icon: 'people-outline', label: 'Usuarios', visible: perm.puedeVerUsuarios },

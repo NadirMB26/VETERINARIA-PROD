@@ -74,11 +74,9 @@ export class ConfiguracionAppPage implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.sub = this.configSvc.getConfiguracion().subscribe(cfg => {
-      if (cfg) {
-        this.configuracion = { ...getConfiguracionDefault(), ...cfg };
-        this.cargando = false;
-      }
+    this.sub = this.configSvc.config$.subscribe(cfg => {
+      this.configuracion = { ...getConfiguracionDefault(), ...(cfg ?? {}) };
+      this.cargando = false;
     });
   }
 

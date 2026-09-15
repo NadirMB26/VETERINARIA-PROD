@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, doc, setDoc, docData, updateDoc, getDoc } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Firestore, doc, setDoc, docData, getDoc, deleteField } from '@angular/fire/firestore';
+import { Observable, of } from 'rxjs';
+import { catchError, shareReplay, switchMap } from 'rxjs/operators';
 import { ConfiguracionApp, getConfiguracionDefault } from '../models/configuracion-app.model';
 import { generarPaleta } from '../utils/color.util';
 import { FUENTES_DISPONIBLES, cargarFuente, FuenteDisponible } from '../models/fuentes.model';
+import { AuthService } from './auth.service';
 
 const COLECCION = 'configuracion';
 const DOC_ID = 'app';
@@ -23,10 +25,36 @@ const VARS_PRIMARIAS = [
 export class ConfiguracionAppService {
 
   private firestore = inject(Firestore);
+  private authService = inject(AuthService);
   private docRef = doc(this.firestore, COLECCION, DOC_ID);
+
+  /**
+   * Configuración en vivo y a prueba de fallos: si la lectura falla (reglas,
+   * red) emite `undefined` en lugar de romper la suscripción para siempre.
+   */
+  readonly config$: Observable<ConfiguracionApp | undefined> = this.getConfiguracion().pipe(
+    catchError(err => {
+      console.error('Error leyendo la configuración de la app:', err);
+      return of(undefined);
+    }),
+    shareReplay({ bufferSize: 1, refCount: true })
+  );
 
   getConfiguracion(): Observable<ConfiguracionApp | undefined> {
     return docData(this.docRef) as Observable<ConfiguracionApp | undefined>;
+  }
+
+  /**
+   * Aplica la configuración al arrancar y la vuelve a leer cuando cambia la
+   * sesión, de modo que el tema/color/fuente/título se apliquen aunque la
+   * primera lectura ocurra sin autenticación (página de inicio sin sesión).
+   */
+  iniciar(): void {
+    this.authService.user$
+      .pipe(switchMap(() => this.config$))
+      .subscribe(cfg => {
+        this.aplicarConfiguracion(cfg ?? getConfiguracionDefault());
+      });
   }
 
   async inicializarSiNoExiste(): Promise<void> {
@@ -40,8 +68,17 @@ export class ConfiguracionAppService {
     }
   }
 
+  /**
+   * Guarda la configuración creando el documento si aún no existe.
+   * Los campos en `undefined` se eliminan (reset de color/fuente), porque
+   * Firestore no admite `undefined` como valor de campo.
+   */
   actualizar(cambios: Partial<ConfiguracionApp>): Promise<void> {
-    return updateDoc(this.docRef, cambios as any);
+    const datos: Record<string, unknown> = {};
+    for (const [clave, valor] of Object.entries(cambios)) {
+      datos[clave] = valor === undefined ? deleteField() : valor;
+    }
+    return setDoc(this.docRef, datos as any, { merge: true });
   }
 
   aplicarTema(tema: string): void {

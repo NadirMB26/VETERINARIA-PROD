@@ -16,6 +16,7 @@ describe('NavigationService', () => {
 
     expect(vetVeAgenda).toBeTrue();
     expect(groomerVeServicios).toBeTrue();
+    expect(menuVet.find(i => i.label === 'Inicio' && i.ruta === '/layout/dashboard')?.visible).toBeFalse();
     expect(menuGroomer.find(i => i.label === 'Usuarios')?.visible).toBeFalse();
     expect(menuGroomer.find(i => i.label === 'Cobranza')?.visible).toBeFalse();
   });

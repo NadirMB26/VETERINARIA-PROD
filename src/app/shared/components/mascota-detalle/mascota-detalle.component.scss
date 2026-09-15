@@ -576,10 +576,28 @@
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  padding-bottom: 10px;
+  padding: 0 16px 10px;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--app-border-dark, #cbd5e1) transparent;
 
-  &::-webkit-scrollbar { display: none; }
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 0 16px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--app-border-dark, #cbd5e1);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--app-primary);
+  }
 }
 
 .md-tab {

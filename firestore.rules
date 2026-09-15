@@ -116,8 +116,10 @@ service cloud.firestore {
     }
 
     // ── Configuración de la app ─────────────────────────
+    // Lectura pública: el login (sin sesión) muestra nombre/logo/colores.
+    // La escritura sigue siendo exclusiva del administrador.
     match /configuracion/{docId} {
-      allow read: if isSignedIn();
+      allow read: if true;
       allow write: if esAdmin();
     }
 

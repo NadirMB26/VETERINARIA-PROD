@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ConfiguracionAppService } from './core/services/configuracion-app.service';
+import { AuthService } from './core/services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -9,14 +10,17 @@ import { ConfiguracionAppService } from './core/services/configuracion-app.servi
 })
 export class AppComponent implements OnInit {
 
-  constructor(private configSvc: ConfiguracionAppService) {}
+  private configSvc = inject(ConfiguracionAppService);
+  private authService = inject(AuthService);
 
   async ngOnInit() {
-    await this.configSvc.inicializarSiNoExiste();
-    this.configSvc.getConfiguracion().subscribe(cfg => {
-      if (cfg) {
-        this.configSvc.aplicarConfiguracion(cfg);
-      }
-    });
+    // Aplica la configuración en vivo (incluido el login) y la re-aplica al
+    // iniciar sesión, aunque la primera lectura ocurra sin autenticación.
+    this.configSvc.iniciar();
+
+    // El documento de configuración solo lo puede crear un administrador.
+    if (this.authService.getRolActual() === 'administrador') {
+      await this.configSvc.inicializarSiNoExiste();
+    }
   }
 }

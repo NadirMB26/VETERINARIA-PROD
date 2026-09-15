@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { ConfiguracionAppService } from 'src/app/core/services/configuracion-app.service';
 import { ConfiguracionApp } from 'src/app/core/models/configuracion-app.model';
 
@@ -8,7 +9,7 @@ import { ConfiguracionApp } from 'src/app/core/models/configuracion-app.model';
   styleUrls: ['./side-menu.component.scss'],
   standalone: false
 })
-export class SideMenuComponent implements OnInit {
+export class SideMenuComponent implements OnInit, OnDestroy {
 
   @Input() uid = '';
 
@@ -26,12 +27,18 @@ export class SideMenuComponent implements OnInit {
 
   configuracion: ConfiguracionApp | null = null;
 
+  private configSub?: Subscription;
+
   constructor(private configSvc: ConfiguracionAppService) {}
 
   ngOnInit(): void {
-    this.configSvc.getConfiguracion().subscribe(cfg => {
+    this.configSub = this.configSvc.config$.subscribe(cfg => {
       this.configuracion = cfg ?? null;
     });
+  }
+
+  ngOnDestroy(): void {
+    this.configSub?.unsubscribe();
   }
 
   get iniciales(): string {
