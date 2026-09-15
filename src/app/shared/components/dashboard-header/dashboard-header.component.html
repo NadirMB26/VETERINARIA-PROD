@@ -1,0 +1,14 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button color="light"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>{{ titulo }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" color="light" class="dh-campana-btn" (click)="abrirNotificaciones()">
+        <ion-icon slot="icon-only" name="notifications-outline"></ion-icon>
+        <ion-badge class="dh-campana-badge" *ngIf="contadorAlertas > 0" color="danger">{{ contadorAlertas }}</ion-badge>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>

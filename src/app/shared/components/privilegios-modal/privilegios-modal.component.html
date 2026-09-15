@@ -1,0 +1,142 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>
+      <div class="modal-title">
+        <ion-icon name="shield-checkmark"></ion-icon>
+        <span>Privilegios — {{ usuario?.Nombre }}</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()" fill="clear" color="light">
+        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+
+  <!-- Tarjeta usuario -->
+  <div class="usuario-card">
+    <div class="usuario-avatar" [ngClass]="'avatar-' + usuario?.rol">
+      <img *ngIf="usuario?.fotoUrl" [src]="usuario?.fotoUrl" alt="Foto de {{ usuario?.Nombre }}" class="usuario-avatar__img" />
+      <span *ngIf="!usuario?.fotoUrl">{{ iniciales }}</span>
+    </div>
+    <div class="usuario-datos">
+      <h2>{{ usuario?.Nombre }} {{ usuario?.Apellido }}</h2>
+      <p>{{ usuario?.Correo }}</p>
+    </div>
+    <span class="badge-rol" [ngClass]="'badge-' + usuario?.rol">
+      {{ usuario?.rol | titlecase }}
+    </span>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="cargando" class="loading-priv">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando privilegios...</p>
+  </div>
+
+  <!-- ── RECEPCIONISTA ── -->
+  <ng-container *ngIf="!cargando && usuario?.rol === 'recepcionista'">
+
+    <div class="modulo-card">
+      <div class="modulo-header">
+        <div class="modulo-icono ic-usuarios"><ion-icon name="people-outline"></ion-icon></div>
+        <span>Usuarios</span>
+      </div>
+      <div class="priv-lista">
+        <div class="priv-fila" *ngFor="let p of privilegiosRecep.slice(0,3)">
+          <span>{{ p.label }}</span>
+          <div class="toggle-wrap">
+            <ion-toggle [(ngModel)]="privilegios[p.key]" color="primary"></ion-toggle>
+            <span class="on-off" [class.on]="privilegios[p.key]">{{ privilegios[p.key] ? 'ON' : 'OFF' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modulo-card">
+      <div class="modulo-header">
+        <div class="modulo-icono ic-mascotas"><ion-icon name="paw-outline"></ion-icon></div>
+        <span>Mascotas</span>
+      </div>
+      <div class="priv-lista">
+        <div class="priv-fila" *ngFor="let p of privilegiosRecep.slice(3,6)">
+          <span>{{ p.label }}</span>
+          <div class="toggle-wrap">
+            <ion-toggle [(ngModel)]="privilegios[p.key]" color="primary"></ion-toggle>
+            <span class="on-off" [class.on]="privilegios[p.key]">{{ privilegios[p.key] ? 'ON' : 'OFF' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modulo-card">
+      <div class="modulo-header">
+        <div class="modulo-icono ic-citas"><ion-icon name="calendar-outline"></ion-icon></div>
+        <span>Citas</span>
+      </div>
+      <div class="priv-lista">
+        <div class="priv-fila" *ngFor="let p of privilegiosRecep.slice(6,10)">
+          <span>{{ p.label }}</span>
+          <div class="toggle-wrap">
+            <ion-toggle [(ngModel)]="privilegios[p.key]" color="primary"></ion-toggle>
+            <span class="on-off" [class.on]="privilegios[p.key]">{{ privilegios[p.key] ? 'ON' : 'OFF' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modulo-card">
+      <div class="modulo-header">
+        <div class="modulo-icono ic-ventas"><ion-icon name="cart-outline"></ion-icon></div>
+        <span>Ventas y Cobranza</span>
+      </div>
+      <div class="priv-lista">
+        <div class="priv-fila" *ngFor="let p of privilegiosRecep.slice(10)">
+          <span>{{ p.label }}</span>
+          <div class="toggle-wrap">
+            <ion-toggle [(ngModel)]="privilegios[p.key]" color="primary"></ion-toggle>
+            <span class="on-off" [class.on]="privilegios[p.key]">{{ privilegios[p.key] ? 'ON' : 'OFF' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </ng-container>
+
+  <!-- ── VETERINARIO ── -->
+  <ng-container *ngIf="!cargando && usuario?.rol === 'veterinario'">
+    <div class="modulo-card">
+      <div class="modulo-header">
+        <div class="modulo-icono ic-vet"><ion-icon name="medkit-outline"></ion-icon></div>
+        <span>Citas e Historial</span>
+      </div>
+      <div class="priv-lista">
+        <div class="priv-fila" *ngFor="let p of privilegiosVet">
+          <span>{{ p.label }}</span>
+          <div class="toggle-wrap">
+            <ion-toggle [(ngModel)]="privilegios[p.key]" color="primary"></ion-toggle>
+            <span class="on-off" [class.on]="privilegios[p.key]">{{ privilegios[p.key] ? 'ON' : 'OFF' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+</ion-content>
+
+<ion-footer class="modal-footer">
+  <div class="footer-btns">
+    <ion-button expand="block" color="primary" (click)="guardar()" [disabled]="guardando" class="btn-guardar">
+      <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
+      <ion-icon *ngIf="!guardando" name="checkmark-circle-outline" slot="start"></ion-icon>
+      {{ guardando ? 'Guardando...' : 'Guardar Privilegios' }}
+    </ion-button>
+    <ion-button expand="block" fill="outline" color="medium" (click)="cerrar()">
+      <ion-icon name="close-outline" slot="start"></ion-icon>
+      Cancelar
+    </ion-button>
+  </div>
+</ion-footer>

@@ -1,0 +1,162 @@
+<div class="page">
+
+  <header class="header">
+    <button class="icon-btn" aria-label="Menú">
+      <span class="icon-menu"></span>
+    </button>
+  </header>
+
+  <section class="greeting">
+    <div class="greeting-text">
+      <p class="greeting-sub">Hola,</p>
+      <h1>{{ nombreCliente || 'Cliente' }} <span class="wave">👋</span></h1>
+    </div>
+    <p class="subtitle">¿Cómo están tus mascotas hoy?</p>
+  </section>
+
+  <section class="mascotas-section" aria-label="Tus mascotas">
+    <p class="section-label">Tus mascotas</p>
+
+    <div class="mascotas-row">
+
+      @if (mascotas$ | async; as mascotas) {
+        @if (mascotas.length === 0) {
+          <p class="empty-msg">Aún no tienes mascotas registradas.</p>
+        }
+        @for (mascota of mascotas; track mascota.idMascota) {
+          <button
+            class="mascota-card"
+            [class]="'mascota-card mascota-card--' + mascota.especie.toLowerCase()"
+            (click)="verDetalleMascota(mascota)"
+            [attr.aria-label]="'Ver detalles de ' + mascota.nombre"
+          >
+            <div class="mascota-avatar">
+              @if (mascota.fotoUrl) {
+                <img [src]="mascota.fotoUrl" alt="{{ mascota.nombre }}" class="mascota-foto" />
+              } @else {
+                {{ emojiEspecie(mascota.especie) }}
+              }
+            </div>
+            <span class="mascota-name">{{ mascota.nombre }}</span>
+            <span class="mascota-age">{{ calcularEdad(mascota.fechaNacimiento) }}</span>
+            @if (mascota.raza) {
+              <span class="mascota-raza">{{ mascota.raza }}</span>
+            }
+          </button>
+        }
+      } @else {
+        <div class="mascota-card skeleton" aria-hidden="true"></div>
+        <div class="mascota-card skeleton" aria-hidden="true"></div>
+      }
+
+      <button class="add-btn" (click)="agregarMascota()" aria-label="Agregar mascota">
+        <div class="add-btn-icon">+</div>
+        <span class="add-btn-label">Agregar mascota</span>
+      </button>
+
+    </div>
+  </section>
+
+
+  <section class="citas-section" aria-label="Últimas citas">
+    <p class="section-label">Últimas citas</p>
+
+    @if (ultimasCitas$ | async; as citas) {
+      @if (citas.length === 0) {
+        <p class="empty-msg">No tienes citas registradas aún.</p>
+      }
+      @for (cita of citas; track cita.idCita) {
+        <div class="cita-card">
+          <div class="cita-icon" [ngClass]="'cita-icon--' + cita.estado">
+            <span>🩺</span>
+          </div>
+          <div class="cita-info">
+            <div class="cita-top">
+              <span class="cita-mascota">{{ cita.nombreMascota }}</span>
+              <span [class]="badgeClass(cita.estado)">{{ estadoTexto(cita.estado) }}</span>
+            </div>
+            <p class="cita-tipo">{{ cita.tipo }} · {{ cita.nombreVeterinario }}</p>
+            <p class="cita-fecha">{{ formatearFecha(cita.fechaRegistro) }} · {{ cita.horaInicio }}</p>
+          </div>
+          <span class="chevron" aria-hidden="true">›</span>
+        </div>
+      }
+    } @else {
+      <div class="cita-card skeleton" aria-hidden="true" style="height:72px;"></div>
+      <div class="cita-card skeleton" aria-hidden="true" style="height:72px;"></div>
+    }
+  </section>
+
+  <div class="banner">
+    <div class="banner-text">
+      <p class="banner-title">¡Haz un nuevo amigo!</p>
+      <p class="banner-sub">Adopta una mascota hoy</p>
+    </div>
+    <span class="paw" aria-hidden="true">🐾</span>
+  </div>
+
+  @if (mascotaSeleccionada) {
+    <div class="detalle-overlay" (click)="mascotaSeleccionada = null">
+      <div class="detalle-panel" (click)="$event.stopPropagation()">
+
+        <div class="detalle-handle"></div>
+
+        <div class="detalle-hero">
+          <div class="detalle-hero-avatar" [class]="'detalle-hero-avatar detalle-hero-avatar--' + mascotaSeleccionada.especie.toLowerCase()">
+            {{ emojiEspecie(mascotaSeleccionada.especie) }}
+          </div>
+          <div class="detalle-hero-info">
+            <h2 class="detalle-nombre">{{ mascotaSeleccionada.nombre }}</h2>
+            <p class="detalle-especie">
+              {{ mascotaSeleccionada.especie | titlecase }}
+              @if (mascotaSeleccionada.raza) { · {{ mascotaSeleccionada.raza }} }
+            </p>
+          </div>
+          <button class="detalle-close" (click)="mascotaSeleccionada = null" aria-label="Cerrar">✕</button>
+        </div>
+
+        <div class="detalle-estado-row">
+          <span class="detalle-badge"
+            [class.detalle-badge--activo]="mascotaSeleccionada.estado === 'activo'"
+            [class.detalle-badge--inactivo]="mascotaSeleccionada.estado === 'inactivo'">
+            {{ mascotaSeleccionada.estado === 'activo' ? '● Activa' : '● Inactiva' }}
+          </span>
+        </div>
+
+        <div class="detalle-grid">
+          <div class="detalle-chip">
+            <span class="detalle-chip-icon">🎂</span>
+            <span class="detalle-chip-label">Edad</span>
+            <span class="detalle-chip-value">{{ calcularEdad(mascotaSeleccionada.fechaNacimiento) }}</span>
+          </div>
+          <div class="detalle-chip">
+            <span class="detalle-chip-icon">⚖️</span>
+            <span class="detalle-chip-label">Peso</span>
+            <span class="detalle-chip-value">{{ mascotaSeleccionada.peso }} kg</span>
+          </div>
+          <div class="detalle-chip">
+            <span class="detalle-chip-icon">🎨</span>
+            <span class="detalle-chip-label">Color</span>
+            <span class="detalle-chip-value">{{ mascotaSeleccionada.color }}</span>
+          </div>
+          <div class="detalle-chip">
+            <span class="detalle-chip-icon">📅</span>
+            <span class="detalle-chip-label">Nacimiento</span>
+            <span class="detalle-chip-value">{{ formatearFecha(mascotaSeleccionada.fechaNacimiento) }}</span>
+          </div>
+        </div>
+
+        <div class="detalle-acciones">
+          <button class="detalle-btn detalle-btn--secondary" (click)="mascotaSeleccionada = null">
+            Cerrar
+          </button>
+          <button class="detalle-btn detalle-btn--primary" (click)="mascotaSeleccionada = null">
+            🗓 Agendar cita
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

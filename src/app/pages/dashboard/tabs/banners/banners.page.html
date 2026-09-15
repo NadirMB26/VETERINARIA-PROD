@@ -1,0 +1,94 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-title">
+        <ion-icon name="images-outline"></ion-icon>
+        <span>Banners promocionales</span>
+      </div>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="banners-content">
+
+  <div class="banners-hint">
+    <ion-icon name="information-circle-outline"></ion-icon>
+    <span>Los banners activos se muestran en la parte superior del módulo de Ventas. Usa las flechas para reordenar.</span>
+  </div>
+
+  <div *ngIf="cargando" class="banners-loading">
+    <div class="banners-loading__row" *ngFor="let i of [0,1,2]"></div>
+  </div>
+
+  <div class="banners-lista" *ngIf="!cargando && slides.length > 0">
+    <div class="banner-row" *ngFor="let s of slides; let i = index">
+      <div class="banner-row__orden">{{ s.orden + 1 }}</div>
+
+      <div class="banner-row__img">
+        <img [src]="s.imagenUrl" [alt]="s.titulo || 'Banner'" />
+      </div>
+
+      <div class="banner-row__info">
+        <strong>{{ s.titulo || 'Sin título' }}</strong>
+        <span *ngIf="s.link">Enlace: {{ s.link }}</span>
+        <span *ngIf="!s.link">Sin enlace</span>
+      </div>
+
+      <div class="banner-row__acciones">
+        <button
+          type="button"
+          class="banner-row__btn"
+          title="Subir"
+          [disabled]="i === 0"
+          (click)="subir(s)">
+          <ion-icon name="arrow-up-outline"></ion-icon>
+        </button>
+        <button
+          type="button"
+          class="banner-row__btn"
+          title="Bajar"
+          [disabled]="i === slides.length - 1"
+          (click)="bajar(s)">
+          <ion-icon name="arrow-down-outline"></ion-icon>
+        </button>
+        <button
+          type="button"
+          class="banner-row__btn"
+          title="Editar"
+          (click)="editarSlide(s)">
+          <ion-icon name="pencil-outline"></ion-icon>
+        </button>
+        <button
+          type="button"
+          class="banner-row__btn banner-row__btn--danger"
+          title="Eliminar"
+          (click)="eliminar(s)">
+          <ion-icon name="trash-outline"></ion-icon>
+        </button>
+      </div>
+
+      <ion-toggle
+        [checked]="s.activo"
+        (ionChange)="toggleActivo(s)"
+        color="success"
+        aria-label="Activo"></ion-toggle>
+    </div>
+  </div>
+
+  <div class="banners-vacio" *ngIf="!cargando && slides.length === 0">
+    <ion-icon name="images-outline"></ion-icon>
+    <h3>Sin banners</h3>
+    <p>Agrega tu primer banner promocional para mostrarlo en Ventas.</p>
+    <ion-button (click)="nuevoSlide()">Crear banner</ion-button>
+  </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" style="margin-bottom: 60px;">
+    <ion-fab-button color="primary" (click)="nuevoSlide()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>

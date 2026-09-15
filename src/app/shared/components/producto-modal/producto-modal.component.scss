@@ -1,0 +1,212 @@
+// ── Contenedor ─────────────────────────────────────
+.pm-content {
+  --background: var(--app-page);
+}
+
+.pm-wrapper {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+// ── Campos ─────────────────────────────────────────
+.pm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.pm-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--app-text-2);
+}
+
+.pm-input {
+  --background: var(--app-surface);
+  --border-radius: 10px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --min-height: 42px;
+  font-size: 14px;
+  background: var(--app-surface);
+  border-radius: 10px;
+
+  &--area {
+    --padding-start: 12px;
+    --padding-top: 10px;
+  }
+}
+
+.pm-hint {
+  font-size: 11px;
+  color: var(--app-text-3);
+}
+
+.pm-imagen {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__preview {
+    position: relative;
+    width: 96px;
+    height: 96px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: var(--app-radius-md);
+      border: 1px solid var(--app-border);
+    }
+  }
+
+  &__quitar {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: var(--app-danger);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    ion-icon { font-size: 12px; }
+  }
+
+  &__input {
+    font-size: 12px;
+    color: var(--app-text-2);
+  }
+}
+
+.pm-row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pm-segment {
+  --background: var(--app-surface);
+  border-radius: 10px;
+}
+
+// ── Oferta ─────────────────────────────────────────
+.pm-oferta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  margin-top: 4px;
+  border: 1px dashed var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-surface-2);
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--app-primary-dark);
+
+    ion-icon { font-size: 16px; }
+  }
+
+  &__preview {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--app-primary-xlight);
+    font-size: 12px;
+    color: var(--app-text-2);
+
+    strong {
+      font-size: 15px;
+      color: var(--app-primary-dark);
+    }
+
+    .pm-oferta__off {
+      font-weight: 700;
+      color: var(--app-success);
+    }
+  }
+
+  &__error {
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--app-danger-light);
+    font-size: 12px;
+    color: var(--app-danger);
+  }
+}
+
+// ── Footer ─────────────────────────────────────────
+.pm-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--app-border);
+  flex-wrap: wrap;
+}
+
+.pm-btn {
+  --border-radius: 10px;
+  font-size: 13px;
+  height: 38px;
+}
+
+// ── Checklist "qué incluye" del servicio ─────────────────
+.pm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.pm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--app-primary-xlight);
+  color: var(--app-primary-dark);
+  font-size: 12px;
+  font-weight: 600;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    border: none;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    padding: 0;
+    font-size: 14px;
+  }
+}
+
+.pm-incluye-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  ion-input {
+    flex: 1;
+  }
+}

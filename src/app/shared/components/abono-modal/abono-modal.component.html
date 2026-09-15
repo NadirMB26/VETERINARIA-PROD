@@ -1,0 +1,96 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Registrar abono</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()" color="light">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="abm-content">
+  <div class="abm-wrapper">
+
+    <div class="abm-resumen">
+      <div class="abm-resumen__fila">
+        <span>Cliente</span>
+        <strong>{{ venta.nombreCliente }}</strong>
+      </div>
+      <div class="abm-resumen__fila">
+        <span>Total venta</span>
+        <span>{{ venta.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+      <div class="abm-resumen__fila">
+        <span>Abonado</span>
+        <span>{{ venta.abonado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+      <div class="abm-resumen__fila abm-resumen__fila--saldo">
+        <span>Saldo pendiente</span>
+        <strong>{{ saldo | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+      </div>
+    </div>
+
+    <div class="abm-field">
+      <label class="abm-label">Monto del abono *</label>
+      <ion-input
+        [(ngModel)]="monto"
+        type="number"
+        min="0"
+        step="500"
+        class="abm-input">
+      </ion-input>
+      <span class="abm-hint">Máximo {{ saldo | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+
+    <div class="abm-field">
+      <label class="abm-label">Método de pago *</label>
+      <ion-segment
+        [(ngModel)]="metodoPago"
+        scrollable="true"
+        (ionChange)="onMetodoPagoChange()"
+        class="abm-segment">
+        <ion-segment-button *ngFor="let m of metodosPago" [value]="m.id">
+          <ion-icon [name]="m.icon"></ion-icon>
+          {{ m.nombre }}
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <div class="abm-field" *ngIf="requiereSoporte">
+      <label class="abm-label">Soporte de pago *</label>
+      <div class="abm-soporte" *ngIf="soportePago">
+        <img [src]="soportePago" alt="Soporte de pago" />
+        <button type="button" class="abm-soporte__quitar" (click)="quitarSoporte()">
+          <ion-icon name="close"></ion-icon>
+        </button>
+      </div>
+      <input
+        *ngIf="!soportePago"
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        (change)="onSoporteSeleccionado($event)"
+        class="abm-file" />
+      <span class="abm-hint">Adjunta el comprobante (PNG, JPG, WEBP · máx 300 KB)</span>
+    </div>
+
+    <div class="abm-field">
+      <label class="abm-label">Nota (opcional)</label>
+      <ion-textarea
+        [(ngModel)]="nota"
+        rows="2"
+        placeholder="Observaciones del abono"
+        class="abm-input abm-input--area">
+      </ion-textarea>
+    </div>
+
+    <div class="abm-footer">
+      <ion-button
+        class="abm-btn"
+        [disabled]="!formValido || guardando"
+        (click)="guardar()">
+        <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
+        {{ guardando ? 'Registrando…' : 'Registrar abono' }}
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

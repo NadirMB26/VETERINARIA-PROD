@@ -1,0 +1,166 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-title">
+        <ion-icon [name]="tipo === 'producto' ? 'cube-outline' : 'fitness-outline'"></ion-icon>
+        <span>{{ titulo }}</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="light" (click)="nuevoItem()" *ngIf="puedeGestionar">
+        <ion-icon name="add-circle-outline" slot="start"></ion-icon>
+        Nuevo
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="catalogo-content">
+
+  <div class="catalogo-hero">
+    <ion-searchbar
+      [(ngModel)]="busqueda"
+      (ionInput)="filtrar()"
+      placeholder="Buscar por nombre, descripción o SKU…"
+      animated
+      class="catalogo-search">
+    </ion-searchbar>
+
+    <div class="catalogo-filtros">
+      <button
+        type="button"
+        class="catalogo-chip"
+        [class.catalogo-chip--activo]="estadoFiltro === 'activo'"
+        (click)="filtrarEstado('activo')">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        Activos
+      </button>
+      <button
+        type="button"
+        class="catalogo-chip"
+        [class.catalogo-chip--activo]="estadoFiltro === 'descontinuado'"
+        (click)="filtrarEstado('descontinuado')">
+        <ion-icon name="pause-circle-outline"></ion-icon>
+        Descontinuados
+      </button>
+      <button
+        type="button"
+        class="catalogo-chip"
+        *ngIf="tipo === 'producto'"
+        [class.catalogo-chip--activo]="soloStockBajo"
+        (click)="toggleStockBajo()">
+        <ion-icon name="warning-outline"></ion-icon>
+        Stock bajo
+      </button>
+    </div>
+
+    <div class="catalogo-filtros">
+      <button
+        *ngFor="let c of categorias"
+        type="button"
+        class="catalogo-chip"
+        [class.catalogo-chip--activo]="categoriaFiltro === c.id"
+        (click)="filtrarCategoria(c.id)">
+        <ion-icon [name]="c.icon"></ion-icon>
+        {{ c.nombre }}
+      </button>
+      <button
+        type="button"
+        class="catalogo-chip"
+        [class.catalogo-chip--activo]="categoriaFiltro === null"
+        (click)="filtrarCategoria(null)">
+        Todos
+      </button>
+    </div>
+
+    <p class="catalogo-contador">{{ itemsFiltrados.length }} {{ etiquetaSingular }}{{ itemsFiltrados.length !== 1 ? 's' : '' }}</p>
+  </div>
+
+  <div *ngIf="cargando" class="catalogo-loading">
+    <div class="catalogo-loading__card" *ngFor="let i of [0,1,2,3]"></div>
+  </div>
+
+  <ion-grid class="catalogo-grid" *ngIf="!cargando && itemsFiltrados.length > 0">
+    <ion-row>
+      <ion-col
+        size="12"
+        size-sm="6"
+        size-md="6"
+        size-lg="4"
+        size-xl="3"
+        *ngFor="let p of itemsFiltrados">
+        <ion-card class="cat-card">
+          <span class="cat-card__estado" [ngClass]="claseEstado(p)">{{ etiquetaEstado(p) }}</span>
+
+          <div class="cat-card__img-wrap">
+            <img
+              *ngIf="p.fotoUrl; else iconoCat"
+              [src]="p.fotoUrl"
+              alt="{{ p.nombre }}"
+              class="cat-card__img" />
+            <ng-template #iconoCat>
+              <ion-icon [name]="iconoCategoria(p)" class="cat-card__img-icono"></ion-icon>
+            </ng-template>
+          </div>
+
+          <ion-card-header class="cat-card__header">
+            <ion-card-title class="cat-card__titulo">{{ p.nombre }}</ion-card-title>
+            <ion-card-subtitle class="cat-card__categoria">
+              {{ nombreCategoria(p) }}
+              <span *ngIf="p.sku"> · {{ p.sku }}</span>
+            </ion-card-subtitle>
+          </ion-card-header>
+
+          <ion-card-content class="cat-card__content">
+            <div class="cat-card__precio">{{ precio(p) }}</div>
+            <div class="cat-card__detalles">
+              <span *ngIf="tipo === 'producto'" class="cat-card__stock">Stock: {{ p.stock }}</span>
+              <span *ngIf="p.costo" class="cat-card__stock">Costo: ${{ p.costo.toLocaleString('es-CO') }}</span>
+              <span *ngIf="tipo === 'servicio' && etiquetaServicio(p)" class="cat-card__stock">{{ etiquetaServicio(p) }}</span>
+              <span *ngIf="tipo === 'servicio' && p.incluye?.length" class="cat-card__stock">{{ p.incluye?.length }} paso(s)</span>
+            </div>
+          </ion-card-content>
+
+          <div class="cat-card__footer">
+            <ion-button
+              size="small"
+              fill="outline"
+              class="cat-card__btn"
+              (click)="editarItem(p)">
+              <ion-icon name="pencil-outline" slot="start"></ion-icon>
+              Editar
+            </ion-button>
+            <ion-button
+              size="small"
+              fill="clear"
+              [color]="p.estado === 'descontinuado' ? 'success' : 'danger'"
+              class="cat-card__btn"
+              (click)="toggleEstado(p)">
+              <ion-icon [name]="p.estado === 'descontinuado' ? 'play-circle-outline' : 'pause-circle-outline'" slot="start"></ion-icon>
+              {{ p.estado === 'descontinuado' ? 'Reactivar' : 'Descontinuar' }}
+            </ion-button>
+          </div>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <div class="catalogo-vacio" *ngIf="!cargando && itemsFiltrados.length === 0">
+    <ion-icon [name]="tipo === 'producto' ? 'cube-outline' : 'fitness-outline'"></ion-icon>
+    <h3>Sin resultados</h3>
+    <p>No se encontraron {{ etiquetaSingular }}s con esos filtros.</p>
+    <ion-button *ngIf="puedeGestionar && items.length === 0" (click)="nuevoItem()">
+      Crear {{ etiquetaSingular }}
+    </ion-button>
+  </div>
+
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" style="margin-bottom: 60px;" *ngIf="puedeGestionar">
+    <ion-fab-button color="primary" (click)="nuevoItem()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>

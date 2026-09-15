@@ -1,0 +1,191 @@
+// ── Contenido ──────────────────────────────────────
+.rep-content {
+  --background: var(--app-page);
+}
+
+// ── Toolbar: filtros ───────────────────────────────
+.rep-toolbar {
+  padding: 12px 16px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rep-filtros {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 2px 4px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.rep-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: var(--app-radius-full);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text-2);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all .15s;
+
+  ion-icon { font-size: 13px; }
+
+  &--activo {
+    background: var(--app-primary);
+    border-color: var(--app-primary);
+    color: #fff;
+  }
+}
+
+.rep-fechas {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 4px 2px;
+
+  ion-button {
+    --border-radius: 10px;
+    font-size: 12px;
+    height: 34px;
+    margin: 0;
+  }
+}
+
+.rep-fecha {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  span {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--app-text-3);
+  }
+
+  input {
+    border: 0.5px solid var(--app-border);
+    border-radius: 10px;
+    background: var(--app-surface);
+    color: var(--app-text-1);
+    font-size: 13px;
+    font-family: inherit;
+    padding: 7px 10px;
+    min-height: 34px;
+
+    &:focus {
+      outline: none;
+      border-color: var(--app-primary);
+    }
+  }
+}
+
+// ── Resumen ────────────────────────────────────────
+.rep-resumen {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 8px 16px 12px;
+
+  &__card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: var(--app-radius-lg);
+    background: var(--app-surface);
+    border: 0.5px solid var(--app-border);
+    box-shadow: var(--app-shadow-sm);
+
+    ion-icon { font-size: 22px; flex-shrink: 0; }
+
+    span {
+      display: block;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--app-text-3);
+    }
+
+    strong {
+      display: block;
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--app-text-1);
+      margin-top: 2px;
+    }
+
+    &--total ion-icon { color: var(--app-primary); }
+    &--valor ion-icon { color: var(--app-info); }
+    &--cobrado ion-icon { color: var(--app-success); }
+    &--pendiente ion-icon { color: var(--app-warning); }
+  }
+}
+
+// ── Tabla ──────────────────────────────────────────
+.rep-col-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.rep-vendedor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--app-primary-tint);
+    color: var(--app-primary-dark);
+    font-size: 13px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+}
+
+.rep-total {
+  font-weight: 800;
+  color: var(--app-primary-dark);
+}
+
+.rep-cobrado {
+  font-weight: 600;
+  color: var(--app-success);
+}
+
+.rep-pendiente {
+  font-weight: 600;
+  color: var(--app-warning);
+}
+
+.table-container tfoot tr td {
+  font-weight: 800;
+  border-top: 1px solid var(--app-border-dark);
+  background: var(--app-surface-2);
+}
+
+// ── Desktop ────────────────────────────────────────
+@media (min-width: 1024px) {
+  .rep-toolbar {
+    padding: 16px 24px 4px;
+  }
+
+  .rep-resumen {
+    grid-template-columns: repeat(4, 1fr);
+    padding: 8px 24px 12px;
+  }
+}

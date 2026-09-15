@@ -1,0 +1,72 @@
+.asm-content {
+  --background: var(--app-page);
+}
+
+.asm-wrapper {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.asm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.asm-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--app-text-2);
+}
+
+.asm-cliente {
+  --border-radius: 10px;
+  --border-color: var(--app-border-dark);
+  font-size: 13px;
+  height: 42px;
+}
+
+.asm-hint {
+  font-size: 12px;
+  color: var(--app-success);
+  font-weight: 600;
+}
+
+.asm-segment {
+  --background: var(--app-surface);
+  border-radius: 10px;
+}
+
+.asm-input {
+  --background: var(--app-surface);
+  --border-radius: 10px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --min-height: 42px;
+  font-size: 14px;
+  background: var(--app-surface);
+  border-radius: 10px;
+
+  &--area {
+    --padding-top: 10px;
+  }
+}
+
+.asm-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--app-border);
+}
+
+.asm-btn {
+  --border-radius: 10px;
+  font-size: 13px;
+  height: 40px;
+}

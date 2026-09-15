@@ -1,0 +1,60 @@
+// ════════════════════════════════════════════════════════════════
+// Reglas de Storage — Veterinaria Canes
+// ════════════════════════════════════════════════════════════════
+// COPIA ESTE CONTENIDO en Firebase Console → Storage → Rules.
+// Lectura: cualquier usuario autenticado (las URLs son públicas por
+// defecto en la UI). Escritura: staff de caja para productos, y
+// propietario/staff para fotos de mascotas.
+// ════════════════════════════════════════════════════════════════
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function esStaff() {
+      return request.auth != null && (
+        firestore.get(/databases/(default)/documents/administradores/$(request.auth.uid)).data.estado == 'activo'
+        || firestore.get(/databases/(default)/documents/recepcionistas/$(request.auth.uid)).data.estado == 'activo'
+        || firestore.get(/databases/(default)/documents/veterinarios/$(request.auth.uid)).data.estado == 'activo'
+      );
+    }
+
+    function esCliente() {
+      return request.auth != null
+        && firestore.get(/databases/(default)/documents/clientes/$(request.auth.uid)).data.estado == 'activo';
+    }
+
+    function esImagen() {
+      return request.resource.size < 600 * 1024
+        && (request.resource.contentType.matches('image/.*') || request.resource.contentType == 'image/svg+xml');
+    }
+
+    // Fotos de productos (staff de caja)
+    match /productos/{idProducto} {
+      allow read: if request.auth != null;
+      allow write: if esStaff() && esImagen();
+      allow delete: if esStaff();
+    }
+
+    // Fotos de mascotas (propietario o staff)
+    match /mascotas/{idCliente}/{idMascota} {
+      allow read: if request.auth != null;
+      allow write: if esStaff() && esImagen() || (esCliente() && request.auth.uid == idCliente && esImagen());
+      allow delete: if esStaff() || (esCliente() && request.auth.uid == idCliente);
+    }
+
+    // Fotos de perfil de usuarios (dueño o staff)
+    match /usuarios/{uid} {
+      allow read: if request.auth != null;
+      allow write: if (esStaff() || request.auth.uid == uid) && esImagen();
+      allow delete: if esStaff() || request.auth.uid == uid;
+    }
+
+    // Imágenes de banners promocionales (solo el admin)
+    match /banners/{idBanner} {
+      allow read: if request.auth != null;
+      allow write: if esAdmin() && esImagen();
+      allow delete: if esAdmin();
+    }
+  }
+}

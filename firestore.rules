@@ -1,0 +1,270 @@
+// ════════════════════════════════════════════════════════════════
+// Reglas de Firestore — Veterinaria Canes
+// ════════════════════════════════════════════════════════════════
+// COPIA ESTE CONTENIDO en Firebase Console → Firestore → Rules.
+// Es una plantilla de referencia: ajústala a tu estructura real.
+// El estado 'inactivo' bloquea el acceso del usuario.
+//
+// Convenciones:
+//  - esStaff()  = administrador | recepcionista | veterinario (estado activo)
+//  - Un cliente solo lee/escribe lo propio (request.auth.uid).
+//  - Las ventas/pagos/ajustes solo los gestiona el staff de caja.
+// ════════════════════════════════════════════════════════════════
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function activo(path) {
+      return get(path).data.estado == 'activo';
+    }
+
+    function esAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/administradores/$(request.auth.uid))
+        && activo(/databases/$(database)/documents/administradores/$(request.auth.uid));
+    }
+
+    function esRecepcionista() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/recepcionistas/$(request.auth.uid))
+        && activo(/databases/$(database)/documents/recepcionistas/$(request.auth.uid));
+    }
+
+    function esVeterinario() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/veterinarios/$(request.auth.uid))
+        && activo(/databases/$(database)/documents/veterinarios/$(request.auth.uid));
+    }
+
+    function esGroomer() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/groomers/$(request.auth.uid))
+        && activo(/databases/$(database)/documents/groomers/$(request.auth.uid));
+    }
+
+    function esCliente() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/clientes/$(request.auth.uid))
+        && activo(/databases/$(database)/documents/clientes/$(request.auth.uid));
+    }
+
+    function esStaff() {
+      return esAdmin() || esRecepcionista() || esVeterinario();
+    }
+
+    // Cambio de propietario de una mascota: el historial (citas, diagnósticos
+    // legados y registros clínicos) puede trasladarse únicamente actualizando
+    // el campo idCliente; ningún otro campo puede modificarse por esta vía.
+    function soloTrasladoDePropietario() {
+      return isSignedIn()
+        && resource != null
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['idCliente'])
+        && request.resource.data.idCliente is string;
+    }
+
+    // El propio usuario solo puede editar sus datos de perfil; nunca estado,
+    // saldoFavor, Correo ni idAdministrador (eso lo controla el staff).
+    function soloCamposDePerfil() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['Nombre', 'Apellido', 'Telefono', 'Cedula', 'fotoUrl', 'Especialidad', 'especialidades']);
+    }
+
+    // ── Usuarios por rol ────────────────────────────────
+    match /administradores/{uid} {
+      allow read: if isSignedIn();
+      allow write: if esAdmin();
+    }
+    match /recepcionistas/{uid} {
+      allow read: if isSignedIn();
+      allow create, delete: if esAdmin();
+      allow update: if esAdmin()
+        || (esRecepcionista() && request.auth.uid == uid && soloCamposDePerfil());
+    }
+    match /veterinarios/{uid} {
+      allow read: if isSignedIn();
+      allow create, delete: if esAdmin();
+      allow update: if esAdmin()
+        || (esVeterinario() && request.auth.uid == uid && soloCamposDePerfil());
+    }
+    match /groomers/{uid} {
+      allow read: if isSignedIn();
+      allow create, delete: if esAdmin();
+      allow update: if esAdmin()
+        || (esGroomer() && request.auth.uid == uid && soloCamposDePerfil());
+    }
+    match /clientes/{uid} {
+      allow read: if esStaff() || (esCliente() && request.auth.uid == uid);
+      allow create: if esAdmin() || esRecepcionista();
+      allow update: if esAdmin() || esRecepcionista()
+        || (esCliente() && request.auth.uid == uid && soloCamposDePerfil());
+      allow delete: if esAdmin();
+    }
+
+    // ── Privilegios (dueño o admin lee; admin escribe; recepción crea
+    //    los privilegios por defecto de un cliente nuevo) ──
+    match /privilegios/{uid} {
+      allow read: if isSignedIn() && (request.auth.uid == uid || esAdmin());
+      allow create: if esAdmin()
+        || (esRecepcionista() && request.resource.data.rol == 'cliente');
+      allow update, delete: if esAdmin();
+    }
+
+    // ── Configuración de la app ─────────────────────────
+    match /configuracion/{docId} {
+      allow read: if isSignedIn();
+      allow write: if esAdmin();
+    }
+
+    // ── Mascotas ────────────────────────────────────────
+    match /clientes/{idCliente}/mascotas/{idMascota} {
+      allow read: if esStaff() || esGroomer() || (esCliente() && request.auth.uid == idCliente);
+      allow create: if esStaff() || (esCliente() && request.auth.uid == idCliente);
+      allow update: if esStaff() || (esCliente() && request.auth.uid == idCliente);
+      allow delete: if esAdmin();
+    }
+    match /{path=**}/mascotas/{idMascota} {
+      allow read: if esStaff();
+    }
+
+    // ── Horarios de veterinarios ────────────────────────
+    match /veterinarios/{uid}/horarios/{dia} {
+      allow read: if esStaff();
+      allow write: if esAdmin() || (esVeterinario() && request.auth.uid == uid);
+    }
+
+    // ── Citas ───────────────────────────────────────────
+    // El groomer lee y atiende SOLO sus citas de estética, y solo puede
+    // modificar campos de servicio (notas, escalado y estado).
+    function esCitaEsteticaAsignada() {
+      return isSignedIn()
+        && resource.data.categoria == 'ESTETICA'
+        && resource.data.idGroomer == request.auth.uid;
+    }
+
+    function soloCamposDeServicio() {
+      return isSignedIn()
+        && resource != null
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly([
+            'notasServicio', 'escaladoAVeterinario', 'idCitaEscalada', 'estado',
+            'checklistServicio', 'hallazgosGroomer',
+            'fechaInicioServicio', 'fechaFinServicio'
+          ]);
+    }
+
+    // Auto-asignación de una cita escalada por estética: un veterinario activo
+    // puede tomar la cita sin veterinario y quedársela (o recepción reasignarla).
+    function autoAsignacionEscalado() {
+      return esVeterinario()
+        && resource.data.idVeterinario == ''
+        && resource.data.escaladoDesde is string
+        && request.resource.data.idVeterinario == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['idVeterinario', 'nombreVeterinario', 'notas']);
+    }
+
+    match /citas/{idCita} {
+      allow read: if esStaff()
+        || (esGroomer() && (esCitaEsteticaAsignada() || resource.data.categoria == 'ESTETICA'))
+        || (esCliente() && resource.data.idCliente == request.auth.uid);
+      allow create: if esAdmin()
+        || esRecepcionista()
+        // Escalado del groomer: cita médica nueva originada en estética.
+        || (esGroomer()
+          && request.resource.data.escaladoDesde is string
+          && (request.resource.data.categoria == 'DIAGNOSTICO'
+            || request.resource.data.categoria == 'EMERGENCIA')
+          && request.resource.data.estado == 'pendiente');
+      allow update: if esAdmin()
+        || esRecepcionista()
+        || (esVeterinario() && resource.data.idVeterinario == request.auth.uid)
+        || autoAsignacionEscalado()
+        || (esGroomer() && esCitaEsteticaAsignada() && soloCamposDeServicio())
+        || (esStaff() && soloTrasladoDePropietario());
+      allow delete: if false;
+    }
+
+    // ── Diagnósticos (legado, Fase 1: ya no se escriben nuevos) ──
+    match /citas/{idCita}/diagnosticos/{docId} {
+      allow read: if esStaff()
+        || (esCliente() && resource.data.idCliente == request.auth.uid);
+      allow create, update: if esVeterinario();
+      allow update: if esStaff() && soloTrasladoDePropietario();
+      allow delete: if false;
+    }
+    match /{path=**}/diagnosticos/{docId} {
+      allow read: if esStaff();
+    }
+
+    // ── Registros clínicos (Fase 1) ─────────────────────
+    match /registrosClinicos/{idRegistro} {
+      allow read: if esStaff()
+        || (esCliente() && resource.data.idCliente == request.auth.uid);
+      // Solo el veterinario crea/corrige contenido clínico.
+      allow create: if esVeterinario();
+      allow update: if esVeterinario()
+        || (esStaff() && soloTrasladoDePropietario());
+      // Imposible borrar el historial clínico.
+      allow delete: if false;
+    }
+
+    // Auditoría de correcciones: solo se agrega; lectura de staff.
+    match /registrosClinicos/{idRegistro}/ediciones/{idEdicion} {
+      allow read: if esStaff();
+      allow create: if esVeterinario();
+      allow update, delete: if false;
+    }
+
+    // ── Productos (catálogo) ────────────────────────────
+    match /productos/{idProducto} {
+      allow read: if isSignedIn();
+      allow write: if esAdmin() || esRecepcionista();
+    }
+
+    // ── Banners promocionales (solo el admin administra) ──
+    match /banners/{idBanner} {
+      allow read: if isSignedIn();
+      allow write: if esAdmin();
+    }
+
+    // ── Ventas ──────────────────────────────────────────
+    // El groomer puede leer la venta de su propia cita de estética y
+    // anularla (solo estadoPago → 'anulada') al cerrar una cita vencida.
+    match /ventas/{idVenta} {
+      allow read: if esStaff()
+        || (esGroomer() && resource.data.idGroomer == request.auth.uid)
+        || (esCliente() && resource.data.idCliente == request.auth.uid);
+      allow create: if esAdmin() || esRecepcionista();
+      allow update: if esAdmin()
+        || esRecepcionista()
+        || (esGroomer()
+          && resource.data.idGroomer == request.auth.uid
+          && resource.data.estadoPago == 'pendiente'
+          && request.resource.data.estadoPago == 'anulada'
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estadoPago']));
+      allow delete: if false;
+    }
+
+    // ── Abonos (pagos a crédito) ────────────────────────
+    match /pagos/{idPago} {
+      allow read: if esStaff()
+        || (esCliente() && resource.data.idCliente == request.auth.uid);
+      allow create: if esAdmin() || esRecepcionista();
+      allow update, delete: if false;
+    }
+
+    // ── Ajustes de saldo a favor ────────────────────────
+    match /ajustes-saldo/{idAjuste} {
+      allow read: if esStaff()
+        || (esCliente() && resource.data.idCliente == request.auth.uid);
+      allow create: if esAdmin() || esRecepcionista();
+      allow update, delete: if false;
+    }
+  }
+}

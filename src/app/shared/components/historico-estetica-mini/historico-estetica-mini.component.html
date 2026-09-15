@@ -1,0 +1,10 @@
+<div class="hem-bloque" *ngIf="servicios.length">
+  <label class="hem-label">Historial de estética</label>
+  <div class="hem-item" *ngFor="let s of servicios">
+    <div class="hem-item__head">
+      <span class="hem-item__tipo">{{ labelServicio(s.tipoServicio ?? '') }}</span>
+      <span class="hem-item__fecha">{{ s.fecha }}</span>
+    </div>
+    <span class="hem-item__resumen" *ngIf="resumen(s)">{{ resumen(s) }}</span>
+  </div>
+</div>

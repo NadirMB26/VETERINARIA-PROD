@@ -1,0 +1,212 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>{{ esEdicion ? 'Editar ' + (etiquetaTipo | lowercase) : 'Nuevo ' + (etiquetaTipo | lowercase) }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()" color="light">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="pm-content">
+  <div class="pm-wrapper">
+
+    <div class="pm-field">
+      <label class="pm-label">Imagen (opcional)</label>
+      <div class="pm-imagen">
+        <div class="pm-imagen__preview" *ngIf="fotoPreview">
+          <img [src]="fotoPreview" alt="Imagen del producto" />
+          <button type="button" class="pm-imagen__quitar" (click)="quitarImagen()" aria-label="Quitar imagen">
+            <ion-icon name="close"></ion-icon>
+          </button>
+        </div>
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="onImagenSeleccionado($event)"
+          class="pm-imagen__input" />
+        <span class="pm-hint">PNG, JPG o WEBP · máximo 500 KB</span>
+      </div>
+    </div>
+
+    <div class="pm-field">
+      <label class="pm-label">Nombre *</label>
+      <ion-input [(ngModel)]="nombre" type="text" placeholder="Ej: Vacuna antirrábica" class="pm-input"></ion-input>
+    </div>
+
+    <div class="pm-row2">
+      <div class="pm-field">
+        <label class="pm-label">Categoría</label>
+        <ion-select [(ngModel)]="categoria" interface="action-sheet" class="pm-input">
+          <ion-select-option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</ion-select-option>
+        </ion-select>
+      </div>
+      <div class="pm-field" *ngIf="!tipoBloqueado">
+        <label class="pm-label">Tipo</label>
+        <ion-segment [(ngModel)]="tipo" class="pm-segment">
+          <ion-segment-button value="producto">Producto</ion-segment-button>
+          <ion-segment-button value="servicio">Servicio</ion-segment-button>
+        </ion-segment>
+      </div>
+    </div>
+
+    <div class="pm-row2">
+      <div class="pm-field">
+        <label class="pm-label">Precio *</label>
+        <ion-input [ngModel]="precio" (ngModelChange)="precio = soloDigitos($event)" type="number" min="0" step="100" placeholder="0" class="pm-input"></ion-input>
+        <span class="pm-hint" *ngIf="tipo === 'producto' && ofertaTipo">Precio normal · el de oferta se calcula con el %</span>
+      </div>
+      <div class="pm-field" *ngIf="tipo === 'producto'">
+        <label class="pm-label">Costo (opcional)</label>
+        <ion-input [ngModel]="costo" (ngModelChange)="costo = soloDigitos($event)" type="number" min="0" step="100" placeholder="0" class="pm-input"></ion-input>
+      </div>
+    </div>
+
+    <div class="pm-field" *ngIf="tipo === 'producto'">
+      <label class="pm-label">SKU / código (opcional)</label>
+      <ion-input [(ngModel)]="sku" type="text" placeholder="Ej: VAC-001" class="pm-input"></ion-input>
+      <span class="pm-hint">Debe ser único entre productos</span>
+    </div>
+
+    <ng-container *ngIf="tipo === 'producto'">
+      <div class="pm-row2">
+        <div class="pm-field">
+          <label class="pm-label">Stock</label>
+          <ion-input [ngModel]="stock" (ngModelChange)="stock = soloDigitos($event)" type="number" min="0" placeholder="0" class="pm-input"></ion-input>
+        </div>
+        <div class="pm-field">
+          <label class="pm-label">Umbral stock bajo</label>
+          <ion-input [ngModel]="stockMinimo" (ngModelChange)="stockMinimo = soloDigitos($event)" type="number" min="0" placeholder="5" class="pm-input"></ion-input>
+          <span class="pm-hint">Aviso cuando queden pocas unidades</span>
+        </div>
+      </div>
+
+      <div class="pm-field">
+        <label class="pm-label">Fecha de vencimiento</label>
+        <ion-input [(ngModel)]="fechaVencimiento" type="date" class="pm-input"></ion-input>
+        <span class="pm-hint">Opcional · alerta si faltan ≤ 30 días</span>
+      </div>
+
+      <!-- Oferta (opcional) -->
+      <div class="pm-oferta">
+        <div class="pm-oferta__head">
+          <ion-icon name="pricetag-outline"></ion-icon>
+          <span>Oferta (opcional)</span>
+        </div>
+
+        <div class="pm-row2">
+          <div class="pm-field">
+            <label class="pm-label">% de descuento</label>
+            <ion-input [ngModel]="descuentoPct" (ngModelChange)="descuentoPct = soloDigitos($event, 99)" type="number" min="1" max="99" step="1" placeholder="Ej: 5 = 5% OFF" class="pm-input"></ion-input>
+            <span class="pm-hint">El precio con descuento se calcula automáticamente</span>
+          </div>
+          <div class="pm-field">
+            <label class="pm-label">Tipo de oferta</label>
+            <ion-select [(ngModel)]="ofertaTipo" interface="action-sheet" class="pm-input">
+              <ion-select-option value="">Sin oferta</ion-select-option>
+              <ion-select-option value="diaria">Oferta del día</ion-select-option>
+              <ion-select-option value="semanal">Oferta semanal</ion-select-option>
+            </ion-select>
+          </div>
+        </div>
+
+        <div class="pm-oferta__preview" *ngIf="ofertaTipo">
+          <ng-container *ngIf="descuentoValido(); else descuentoInvalido">
+            <span>Precio de oferta</span>
+            <strong>{{ precioOfertaVista | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+            <span class="pm-oferta__off">{{ descuentoPct }}% OFF sobre {{ precio | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </ng-container>
+          <ng-template #descuentoInvalido>
+            <span class="pm-oferta__error">Ingresa un porcentaje entre 1 y 99 y un precio mayor a 0.</span>
+          </ng-template>
+        </div>
+
+        <div class="pm-row2" *ngIf="ofertaTipo">
+          <div class="pm-field">
+            <label class="pm-label">Vence el</label>
+            <ion-input [(ngModel)]="ofertaFin" type="date" class="pm-input"></ion-input>
+          </div>
+          <div class="pm-field">
+            <label class="pm-label">Cupón (opcional)</label>
+            <ion-input [(ngModel)]="cupon" type="text" placeholder="Ej: Cupón 30% OFF" class="pm-input"></ion-input>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Metadatos de servicio (agendamiento) -->
+    <ng-container *ngIf="esServicio">
+      <div class="pm-row2">
+        <div class="pm-field" *ngIf="esServicioMedico">
+          <label class="pm-label">Tipo de cita que cubre</label>
+          <ion-select [(ngModel)]="tipoCita" interface="action-sheet" class="pm-input">
+            <ion-select-option value="">Sin tipo específico</ion-select-option>
+            <ion-select-option *ngFor="let t of tiposCita" [value]="t.tipo">{{ t.tipo }}</ion-select-option>
+          </ion-select>
+          <span class="pm-hint">Al agendar una cita de ese tipo, este servicio aparecerá para elegir.</span>
+        </div>
+        <div class="pm-field" *ngIf="esServicioEstetica">
+          <label class="pm-label">Tipo de servicio de estética</label>
+          <ion-select [(ngModel)]="tipoServicioEstetica" interface="action-sheet" class="pm-input">
+            <ion-select-option value="">Sin tipo específico</ion-select-option>
+            <ion-select-option *ngFor="let t of tiposServicioEstetica" [value]="t.value">{{ t.label }}</ion-select-option>
+          </ion-select>
+        </div>
+        <div class="pm-field">
+          <label class="pm-label">Duración (min)</label>
+          <ion-input [ngModel]="duracionMin" (ngModelChange)="duracionMin = soloDigitos($event)" type="number" min="0" step="5" placeholder="0" class="pm-input"></ion-input>
+        </div>
+      </div>
+
+      <div class="pm-field">
+        <label class="pm-label">Qué incluye (checklist del groomer)</label>
+        <div class="pm-chips" *ngIf="incluye.length">
+          <span class="pm-chip" *ngFor="let paso of incluye; let i = index">
+            {{ paso }}
+            <button type="button" (click)="quitarIncluye(i)" aria-label="Quitar">
+              <ion-icon name="close"></ion-icon>
+            </button>
+          </span>
+        </div>
+        <div class="pm-incluye-add">
+          <ion-input
+            [(ngModel)]="nuevoIncluye"
+            type="text"
+            placeholder="Ej: Baño con shampoo hipoalergénico"
+            class="pm-input"
+            (keyup.enter)="agregarIncluye()">
+          </ion-input>
+          <ion-button type="button" fill="outline" size="small" (click)="agregarIncluye()">Agregar</ion-button>
+        </div>
+        <span class="pm-hint">Pasos o insumos que se muestran al atender la cita.</span>
+      </div>
+    </ng-container>
+
+    <div class="pm-field">
+      <label class="pm-label">Descripción</label>
+      <ion-textarea
+        [(ngModel)]="descripcion"
+        rows="3"
+        placeholder="Detalles opcionales"
+        class="pm-input pm-input--area">
+      </ion-textarea>
+    </div>
+
+    <div class="pm-footer">
+      <ion-button
+        *ngIf="esEdicion"
+        class="pm-btn pm-btn--danger"
+        [color]="producto?.estado === 'descontinuado' ? 'success' : 'danger'"
+        (click)="descontinuar()">
+        {{ producto?.estado === 'descontinuado' ? 'Reactivar ' + (etiquetaTipo | lowercase) : 'Descontinuar ' + (etiquetaTipo | lowercase) }}
+      </ion-button>
+      <ion-button
+        class="pm-btn"
+        [disabled]="!formValido || guardando"
+        (click)="guardar()">
+        <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
+        {{ guardando ? 'Guardando…' : (esEdicion ? 'Guardar cambios' : 'Crear ' + (etiquetaTipo | lowercase)) }}
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

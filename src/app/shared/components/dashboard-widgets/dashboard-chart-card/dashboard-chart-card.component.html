@@ -1,0 +1,15 @@
+<div class="chart-card">
+  <div class="chart-card__head">
+    <div>
+      <h3 class="chart-card__titulo">{{ titulo }}</h3>
+      <p class="chart-card__subtitulo" *ngIf="subtitulo">{{ subtitulo }}</p>
+    </div>
+  </div>
+  <div class="chart-card__body" [style.height.px]="altura">
+    <canvas #canvasRef></canvas>
+    <div class="chart-card__centro" *ngIf="tipo === 'doughnut' && totalCentro !== undefined">
+      <strong>{{ totalCentro }}</strong>
+      <span>total</span>
+    </div>
+  </div>
+</div>

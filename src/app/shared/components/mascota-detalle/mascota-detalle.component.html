@@ -1,0 +1,246 @@
+﻿<!-- SIN overlay ni panel wrapper, solo el contenido -->
+<div class="detalle-wrap" *ngIf="mascota">
+
+  <!-- Botón cerrar -->
+  <button class="detalle-close" (click)="cerrar()">
+    <ion-icon name="close-outline"></ion-icon>
+  </button>
+
+  <ion-content class="detalle-scroll">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-photo-wrap">
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="hero-photo" [class.sin-foto]="!mascota.fotoUrl">
+        <img *ngIf="mascota.fotoUrl" [src]="mascota.fotoUrl" alt="{{ mascota.nombre }}" class="mascota-foto" />
+        <span *ngIf="!mascota.fotoUrl">{{ emojiEspecie(mascota.especie) }}</span>
+      </div>
+      <div class="hero-badge">🐾</div>
+    </div>
+    <h2>{{ mascota.nombre }}</h2>
+    <p>{{ mascota.especie | titlecase }} · {{ mascota.raza }}</p>
+    <div class="hero-actions">
+      <ion-badge
+        [color]="mascota.estado === 'activo' ? 'success' : 'medium'"
+        class="badge-activo">
+        {{ mascota.estado === 'activo' ? 'Activa' : 'Inactiva' }}
+      </ion-badge>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <p class="section-label">
+    <ion-icon name="paw-outline"></ion-icon>
+    Datos básicos
+  </p>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon-wrap">
+        <ion-icon name="male-female-outline"></ion-icon>
+      </div>
+      <span class="label">Sexo</span>
+      <span class="value">{{ mascota.sexo | titlecase }}</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap">
+        <ion-icon name="barbell-outline"></ion-icon>
+      </div>
+      <span class="label">Peso</span>
+      <span class="value">{{ mascota.peso }} kg</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap">
+        <ion-icon name="color-palette-outline"></ion-icon>
+      </div>
+      <span class="label">Color</span>
+      <span class="value">{{ mascota.color || '—' }}</span>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon-wrap">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </div>
+      <span class="label">Edad</span>
+      <span class="value">{{ calcularEdad(mascota.fechaNacimiento) }}</span>
+    </div>
+  </div>
+
+  <!-- Info adicional -->
+  <p class="section-label">
+    <ion-icon name="document-text-outline"></ion-icon>
+    Información adicional
+  </p>
+  <div class="seccion-card">
+    <div class="dato-fila">
+      <span class="dato-key">
+        <ion-icon name="ribbon-outline"></ion-icon> Raza
+      </span>
+      <span class="dato-val">{{ mascota.raza }}</span>
+    </div>
+    <div class="dato-fila">
+      <span class="dato-key">
+        <ion-icon name="finger-print-outline"></ion-icon> ID
+      </span>
+      <span class="dato-val">{{ mascota.idMascota }}</span>
+    </div>
+    <div class="dato-fila">
+      <span class="dato-key">
+        <ion-icon name="calendar-number-outline"></ion-icon> Registro
+      </span>
+      <span class="dato-val">{{ formatearDia(mascota.fechaRegistro) }}</span>
+    </div>
+  </div>
+
+  <!-- ══ ANTECEDENTES MÉDICOS (staff) ══ -->
+  <ng-container *ngIf="verAntecedentes">
+    <p class="section-label">
+      <ion-icon name="medical-outline"></ion-icon>
+      Antecedentes médicos
+    </p>
+    <div class="seccion-card hc-antecedentes">
+      <ng-container *ngIf="!editandoAntecedentes">
+        <div class="dato-fila" *ngFor="let a of antecedentesLista">
+          <span class="dato-key">{{ a.label }}</span>
+          <span class="dato-val">{{ a.value || '—' }}</span>
+        </div>
+        <button
+          *ngIf="puedeEditarAntecedentes"
+          class="hc-btn-outline"
+          (click)="editandoAntecedentes = true">
+          <ion-icon name="create-outline"></ion-icon>
+          Editar antecedentes
+        </button>
+      </ng-container>
+
+      <ng-container *ngIf="editandoAntecedentes">
+        <div class="hc-campo" *ngFor="let a of antecedentesLista">
+          <label class="hc-label">{{ a.label }}</label>
+          <ion-textarea
+            [(ngModel)]="antecedentesForm[a.key]"
+            rows="2"
+            class="hc-input">
+          </ion-textarea>
+        </div>
+        <div class="hc-acciones">
+          <button class="hc-btn-outline" (click)="editandoAntecedentes = false">Cancelar</button>
+          <button class="hc-btn-primary" (click)="guardarAntecedentes()">
+            <ion-icon name="save-outline"></ion-icon>
+            Guardar
+          </button>
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
+
+  <!-- ══ PESTAÑAS DEL EXPEDIENTE (Fase 3) ══ -->
+  <p class="section-label">
+    <ion-icon name="time-outline"></ion-icon>
+    Historial clínico
+  </p>
+
+  <div class="md-tabs">
+    <button
+      class="md-tab"
+      *ngFor="let p of pestanas"
+      [class.active]="pestanaActual === p"
+      (click)="seleccionarPestana(p)">
+      <span>{{ p }}</span>
+      <span class="md-tab-count" *ngIf="totalPestana(p) > 0">{{ totalPestana(p) }}</span>
+    </button>
+  </div>
+
+  <div class="md-contenido">
+
+    <!-- Lista paginada -->
+    <div class="rc-lista" *ngIf="totalPestana(pestanaActual) > 0">
+      <div
+        class="rc-item rc-item--click"
+        *ngFor="let f of filasVisibles(pestanaActual)"
+        (click)="abrirFila(f)">
+
+        <!-- ── Fila clínica (RegistroClínico) ── -->
+        <ng-container *ngIf="filaRegistro(f); let r">
+          <div class="rc-head">
+            <ion-badge [color]="colorCategoria(r.categoria)" class="rc-badge">{{ labelCategoria(r.categoria) }}</ion-badge>
+            <span class="rc-fecha">{{ formatearDia(fechaDeRegistro(r)) }}</span>
+            <span class="rc-sep">·</span>
+            <span class="rc-vet">{{ r.nombreVeterinario }}</span>
+            <span class="rc-tipo">{{ tipoDeRegistro(r) }}</span>
+          </div>
+          <p class="rc-linea" *ngIf="r.diagnostico"><strong>Diagnóstico:</strong> {{ r.diagnostico }}</p>
+          <p class="rc-linea" *ngIf="r.tratamiento"><strong>Tratamiento:</strong> {{ r.tratamiento }}</p>
+          <div class="rc-acciones">
+            <span class="rc-corregido" *ngIf="r.motivoUltimaCorreccion">
+              <ion-icon name="create-outline"></ion-icon>
+              Corregido
+            </span>
+            <ion-icon name="eye-outline" class="rc-ver"></ion-icon>
+          </div>
+        </ng-container>
+
+        <!-- ── Fila estética (servicio operativo) ── -->
+        <ng-container *ngIf="filaEstetica(f); let e">
+          <div class="rc-head">
+            <ion-badge color="secondary" class="rc-badge">Estética</ion-badge>
+            <span class="rc-fecha">{{ formatearDia(e.fecha) }}</span>
+            <span class="rc-sep">·</span>
+            <span class="rc-vet">{{ labelServicioEstetica(e.tipoServicio ?? '') }}</span>
+            <span class="rc-tipo" *ngIf="e.nombreGroomer">{{ e.nombreGroomer }}</span>
+          </div>
+          <p class="rc-linea" *ngIf="e.notasServicio">{{ e.notasServicio }}</p>
+          <div class="rc-acciones">
+            <span class="rc-badge-estado" *ngIf="e.escaladoAVeterinario">Escalada a veterinario</span>
+            <ion-icon name="eye-outline" class="rc-ver"></ion-icon>
+          </div>
+        </ng-container>
+
+      </div>
+
+      <!-- Paginación -->
+      <div class="md-paginador" *ngIf="totalPaginas(pestanaActual) > 1">
+        <button class="md-page-btn" [disabled]="paginaActual(pestanaActual) <= 1"
+          (click)="irPagina(pestanaActual, -1)">
+          <ion-icon name="chevron-back-outline"></ion-icon>
+        </button>
+        <span class="md-page-info">
+          Página {{ paginaActual(pestanaActual) }} de {{ totalPaginas(pestanaActual) }}
+        </span>
+        <button class="md-page-btn"
+          [disabled]="paginaActual(pestanaActual) >= totalPaginas(pestanaActual)"
+          (click)="irPagina(pestanaActual, 1)">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Estado vacío por pestaña -->
+    <div class="hc-vacio" *ngIf="totalPestana(pestanaActual) === 0 && !cargando">
+      <ion-icon name="calendar-clear-outline"></ion-icon>
+      <span *ngIf="pestanaActual === 'Cronología'">Sin eventos en la línea de tiempo</span>
+      <span *ngIf="pestanaActual === 'Estética'">Sin servicios de estética registrados</span>
+      <span *ngIf="pestanaActual !== 'Cronología' && pestanaActual !== 'Estética'">Sin registros en {{ pestanaActual }}</span>
+    </div>
+
+    <div class="hc-vacio" *ngIf="cargando">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <span>Cargando expediente...</span>
+    </div>
+
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-wrap" *ngIf="!modoExpediente">
+    <button class="btn-accion" (click)="onAgendar()">
+      <ion-icon name="calendar-outline"></ion-icon>
+      Agendar cita para {{ mascota.nombre }}
+    </button>
+    <button class="btn-accion btn-accion--secundario" (click)="onEditar()">
+      <ion-icon name="create-outline"></ion-icon>
+      Editar mascota
+    </button>
+  </div>
+
+  </ion-content>
+
+</div>

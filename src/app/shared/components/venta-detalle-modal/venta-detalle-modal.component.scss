@@ -1,0 +1,277 @@
+// ── Contenido ──────────────────────────────────────
+.vd-content {
+  --background: var(--app-page);
+}
+
+// ── Hero ───────────────────────────────────────────
+.vd-hero {
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-shade));
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-radius: 0 0 var(--app-radius-lg) var(--app-radius-lg);
+
+  &__id {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    font-family: monospace;
+  }
+
+  &__fecha {
+    font-size: 12px;
+    color: rgba(255, 255, 255, .85);
+  }
+
+  &__badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+}
+
+// ── Cards ──────────────────────────────────────────
+.vd-card {
+  background: var(--app-surface);
+  margin: 12px 14px 0;
+  border-radius: var(--app-radius-xl);
+  padding: 14px 16px;
+  box-shadow: var(--app-shadow-sm);
+
+  &__titulo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--app-text-2);
+    margin-bottom: 12px;
+
+    ion-icon { font-size: 14px; color: var(--app-primary); }
+  }
+}
+
+// ── Personas (vendedor / cliente) ──────────────────
+.vd-persona {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  &__avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--app-primary-tint);
+    color: var(--app-primary-dark);
+    font-size: 15px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    &--cliente {
+      background: var(--app-purple-light);
+      color: #5b21b6;
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    strong {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--app-text-1);
+    }
+
+    span {
+      font-size: 12px;
+      color: var(--app-text-3);
+      font-family: monospace;
+      word-break: break-all;
+    }
+  }
+
+  &__mascota {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: inherit !important;
+    font-weight: 600;
+    color: var(--app-text-2) !important;
+
+    ion-icon { font-size: 13px; color: var(--app-primary); }
+  }
+}
+
+// ── Items ──────────────────────────────────────────
+.vd-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vd-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--app-radius-md);
+  background: var(--app-surface-2);
+  border: 0.5px solid var(--app-border);
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__nombre {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--app-text-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__detalle {
+    font-size: 12px;
+    color: var(--app-text-2);
+  }
+
+  &__tipo {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: var(--app-primary-xlight);
+    color: var(--app-primary-dark);
+    padding: 1px 6px;
+    border-radius: var(--app-radius-full);
+    margin-left: 6px;
+  }
+
+  &__subtotal {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--app-primary-dark);
+    white-space: nowrap;
+  }
+}
+
+// ── Pagos ──────────────────────────────────────────
+.vd-pago {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--app-border);
+
+  &:last-child { border-bottom: none; }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--app-text-1);
+
+    ion-icon { font-size: 16px; color: var(--app-primary); }
+  }
+
+  &__soporte {
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+    border-radius: var(--app-radius-sm);
+    border: 1px solid var(--app-border);
+  }
+
+  &__monto {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--app-text-1);
+    white-space: nowrap;
+  }
+
+  &__der {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+
+  &__vuelto {
+    font-size: 11px;
+    color: var(--app-text-2);
+    white-space: nowrap;
+  }
+}
+
+// ── Totales ────────────────────────────────────────
+.vd-totales {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vd-fila {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--app-text-2);
+
+  &--total {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--app-text-1);
+    border-top: 0.5px solid var(--app-border);
+    padding-top: 8px;
+    margin-top: 2px;
+  }
+
+  &--pendiente {
+    font-weight: 700;
+    color: var(--app-warning);
+  }
+
+  &__menos {
+    color: var(--app-success);
+    font-weight: 700;
+  }
+}
+
+// ── Abonos ─────────────────────────────────────────
+.vd-abono {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--app-border);
+
+  &:last-child { border-bottom: none; }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__monto {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--app-success);
+  }
+
+  &__detalle {
+    font-size: 11px;
+    color: var(--app-text-3);
+  }
+}

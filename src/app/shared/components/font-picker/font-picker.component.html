@@ -1,0 +1,23 @@
+<div class="fp">
+
+  <!-- Cada opción se renderiza con su propia fuente (preview real). -->
+  <button
+    *ngFor="let f of fuentes"
+    type="button"
+    class="fp__opcion"
+    [class.fp__opcion--activa]="seleccionada === f.id"
+    [style.font-family]="f.css"
+    (click)="elegir(f)">
+    <span class="fp__preview">Aa Bb Cc</span>
+    <span class="fp__nombre">{{ f.nombre }}</span>
+    <span class="fp__check" *ngIf="seleccionada === f.id">
+      <ion-icon name="checkmark-circle"></ion-icon>
+    </span>
+  </button>
+
+  <button type="button" class="fp__reset" (click)="onRestablecer()">
+    <ion-icon name="refresh-outline"></ion-icon>
+    Restablecer fuente por defecto
+  </button>
+
+</div>

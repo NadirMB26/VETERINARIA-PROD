@@ -1,0 +1,116 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Historial de Ventas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="hv-content">
+
+  <div class="empty-state" *ngIf="!puedeVerVentas">
+    <ion-icon name="lock-closed-outline"></ion-icon>
+    <h3>Sin permiso</h3>
+    <p>No tienes privilegios para ver el historial de ventas.</p>
+  </div>
+
+  <ng-container *ngIf="puedeVerVentas">
+
+  <!-- Búsqueda + filtros + exportar -->
+  <div class="hv-toolbar">
+    <ion-searchbar
+      [(ngModel)]="busqueda"
+      placeholder="Buscar por cliente o ID de venta…"
+      class="hv-search">
+    </ion-searchbar>
+
+    <div class="hv-filtros">
+      <button
+        type="button"
+        class="hv-chip"
+        [class.hv-chip--activo]="metodoFiltro === null"
+        (click)="filtrarPorMetodo(null)">
+        Todos
+      </button>
+      <button
+        *ngFor="let m of metodos"
+        type="button"
+        class="hv-chip"
+        [class.hv-chip--activo]="metodoFiltro === m.id"
+        (click)="filtrarPorMetodo(m.id)">
+        <ion-icon [name]="m.icon"></ion-icon>
+        {{ m.nombre }}
+      </button>
+    </div>
+
+    <div class="hv-exportar">
+      <span class="hv-exportar__label">Exportar</span>
+      <ion-button size="small" fill="outline" (click)="exportarCSV()">
+        <ion-icon name="document-text-outline" slot="start"></ion-icon>
+        CSV
+      </ion-button>
+      <ion-button size="small" fill="outline" (click)="exportarExcel()">
+        <ion-spinner *ngIf="exportando === 'excel'" name="crescent" slot="start"></ion-spinner>
+        <ion-icon name="logo-microsoft" slot="start" *ngIf="exportando !== 'excel'"></ion-icon>
+        Excel
+      </ion-button>
+      <ion-button size="small" fill="outline" (click)="exportarPDF()">
+        <ion-icon name="download-outline" slot="start"></ion-icon>
+        PDF
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-container" *ngIf="filtradas.length > 0">
+    <div class="table-wrap">
+      <table class="app-table">
+        <thead>
+          <tr>
+            <th>Detalle</th>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Mascota</th>
+            <th>Vendedor</th>
+            <th>Ítems</th>
+            <th>Método</th>
+            <th>Estado</th>
+            <th class="hv-col-total">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of filtradas">
+            <td>
+              <button type="button" class="hv-ver" title="Ver detalle" (click)="verDetalle(v)">
+                <ion-icon name="eye-outline"></ion-icon>
+              </button>
+            </td>
+            <td class="hv-id">{{ v.idVenta.slice(0, 8) }}</td>
+            <td>{{ formatearFecha(v.fecha) }}</td>
+            <td>{{ v.nombreCliente }}</td>
+            <td>{{ v.nombreMascota || '—' }}</td>
+            <td>{{ v.nombreVendedor || '—' }}</td>
+            <td>{{ v.items.length }} ítem(s) · {{ totalItems(v) }} und</td>
+            <td><span class="badge-estado" [ngClass]="'badge-' + v.metodoPago">{{ metodosVenta(v) }}</span></td>
+            <td><span class="badge-estado" [ngClass]="v.estadoPago === 'pagado' ? 'badge-pagado' : (v.estadoPago === 'anulada' ? 'badge-anulada' : 'badge-pendiente')">{{ v.estadoPago | titlecase }}</span></td>
+            <td class="hv-total">{{ v.total | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="ventas.length === 0">
+    <ion-icon name="receipt-outline"></ion-icon>
+    <h3>Sin ventas registradas</h3>
+    <p>Las ventas realizadas en el módulo de Ventas aparecerán aquí.</p>
+  </div>
+
+  <div class="empty-state" *ngIf="ventas.length > 0 && filtradas.length === 0">
+    <ion-icon name="search-outline"></ion-icon>
+    <h3>Sin resultados</h3>
+    <p>Ninguna venta coincide con el filtro aplicado.</p>
+  </div>
+
+  </ng-container>
+
+</ion-content>

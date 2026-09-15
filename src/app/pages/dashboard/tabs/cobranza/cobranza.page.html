@@ -1,0 +1,200 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Cobranza</ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="light" (click)="ajustarSaldo()" *ngIf="puedeCobrar">
+        <ion-icon name="wallet-outline" slot="start"></ion-icon>
+        Saldo a favor
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="cob-content">
+
+  <!-- Resumen -->
+  <div class="cob-resumen">
+    <div class="cob-resumen__card">
+      <span class="cob-resumen__label">Deuda pendiente</span>
+      <span class="cob-resumen__valor cob-resumen__valor--deuda">
+        {{ deudaTotal | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </span>
+      <span class="cob-resumen__sub">{{ pendientes.length }} venta(s) a crédito</span>
+    </div>
+  </div>
+
+  <!-- Búsqueda + filtro -->
+  <div class="cob-toolbar">
+    <ion-searchbar
+      [(ngModel)]="busqueda"
+      placeholder="Buscar por cliente o ID de venta…"
+      class="cob-search">
+    </ion-searchbar>
+
+    <div class="cob-filtros">
+      <button
+        type="button"
+        class="cob-chip"
+        [class.cob-chip--activo]="soloPendientes"
+        (click)="soloPendientes = true">
+        Solo pendientes
+      </button>
+      <button
+        type="button"
+        class="cob-chip"
+        [class.cob-chip--activo]="!soloPendientes"
+        (click)="soloPendientes = false">
+        Todas
+      </button>
+      <button
+        type="button"
+        class="cob-chip"
+        [class.cob-chip--activo]="soloCitas"
+        (click)="soloCitas = !soloCitas">
+        Solo citas
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-container" *ngIf="filtradas.length > 0">
+    <div class="table-wrap">
+      <table class="app-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Total</th>
+            <th>Abonado</th>
+            <th>Saldo</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of filtradas">
+            <td class="cob-id">{{ v.idVenta.slice(0, 8) }}</td>
+            <td>{{ formatearFecha(v.fecha) }}</td>
+            <td>
+              {{ v.nombreCliente }}
+              <span class="cob-origen" *ngIf="esCita(v)" title="Generada desde una cita">
+                <ion-icon name="calendar-outline"></ion-icon>
+                {{ v.nombreMascota || 'Cita' }}
+              </span>
+            </td>
+            <td>{{ v.total | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            <td>{{ v.abonado | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            <td class="cob-saldo" [class.cob-saldo--ok]="saldoDe(v) === 0">
+              {{ saldoDe(v) | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </td>
+            <td>
+              <span
+                class="badge-estado"
+                [ngClass]="v.estadoPago === 'pagado' ? 'badge-pagado' : (v.estadoPago === 'anulada' ? 'badge-anulada' : 'badge-pendiente')">
+                {{ etiquetaEstado(v) }}
+              </span>
+            </td>
+            <td>
+              <div class="cob-acciones">
+                <ion-button size="small" fill="solid" [disabled]="saldoDe(v) === 0 || !puedeCobrar" (click)="registrarAbono(v)">
+                  Abono
+                </ion-button>
+                <ion-button size="small" fill="outline" (click)="verDetalle(v)">
+                  Detalle
+                </ion-button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="filtradas.length === 0">
+    <ion-icon name="cash-outline"></ion-icon>
+    <h3>{{ soloPendientes ? 'Sin deudas pendientes' : 'Sin ventas registradas' }}</h3>
+    <p>{{ soloPendientes ? 'Todas las ventas a crédito están al día.' : 'Registra ventas para ver su estado aquí.' }}</p>
+  </div>
+
+  <!-- ── Modal detalle de deuda (historial de abonos) ── -->
+  <ion-modal [isOpen]="!!clienteDetalle" (didDismiss)="cerrarDetalle()" [breakpoints]="[0, 1]" [initialBreakpoint]="1">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Detalle de deuda</ion-title>
+          <ion-buttons slot="end">
+            <ion-button color="light" (click)="cerrarDetalle()">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="cob-content">
+        <div class="cob-detalle" *ngIf="clienteDetalle">
+
+          <div class="cob-detalle__info">
+            <div class="cob-detalle__fila">
+              <span>Cliente</span>
+              <strong>{{ clienteDetalle.nombreCliente }}</strong>
+            </div>
+            <div class="cob-detalle__fila" *ngIf="clienteDetalle.nombreMascota">
+              <span>Mascota</span>
+              <strong>{{ clienteDetalle.nombreMascota }}</strong>
+            </div>
+            <div class="cob-detalle__fila" *ngIf="esCita(clienteDetalle)">
+              <span>Origen</span>
+              <span>Cita agendada</span>
+            </div>
+            <div class="cob-detalle__fila">
+              <span>Venta</span>
+              <strong>{{ clienteDetalle.idVenta }}</strong>
+            </div>
+            <div class="cob-detalle__fila">
+              <span>Fecha</span>
+              <span>{{ formatearFecha(clienteDetalle.fecha) }}</span>
+            </div>
+            <div class="cob-detalle__fila">
+              <span>Total</span>
+              <span>{{ clienteDetalle.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="cob-detalle__fila">
+              <span>Abonado</span>
+              <span>{{ clienteDetalle.abonado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            </div>
+            <div class="cob-detalle__fila cob-detalle__fila--saldo">
+              <span>Saldo pendiente</span>
+              <strong>{{ saldoDe(clienteDetalle) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+            </div>
+          </div>
+
+          <div class="cob-detalle__titulo">Historial de abonos</div>
+
+          <div class="cob-pagos" *ngIf="pagosDetalle.length > 0; else sinPagos">
+            <div class="cob-pago" *ngFor="let p of pagosDetalle">
+              <div class="cob-pago__info">
+                <span class="cob-pago__monto">{{ p.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                <span class="cob-pago__detalle">
+                  {{ formatearFecha(p.fecha) }} · {{ metodoNombre(p.metodoPago) }} · {{ p.nombreVendedor }}
+                </span>
+                <span class="cob-pago__nota" *ngIf="p.nota">{{ p.nota }}</span>
+              </div>
+            </div>
+          </div>
+          <ng-template #sinPagos>
+            <p class="cob-detalle__vacio">Aún no hay abonos registrados para esta venta.</p>
+          </ng-template>
+
+          <ion-button
+            expand="block"
+            class="cob-detalle__btn"
+            [disabled]="saldoDe(clienteDetalle) === 0 || !puedeCobrar"
+            (click)="registrarAbono(clienteDetalle)">
+            Registrar abono
+          </ion-button>
+
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>

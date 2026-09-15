@@ -1,0 +1,58 @@
+<div
+  class="hb"
+  role="region"
+  aria-roledescription="carousel"
+  aria-label="Banner promocional"
+  (mouseenter)="pausar()"
+  (mouseleave)="reanudar()"
+  (touchstart)="pausar()"
+  (touchend)="reanudar()">
+
+  <div class="hb__viewport" [style.aspect-ratio]="'16 / 5'">
+    <div
+      *ngFor="let slide of activos; let i = index"
+      class="hb__slide"
+      [class.hb__slide--activo]="i === indice"
+      (click)="abrirSlide(slide)">
+      <img
+        [src]="slide.imagenUrl"
+        [alt]="slide.titulo || 'Banner promocional'"
+        class="hb__img" />
+      <div class="hb__capas">
+        <div class="hb__titulo" *ngIf="slide.titulo">{{ slide.titulo }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flechas prev/next -->
+  <button
+    *ngIf="activos.length > 1"
+    type="button"
+    class="hb__flecha hb__flecha--prev"
+    aria-label="Banner anterior"
+    (click)="retroceder()">
+    <ion-icon name="chevron-back"></ion-icon>
+  </button>
+  <button
+    *ngIf="activos.length > 1"
+    type="button"
+    class="hb__flecha hb__flecha--next"
+    aria-label="Banner siguiente"
+    (click)="avanzar()">
+    <ion-icon name="chevron-forward"></ion-icon>
+  </button>
+
+  <!-- Dots indicadores -->
+  <div class="hb__dots" role="tablist" aria-label="Posición del banner" *ngIf="activos.length > 1">
+    <button
+      *ngFor="let slide of activos; let i = index"
+      type="button"
+      class="hb__dot"
+      [class.hb__dot--activo]="i === indice"
+      [attr.aria-label]="'Ir al banner ' + (i + 1)"
+      [attr.aria-current]="i === indice ? 'true' : null"
+      (click)="irA(i)">
+    </button>
+  </div>
+
+</div>

@@ -1,0 +1,1073 @@
+/*
+ * App Global CSS
+ * ----------------------------------------------------------------------------
+ * Put style rules here that you want to apply globally. These styles are for
+ * the entire app and not just one component. Additionally, this file can be
+ * used as an entry point to import other CSS/Sass files to be included in the
+ * output CSS.
+ * For more information on global stylesheets, visit the documentation:
+ * https://ionicframework.com/docs/layout/global-stylesheets
+ */
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+/**
+ * Ionic Dark Mode
+ * -----------------------------------------------------
+ * For more info, please see:
+ * https://ionicframework.com/docs/theming/dark-mode
+ */
+
+/* @import "@ionic/angular/css/palettes/dark.always.css"; */
+/* @import "@ionic/angular/css/palettes/dark.class.css"; */
+@import "@ionic/angular/css/palettes/dark.system.css";
+
+// ── Modal detalle mascota ─────────────────────────────────────────
+.modal-mascota-detalle {
+  --border-radius: 26px 26px 0 0;
+  --box-shadow: 0 -6px 32px rgba(0, 77, 64, 0.2);
+  --backdrop-opacity: 0.5;
+
+  &::part(content) {
+    border-radius: 26px 26px 0 0;
+    background: var(--app-page);
+    overflow: hidden;
+  }
+
+  &::part(handle) {
+    width: 36px;
+    height: 4px;
+    background: #B2DFDF;
+    border-radius: 100px;
+    margin-top: 14px;
+    opacity: 1;
+  }
+
+  &::part(backdrop) {
+    background: rgba(0, 77, 64, 0.48);
+    backdrop-filter: blur(2px);
+  }
+}
+// ── Popover selector de cliente ────────────────────────────────
+.cliente-selector-popover {
+  --width: 340px;
+  --max-width: 92vw;
+  --max-height: 520px;
+  --box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+  --backdrop-opacity: 0.25;
+
+  &::part(content) {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--app-border);
+  }
+}
+
+// ── Modal del círculo cromático ────────────────────────────────
+.color-picker-modal {
+  --width: 380px;
+  --max-width: 94vw;
+
+  &::part(content) {
+    border-radius: 20px;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// GLOBAL.SCSS — VetApp
+// Sistema de diseño centralizado para toda la aplicación Ionic
+// ═══════════════════════════════════════════════════════════════════
+
+// ── 1. FUENTE ────────────────────────────────────────────────────
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap');
+
+// ── 2. VARIABLES SCSS (tiempo de compilación) ────────────────────
+// Estas se usan solo en el build; en runtime todo va por CSS vars.
+
+$font-base: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+
+// Fallback de color primario (el admin lo sobreescribe en runtime)
+$primary-fallback: #00897B;
+
+// Semánticos (fijos, no configurables por el admin)
+$danger:         #ef4444;
+$danger-light:   #fee2e2;
+$success:        #10b981;
+$success-light:  #d1fae5;
+$warning:        #f59e0b;
+$warning-light:  #fef3c7;
+$info:           #3b82f6;
+$info-light:     #dbeafe;
+$purple:         #8b5cf6;
+$purple-light:   #ede9fe;
+$pink:           #ec4899;
+$pink-light:     #fce7f3;
+
+// Neutros
+$surface:        #ffffff;
+$surface-2:      #f9fafb;
+$page:           #f1f5f9;
+$border:         #e5e7eb;
+$border-dark:    #d1d5db;
+$text-1:         #1f2937;
+$text-2:         #6b7280;
+$text-3:         #9ca3af;
+
+// Radios
+$radius-xs:   4px;
+$radius-sm:   8px;
+$radius-md:   12px;
+$radius-lg:   16px;
+$radius-xl:   20px;
+$radius-2xl:  24px;
+$radius-full: 9999px;
+
+// Sombras
+$shadow-sm:  0 2px 8px rgba(0,0,0,0.06);
+$shadow-md:  0 4px 16px rgba(0,0,0,0.10);
+$shadow-lg:  0 8px 32px rgba(0,0,0,0.14);
+
+// Transiciones
+$ease:        cubic-bezier(0.4, 0, 0.2, 1);
+$ease-spring: cubic-bezier(0.34, 1.3, 0.64, 1);
+
+
+// ── 3. CSS CUSTOM PROPERTIES ─────────────────────────────────────
+// El admin sobreescribe --app-primary (y derivadas) en Firestore.
+// El servicio ConfiguracionAppService inyecta el atributo
+// data-theme en <html> en runtime y las paletas se aplican aquí.
+
+:root {
+  // ── Color primario (configurable) ──
+  --app-primary:       #{$primary-fallback};
+  --app-primary-dark:  #00695C;
+  --app-primary-shade: #004D40;
+  --app-primary-light: #B2DFDF;
+  --app-primary-tint:  #E0F2F1;
+  --app-primary-xlight:#F0F9F8;
+  --app-primary-rgb:   0, 137, 123;
+
+  // ── Colores semánticos (fijos) ──
+  --app-danger:        #{$danger};
+  --app-danger-light:  #{$danger-light};
+  --app-success:       #{$success};
+  --app-success-light: #{$success-light};
+  --app-warning:       #{$warning};
+  --app-warning-light: #{$warning-light};
+  --app-info:          #{$info};
+  --app-info-light:    #{$info-light};
+  --app-purple:        #{$purple};
+  --app-purple-light:  #{$purple-light};
+  --app-pink:          #{$pink};
+  --app-pink-light:    #{$pink-light};
+
+  // ── Estados de producto (ventas) ──
+  --app-por-vencer:        #f97316;
+  --app-por-vencer-light:  #ffedd5;
+  --app-por-vencer-text:   #7c2d12;
+
+  // ── Superficies y tipografía ──
+  --app-surface:       #{$surface};
+  --app-surface-2:     #{$surface-2};
+  --app-page:          #{$page};
+  --app-border:        #{$border};
+  --app-border-dark:   #{$border-dark};
+  --app-text-1:        #{$text-1};
+  --app-text-2:        #{$text-2};
+  --app-text-3:        #{$text-3};
+
+  // ── Colores por especie ──
+  --app-species-perro-bg:     #EEEDFE;
+  --app-species-perro-border: #CECBF6;
+  --app-species-perro-text:   #26215C;
+  --app-species-perro-sub:    #534AB7;
+
+  --app-species-gato-bg:      #E1F5EE;
+  --app-species-gato-border:  #9FE1CB;
+  --app-species-gato-text:    #04342C;
+  --app-species-gato-sub:     #0F6E56;
+
+  --app-species-ave-bg:       #FBEAF0;
+  --app-species-ave-border:   #F4C0D1;
+  --app-species-ave-text:     #4B1528;
+  --app-species-ave-sub:      #993556;
+
+  --app-species-conejo-bg:    #FAEEDA;
+  --app-species-conejo-border:#FAC775;
+  --app-species-conejo-text:  #412402;
+  --app-species-conejo-sub:   #854F0B;
+
+  --app-species-pez-bg:       #E6F1FB;
+  --app-species-pez-border:   #B5D4F4;
+  --app-species-pez-text:     #042C53;
+  --app-species-pez-sub:      #185FA5;
+
+  // ── Colores por rol ──
+  --app-rol-admin:        #10b981;
+  --app-rol-admin-bg:     #d1fae5;
+  --app-rol-admin-text:   #065f46;
+  --app-rol-recepcion:    #f59e0b;
+  --app-rol-recepcion-bg: #fef3c7;
+  --app-rol-recepcion-text:#92400e;
+  --app-rol-vet:          #3b82f6;
+  --app-rol-vet-bg:       #dbeafe;
+  --app-rol-vet-text:     #1e40af;
+  --app-rol-cliente:      #8b5cf6;
+  --app-rol-cliente-bg:   #ede9fe;
+  --app-rol-cliente-text: #5b21b6;
+
+  // ── Border radius (configurable) ──
+  --app-radius-xs:   #{$radius-xs};
+  --app-radius-sm:   #{$radius-sm};
+  --app-radius-md:   #{$radius-md};
+  --app-radius-lg:   #{$radius-lg};
+  --app-radius-xl:   #{$radius-xl};
+  --app-radius-2xl:  #{$radius-2xl};
+  --app-radius-full: #{$radius-full};
+
+  // ── Sombras (configurables por nivel) ──
+  --app-shadow-sm:  #{$shadow-sm};
+  --app-shadow-md:  #{$shadow-md};
+  --app-shadow-lg:  #{$shadow-lg};
+  --app-shadow-primary: 0 4px 14px rgba(var(--app-primary-rgb), 0.35);
+
+  // ── Transiciones ──
+  --app-transition:        0.2s #{$ease};
+  --app-transition-spring: 0.35s #{$ease-spring};
+}
+
+// ── 3b. TEMAS DE COLOR ──────────────────────────────────────────
+// Se activan con <html data-theme="..."> (runtime, ConfiguracionAppService).
+// Cada tema reemplaza la paleta primaria; los semánticos permanecen fijos.
+
+[data-theme='azul'] {
+  --app-primary:       #3B82F6;
+  --app-primary-dark:  #2563EB;
+  --app-primary-shade: #1E3A8A;
+  --app-primary-light: #BFDBFE;
+  --app-primary-tint:  #DBEAFE;
+  --app-primary-xlight:#EFF6FF;
+  --app-primary-rgb:   59, 130, 246;
+}
+
+[data-theme='esmeralda'] {
+  --app-primary:       #10B981;
+  --app-primary-dark:  #059669;
+  --app-primary-shade: #064E3B;
+  --app-primary-light: #A7F3D0;
+  --app-primary-tint:  #D1FAE5;
+  --app-primary-xlight:#ECFDF5;
+  --app-primary-rgb:   16, 185, 129;
+}
+
+[data-theme='violeta'] {
+  --app-primary:       #8B5CF6;
+  --app-primary-dark:  #7C3AED;
+  --app-primary-shade: #4C1D95;
+  --app-primary-light: #C4B5FD;
+  --app-primary-tint:  #EDE9FE;
+  --app-primary-xlight:#F5F3FF;
+  --app-primary-rgb:   139, 92, 246;
+}
+
+
+// ── 4. OVERRIDE DE VARIABLES IONIC ───────────────────────────────
+// Mapeamos nuestro sistema al sistema de colores de Ionic.
+
+:root {
+  --ion-font-family: #{$font-base};
+  --ion-background-color: var(--app-page);
+  --ion-text-color: var(--app-text-1);
+
+  --ion-color-primary:          var(--app-primary);
+  --ion-color-primary-rgb:      var(--app-primary-rgb);
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade:    var(--app-primary-shade);
+  --ion-color-primary-tint:     var(--app-primary-light);
+
+  --ion-color-secondary:        var(--app-warning);
+  --ion-color-secondary-rgb:    245,158,11;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-shade:  #{darken(#f59e0b, 10%)};
+  --ion-color-secondary-tint:   var(--app-warning-light);
+
+  --ion-color-danger:           var(--app-danger);
+  --ion-color-danger-light:     var(--app-danger-light);
+  --ion-color-success:          var(--app-success);
+  --ion-color-warning:          var(--app-warning);
+
+  --ion-color-light:            var(--app-border);
+  --ion-color-light-shade:      var(--app-border-dark);
+  --ion-color-medium:           var(--app-text-2);
+  --ion-color-medium-shade:     var(--app-text-1);
+  --ion-color-dark:             var(--app-text-1);
+}
+
+
+// ── 5. RESET Y BASE ───────────────────────────────────────────────
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  font-family: var(--ion-font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+// ── 6. IONIC COMPONENT OVERRIDES ─────────────────────────────────
+
+// ── Toolbar ──
+ion-toolbar {
+  --background: var(--app-surface);
+  --border-width: 0 0 1px 0;
+  --border-color: var(--app-border);
+  --min-height: 56px;
+  --padding-start: 16px;
+  --padding-end: 8px;
+  --color: var(--app-text-1);
+}
+
+ion-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--app-text-1);
+  letter-spacing: -0.2px;
+  padding: 0;
+}
+
+ion-header ion-toolbar:first-child {
+  padding-top: env(safe-area-inset-top);
+}
+
+// ── Content ──
+ion-content {
+  --background: var(--app-page);
+}
+
+// ── Tab bar ──
+ion-tab-bar {
+  --background: var(--app-surface);
+  border-top: 1px solid var(--app-border);
+  height: 56px;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+ion-tab-button {
+  --color:          var(--app-text-3);
+  --color-selected: var(--app-primary);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1px;
+  transition: color var(--app-transition);
+
+  ion-icon { font-size: 22px; }
+  ion-label { font-size: 10px; font-weight: 700; margin-top: 2px; }
+}
+
+// ── FAB ──
+ion-fab-button {
+  --background:       var(--app-primary);
+  --background-hover: var(--app-primary-dark);
+  --box-shadow:       var(--app-shadow-primary);
+  --border-radius:    var(--app-radius-lg);
+  transition: box-shadow var(--app-transition);
+
+  &:hover { --box-shadow: 0 6px 18px rgba(var(--app-primary-rgb), 0.45); }
+}
+
+// ── Badge ──
+ion-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--app-radius-full);
+  text-transform: capitalize;
+}
+
+// ── Item (listas) ──
+ion-item {
+  --border-radius:    var(--app-radius-md);
+  --padding-start:    14px;
+  --inner-padding-end: 10px;
+  --background:       var(--app-surface);
+  --background-hover: var(--app-primary-xlight);
+  --color:            var(--app-text-1);
+  --highlight-color-focused: var(--app-primary);
+  font-size: 14px;
+  transition: background var(--app-transition);
+}
+
+ion-label {
+  font-weight: 500;
+  color: var(--app-text-1);
+}
+
+// ── Searchbar ──
+ion-searchbar {
+  --border-radius: var(--app-radius-lg);
+  --background:    var(--app-page);
+  --box-shadow:    none;
+  --placeholder-color: var(--app-text-3);
+  --icon-color:    var(--app-primary);
+  --color:         var(--app-text-1);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+// ── Chip ──
+ion-chip {
+  --background: var(--app-page);
+  --color:      var(--app-text-2);
+  border: 1.5px solid var(--app-border);
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--app-radius-full);
+  height: 30px;
+  transition: all var(--app-transition);
+
+  ion-icon { font-size: 13px; margin-right: 2px; color: var(--app-primary); }
+
+  &.active {
+    --background: var(--app-primary);
+    --color: #fff;
+    border-color: var(--app-primary);
+    box-shadow: 0 3px 12px rgba(var(--app-primary-rgb), 0.35);
+
+    ion-icon { color: #fff; }
+  }
+}
+
+// ── Toggle ──
+ion-toggle {
+  --handle-height: 18px;
+  --handle-width:  18px;
+  --track-background: var(--app-border);
+  --track-background-checked: var(--app-primary);
+  width: 42px;
+  height: 24px;
+}
+
+// ── Select / Input ──
+ion-select, ion-input, ion-textarea {
+  --placeholder-color: var(--app-text-3);
+  --color: var(--app-text-1);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+// ── Card ──
+ion-card {
+  --background:    var(--app-surface);
+  border-radius:   var(--app-radius-xl);
+  box-shadow:      var(--app-shadow-sm);
+  margin: 0 0 12px;
+  border: 1.5px solid transparent;
+  transition: box-shadow var(--app-transition), transform var(--app-transition-spring);
+
+  &:hover {
+    box-shadow: var(--app-shadow-md);
+    transform: translateY(-2px);
+  }
+}
+
+ion-card-header { padding: 14px 16px 6px; }
+ion-card-title  { font-size: 16px; font-weight: 800; color: var(--app-text-1); }
+ion-card-subtitle { font-size: 12px; color: var(--app-text-2); font-weight: 600; margin-top: 2px; }
+ion-card-content { padding: 6px 16px 16px; }
+
+// ── Spinner ──
+ion-spinner { color: var(--app-primary); }
+
+// ── Skeleton ──
+ion-skeleton-text {
+  --border-radius: var(--app-radius-sm);
+  --background: linear-gradient(
+    90deg,
+    var(--app-border) 25%,
+    var(--app-primary-tint) 50%,
+    var(--app-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+// ── Menu lateral ──
+ion-menu {
+  --background: var(--app-surface);
+  --width: 280px;
+}
+
+ion-menu ion-content { --background: var(--app-surface); }
+
+// ── Modal ──
+ion-modal {
+  --border-radius: 0;
+  --background:    var(--app-page);
+}
+
+// ── Alert ──
+ion-alert {
+  --background: var(--app-surface);
+  --backdrop-opacity: 0.4;
+
+  .alert-title { font-weight: 800; color: var(--app-text-1); }
+  .alert-button { color: var(--app-primary); font-weight: 700; }
+  .alert-button.danger { color: var(--app-danger); }
+}
+
+// ── Toast ──
+ion-toast {
+  --border-radius: var(--app-radius-md);
+  --box-shadow: var(--app-shadow-lg);
+  --color: #fff;
+  --button-color: rgba(255,255,255,0.75);
+  font-weight: 600;
+}
+
+// ── Action Sheet ──
+ion-action-sheet {
+  --background: var(--app-surface);
+  --button-color: var(--app-text-1);
+  --button-color-selected: var(--app-primary);
+
+  .action-sheet-title { color: var(--app-text-2); font-size: 13px; }
+  .action-sheet-button { font-weight: 600; }
+}
+
+// ── Refresher ──
+ion-refresher { --color: var(--app-primary); }
+
+
+// ── 7. CLASES UTILITARIAS GLOBALES ──────────────────────────────
+
+// ── Hero section (patrón compartido en register, historial, etc.) ──
+.app-hero {
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-shade));
+  padding: 28px 20px 44px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: -30px; left: 50%;
+    transform: translateX(-50%);
+    width: 120%; height: 60px;
+    background: var(--app-page);
+    border-radius: 50%;
+  }
+
+  &-icon {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(6px);
+    border: 2px solid rgba(255,255,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 32px; color: #fff;
+    margin: 0 auto 12px;
+    position: relative; z-index: 2;
+  }
+
+  &-title {
+    color: #fff; font-size: 22px; font-weight: 800;
+    margin: 0 0 4px; letter-spacing: -0.3px;
+  }
+
+  &-sub {
+    color: rgba(255,255,255,0.72); font-size: 13px; margin: 0;
+  }
+}
+
+.hero-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.22);
+  animation: pulseRing 2.5s ease-out infinite;
+  &.r1 { width: 96px;  height: 96px;  animation-delay: 0s; }
+  &.r2 { width: 120px; height: 120px; animation-delay: 0.6s; }
+}
+
+// ── Form card (citas, register, etc.) ──
+.form-card {
+  background: var(--app-surface);
+  margin: 10px 14px 0;
+  border-radius: var(--app-radius-xl);
+  padding: 16px;
+  box-shadow: var(--app-shadow-sm);
+}
+
+.form-card-label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--app-text-2); margin: 0 0 14px;
+
+  ion-icon { font-size: 14px; color: var(--app-primary); }
+}
+
+.form-group {
+  display: flex; flex-direction: column; gap: 5px;
+  margin-bottom: 14px;
+  &:last-child { margin-bottom: 0; }
+}
+
+.form-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-bottom: 12px;
+  @media (max-width: 600px) { grid-template-columns: 1fr; gap: 0; }
+}
+
+// ── Field label ──
+.field-label {
+  font-size: 12px; font-weight: 700; color: var(--app-text-1);
+  display: flex; align-items: center; gap: 4px;
+  .required { color: var(--app-danger); }
+}
+
+// ── Inputs nativos (fuera de ion-item) ──
+.custom-input,
+.custom-select,
+.custom-textarea {
+  border: 1.5px solid var(--app-border);
+  border-radius: var(--app-radius-sm);
+  padding: 10px 12px;
+  font-size: 13px; color: var(--app-text-1);
+  background: var(--app-surface-2);
+  width: 100%; appearance: none;
+  font-family: var(--ion-font-family);
+  outline: none;
+  transition: border-color var(--app-transition), box-shadow var(--app-transition), background var(--app-transition);
+  box-sizing: border-box;
+
+  &::placeholder { color: var(--app-text-3); }
+
+  &:focus {
+    border-color: var(--app-primary);
+    box-shadow: 0 0 0 3px rgba(var(--app-primary-rgb), 0.12);
+    background: var(--app-surface);
+  }
+
+  &:disabled { opacity: 0.5; cursor: not-allowed; background: #f3f4f6; }
+  &.error    { border-color: var(--app-danger) !important; background: var(--app-danger-light) !important; }
+}
+
+.custom-textarea { resize: vertical; min-height: 64px; line-height: 1.5; }
+
+.custom-select-wrap {
+  position: relative;
+  &::after {
+    content: '▾'; position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%); font-size: 11px;
+    color: var(--app-text-3); pointer-events: none;
+  }
+}
+
+// ── Botones nativos ──
+.btn-primary {
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-dark));
+  color: #fff; border: none; border-radius: var(--app-radius-md);
+  padding: 12px 22px; font-size: 14px; font-weight: 800;
+  font-family: var(--ion-font-family); cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  transition: box-shadow var(--app-transition), transform var(--app-transition);
+  box-shadow: var(--app-shadow-primary);
+
+  ion-icon { font-size: 15px; }
+  &:hover  { box-shadow: 0 6px 18px rgba(var(--app-primary-rgb), 0.45); transform: translateY(-1px); }
+  &:active { transform: scale(0.97); }
+  &:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; transform: none; }
+}
+
+.btn-secondary {
+  background: none; border: 1.5px solid var(--app-border);
+  border-radius: var(--app-radius-sm); padding: 10px 20px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  color: var(--app-text-2); font-family: var(--ion-font-family);
+  transition: all var(--app-transition);
+
+  &:hover  { background: var(--app-surface-2); border-color: var(--app-border-dark); }
+  &:active { transform: scale(0.97); }
+}
+
+// ── Section label ──
+.section-label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: 0.8px; color: var(--app-text-2); margin-bottom: 12px;
+
+  ion-icon { font-size: 15px; color: var(--app-primary); }
+}
+
+// ── Quick tip banner ──
+.quick-tip {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--app-warning-light);
+  border-radius: var(--app-radius-sm); padding: 10px 12px;
+  margin: 10px 14px 0;
+  border: 1px solid #fde68a;
+
+  ion-icon { font-size: 16px; flex-shrink: 0; color: var(--app-warning); }
+  span     { font-size: 12px; color: #92400e; line-height: 1.4; font-weight: 500; }
+}
+
+// ── Modal footer ──
+.modal-footer-custom {
+  padding: 12px 14px calc(16px + env(safe-area-inset-bottom));
+  display: flex; justify-content: flex-end; gap: 8px;
+  background: var(--app-surface);
+  border-top: 1px solid var(--app-border);
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+}
+
+
+// ── 8. BADGES DE ESTADO (compartidos en citas, mascotas, usuarios) ─
+
+%badge-base {
+  display: inline-flex; align-items: center;
+  font-size: 10px; font-weight: 700;
+  padding: 3px 10px; border-radius: var(--app-radius-full);
+  white-space: nowrap; flex-shrink: 0;
+}
+
+// Citas
+.badge-pendiente  { @extend %badge-base; background: var(--app-warning-light); color: #92400e; }
+.badge-confirmada { @extend %badge-base; background: var(--app-primary-tint);  color: var(--app-primary-dark); }
+.badge-finalizada { @extend %badge-base; background: var(--app-success-light); color: #065f46; }
+.badge-cancelada  { @extend %badge-base; background: var(--app-danger-light);  color: #991b1b; }
+.badge-en_proceso { @extend %badge-base; background: var(--app-info-light);    color: #1e40af; }
+.badge-no_asistio { @extend %badge-base; background: #f3f4f6; color: var(--app-text-2); }
+
+// Usuarios — rol
+.badge-administrador { @extend %badge-base; background: var(--app-success-light); color: #065f46; }
+.badge-recepcionista { @extend %badge-base; background: var(--app-warning-light); color: #92400e; }
+.badge-veterinario   { @extend %badge-base; background: var(--app-info-light);    color: #1e40af; }
+.badge-cliente       { @extend %badge-base; background: var(--app-purple-light);  color: #5b21b6; }
+
+// Estado activo/inactivo
+.badge-activo   { @extend %badge-base; background: var(--app-success-light); color: #065f46; }
+.badge-inactivo { @extend %badge-base; background: var(--app-danger-light);  color: #991b1b; }
+
+// Tipo de cita (chips)
+.badge-consulta { @extend %badge-base; background: var(--app-info-light);    color: #1e40af; }
+.badge-vacuna   { @extend %badge-base; background: var(--app-success-light); color: #065f46; }
+.badge-cirugia  { @extend %badge-base; background: var(--app-danger-light);  color: #991b1b; }
+.badge-urgencia { @extend %badge-base; background: var(--app-warning-light); color: #92400e; }
+.badge-control  { @extend %badge-base; background: var(--app-purple-light);  color: #5b21b6; }
+
+// Productos (ventas)
+.badge-disponible    { @extend %badge-base; background: var(--app-success-light);   color: #065f46; }
+.badge-stock-bajo    { @extend %badge-base; background: var(--app-warning-light);   color: #92400e; }
+.badge-por-vencer    { @extend %badge-base; background: var(--app-por-vencer-light);color: var(--app-por-vencer-text); }
+.badge-agotado       { @extend %badge-base; background: var(--app-danger-light);    color: #991b1b; }
+.badge-descontinuado { @extend %badge-base; background: var(--app-surface-2);       color: var(--app-text-2); }
+
+// Métodos de pago (ventas)
+.badge-efectivo      { @extend %badge-base; background: var(--app-success-light);   color: #065f46; }
+.badge-tarjeta       { @extend %badge-base; background: var(--app-info-light);      color: #1e40af; }
+.badge-transferencia { @extend %badge-base; background: var(--app-purple-light);    color: #5b21b6; }
+.badge-credito       { @extend %badge-base; background: var(--app-warning-light);   color: #92400e; }
+.badge-otro          { @extend %badge-base; background: var(--app-surface-2);       color: var(--app-text-2); }
+.badge-pagado        { @extend %badge-base; background: var(--app-success-light);   color: #065f46; }
+.badge-pendiente     { @extend %badge-base; background: var(--app-warning-light);   color: #92400e; }
+.badge-anulada       { @extend %badge-base; background: var(--app-surface-2);       color: var(--app-text-2); }
+
+
+// ── 9. AVATARES DE ROL ───────────────────────────────────────────
+
+%avatar-base {
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; flex-shrink: 0; font-weight: 700;
+}
+
+// Foto de mascota dentro de contenedores de avatar
+.mascota-foto {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.avatar-administrador { @extend %avatar-base; background: var(--app-success-light); color: #065f46; }
+.avatar-recepcionista { @extend %avatar-base; background: var(--app-warning-light); color: #92400e; }
+.avatar-veterinario   { @extend %avatar-base; background: var(--app-info-light);    color: #1e40af; }
+.avatar-cliente       { @extend %avatar-base; background: var(--app-purple-light);  color: #5b21b6; }
+
+
+// ── 10. ESTADO VACÍO ─────────────────────────────────────────────
+
+.empty-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 80px 20px; gap: 12px;
+  text-align: center;
+
+  ion-icon { font-size: 64px; color: var(--app-primary); opacity: 0.15; }
+
+  h3 { font-size: 16px; font-weight: 800; color: var(--app-text-1); margin: 0; }
+  p  { font-size: 13px; color: var(--app-text-2); margin: 0; }
+
+  ion-button {
+    --border-radius: var(--app-radius-lg);
+    --background:    var(--app-primary);
+    --box-shadow:    var(--app-shadow-primary);
+    margin-top: 4px; font-weight: 700;
+  }
+}
+
+
+// ── 11. SKELETON LOADER ──────────────────────────────────────────
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--app-border) 25%,
+    var(--app-primary-xlight) 50%,
+    var(--app-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--app-radius-sm);
+  pointer-events: none;
+}
+
+
+// ── 12. CHIPS ────────────────────────────────────────────────────
+
+.tipo-chip {
+  padding: 6px 14px; border-radius: var(--app-radius-full);
+  border: 1.5px solid var(--app-border);
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  background: var(--app-surface); color: var(--app-text-2);
+  transition: all var(--app-transition); font-family: var(--ion-font-family);
+
+  &:hover  { background: var(--app-surface-2); }
+  &:active { transform: scale(0.96); }
+
+  // Colores por tipo de cita
+  &.c-consulta.active { background: var(--app-info-light);    color: #1e40af; border-color: var(--app-info);    font-weight: 700; box-shadow: 0 2px 8px rgba(59,130,246,0.2); }
+  &.c-vacuna.active   { background: var(--app-success-light); color: #065f46; border-color: var(--app-success); font-weight: 700; box-shadow: 0 2px 8px rgba(16,185,129,0.2); }
+  &.c-cirugia.active  { background: var(--app-danger-light);  color: #991b1b; border-color: var(--app-danger);  font-weight: 700; box-shadow: 0 2px 8px rgba(239,68,68,0.2); }
+  &.c-urgencia.active { background: var(--app-warning-light); color: #92400e; border-color: var(--app-warning); font-weight: 700; box-shadow: 0 2px 8px rgba(245,158,11,0.2); }
+  &.c-control.active  { background: var(--app-purple-light);  color: #5b21b6; border-color: var(--app-purple);  font-weight: 700; box-shadow: 0 2px 8px rgba(139,92,246,0.2); }
+}
+
+.slot-chip {
+  padding: 7px 12px; border-radius: var(--app-radius-full);
+  border: 1.5px solid var(--app-border);
+  font-size: 11px; font-weight: 500; cursor: pointer;
+  background: var(--app-surface); color: var(--app-text-1);
+  transition: all var(--app-transition); user-select: none;
+  font-family: var(--ion-font-family);
+
+  &:hover:not(.ocupado) { background: var(--app-primary-tint); border-color: var(--app-primary); color: var(--app-primary-dark); }
+  &.active  { background: var(--app-primary); color: #fff; border-color: transparent; font-weight: 600; box-shadow: 0 2px 8px rgba(var(--app-primary-rgb), 0.35); }
+  &.ocupado { background: #f3f4f6; color: var(--app-text-3); border-color: var(--app-border); cursor: not-allowed; text-decoration: line-through; pointer-events: none; opacity: 0.55; }
+}
+
+
+// ── 13. DETAIL CARDS (modal detalle cita / mascota) ──────────────
+
+.detail-hero {
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-dark));
+  margin: 0 0 16px;
+  padding: 20px 16px;
+  border-radius: 0 0 var(--app-radius-lg) var(--app-radius-lg);
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.detail-card {
+  background: var(--app-surface);
+  margin: 0 14px 10px;
+  border-radius: var(--app-radius-xl);
+  padding: 4px 16px;
+  box-shadow: var(--app-shadow-sm);
+}
+
+.detail-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 0; border-bottom: 1px solid var(--app-border);
+  font-size: 13px;
+  &:last-child { border-bottom: none; }
+}
+
+.detail-label {
+  color: var(--app-text-2); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  width: 86px; flex-shrink: 0; padding-top: 1px;
+}
+
+.detail-val {
+  color: var(--app-text-1); flex: 1; font-weight: 500;
+  &.notas { font-size: 12px; line-height: 1.6; white-space: pre-line; color: var(--app-text-2); font-weight: 400; }
+}
+
+
+// ── 14. MASCOTA CARD (grid de mascotas) ──────────────────────────
+
+.mascota-card {
+  border-radius: var(--app-radius-2xl);
+  box-shadow: var(--app-shadow-md);
+  overflow: visible; position: relative;
+  margin: 0 0 4px; background: var(--app-surface);
+  border: 1.5px solid transparent;
+  transition: transform var(--app-transition-spring), box-shadow var(--app-transition), border-color var(--app-transition);
+
+  &::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 95px;
+    background: linear-gradient(135deg, var(--app-primary), var(--app-primary-shade));
+    border-radius: var(--app-radius-2xl) var(--app-radius-2xl) 60% 60% / var(--app-radius-2xl) var(--app-radius-2xl) 44px 44px;
+    z-index: 0;
+  }
+
+  &:hover  { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(var(--app-primary-rgb), 0.18); border-color: var(--app-primary-light); }
+  &:active { transform: scale(0.97); }
+  &.inactiva { opacity: 0.5; filter: grayscale(60%); }
+}
+
+
+// ── 15. TABLA (admin: usuarios, citas) ───────────────────────────
+
+.table-container {
+  background: var(--app-surface); border-radius: var(--app-radius-xl);
+  box-shadow: var(--app-shadow-sm); overflow: hidden; margin-bottom: 20px;
+}
+
+.app-table {
+  width: 100%; border-collapse: collapse; min-width: 620px;
+
+  thead tr { background: #f8fafc; border-bottom: 2px solid var(--app-border); }
+
+  th {
+    font-size: 10.5px; font-weight: 800; color: var(--app-text-2);
+    padding: 12px 14px; text-align: left;
+    text-transform: uppercase; letter-spacing: 0.6px; white-space: nowrap;
+  }
+
+  td {
+    font-size: 13px; padding: 12px 14px;
+    color: var(--app-text-1); border-bottom: 1px solid #f0f4fb;
+    vertical-align: middle;
+  }
+
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td      { background: #faf8ff; }
+}
+
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+.estado-pill {
+  display: inline-block; padding: 4px 12px; border-radius: var(--app-radius-full);
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+
+  &.pendiente  { background: var(--app-warning-light); color: #92400e; }
+  &.en_proceso { background: var(--app-info-light);    color: #1e40af; }
+  &.completada { background: var(--app-success-light); color: #065f46; }
+  &.cancelada  { background: var(--app-danger-light);  color: #991b1b; }
+}
+
+
+// ── 16. SIDE MENU ─────────────────────────────────────────────────
+
+.menu-header {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 24px 16px 16px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-primary-xlight);
+
+  ion-icon { font-size: 56px; margin-bottom: 8px; }
+
+  .nombre {
+    margin: 8px 0 6px; font-weight: 800; font-size: 15px;
+    text-align: center; color: var(--app-text-1);
+  }
+}
+
+ion-menu ion-item.active-link {
+  --background: rgba(var(--app-primary-rgb), 0.08);
+  border-right: 3px solid var(--app-primary);
+  font-weight: 700;
+}
+
+
+// ── 17. ANIMACIONES GLOBALES ─────────────────────────────────────
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes pulseRing {
+  0%   { transform: scale(0.85); opacity: 0.6; }
+  100% { transform: scale(1.1);  opacity: 0; }
+}
+
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(var(--app-primary-rgb), 0.25); }
+  50%       { box-shadow: 0 0 0 5px rgba(var(--app-primary-rgb), 0); }
+}
+
+// Clases de entrada (para aplicar con [class.slide-up]="loaded")
+.anim-slide-up  { animation: slideUp  0.4s #{$ease-spring} both; }
+.anim-fade-in   { animation: fadeIn   0.3s #{$ease} both; }
+.anim-scale-in  { animation: scaleIn  0.3s #{$ease-spring} both; }
+
+// Delays escalonados
+@for $i from 1 through 8 {
+  .anim-delay-#{$i} { animation-delay: #{$i * 0.06}s; }
+}
+
+
+// ── 18. RESPONSIVE GLOBAL ────────────────────────────────────────
+
+@media (max-width: 600px) {
+  .form-card, .detail-card { margin-left: 10px; margin-right: 10px; padding: 14px 12px; }
+  .quick-tip               { margin-left: 10px; margin-right: 10px; }
+  .modal-footer-custom     { flex-direction: column-reverse; }
+  .detail-label            { width: 76px; }
+  ion-title                { font-size: 15px; }
+}
+
+@media (max-width: 380px) {
+  .slot-chip  { padding: 7px 9px; font-size: 11px; }
+  .tipo-chip  { padding: 5px 10px; font-size: 11px; }
+}

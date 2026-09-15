@@ -1,0 +1,84 @@
+.bf-content {
+  --background: var(--app-surface);
+}
+
+.bf-wrapper {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bf-preview {
+  width: 100%;
+  border-radius: var(--app-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  aspect-ratio: 16 / 5;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.bf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bf-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--app-text-1);
+}
+
+.bf-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px dashed var(--app-primary);
+  border-radius: var(--app-radius-md);
+  background: var(--app-primary-xlight);
+  color: var(--app-primary-dark);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+
+  input { display: none; }
+
+  ion-icon { font-size: 18px; }
+}
+
+.bf-quitar {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: var(--app-danger);
+  font-size: 12px;
+  cursor: pointer;
+
+  ion-icon { font-size: 14px; }
+}
+
+.bf-hint {
+  font-size: 11px;
+  color: var(--app-text-3);
+}
+
+.bf-input {
+  --background: var(--app-surface-2);
+  --padding-start: 12px;
+  border-radius: 10px;
+}
+
+.bf-footer {
+  padding-top: 4px;
+}

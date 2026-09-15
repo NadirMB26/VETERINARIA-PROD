@@ -1,0 +1,142 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Mis Compras</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="mc-content">
+
+  <!-- Resumen -->
+  <div class="mc-resumen">
+    <div class="mc-resumen__card mc-resumen__card--favor">
+      <ion-icon name="wallet-outline"></ion-icon>
+      <div>
+        <span class="mc-resumen__label">Saldo a favor</span>
+        <span class="mc-resumen__valor">{{ saldoFavor | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+    </div>
+    <div class="mc-resumen__card mc-resumen__card--deuda">
+      <ion-icon name="hourglass-outline"></ion-icon>
+      <div>
+        <span class="mc-resumen__label">Deuda pendiente</span>
+        <span class="mc-resumen__valor">{{ deudaTotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Deudas a crédito -->
+  <div class="mc-seccion" *ngIf="deudas.length > 0">
+    <h3 class="mc-seccion__titulo">Deudas a crédito</h3>
+
+    <div class="mc-deuda" *ngFor="let v of deudas" (click)="verVenta(v)">
+      <div class="mc-deuda__info">
+        <span class="mc-deuda__fecha">{{ formatearFecha(v.fecha) }}</span>
+        <span class="mc-deuda__detalle">Saldo: <strong>{{ saldoDe(v) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong> de {{ v.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="mc-deuda__arrow"></ion-icon>
+    </div>
+  </div>
+
+  <!-- Historial de compras -->
+  <div class="mc-seccion">
+    <h3 class="mc-seccion__titulo">Compras y servicios</h3>
+
+    <div class="table-container" *ngIf="historial.length > 0">
+      <div class="table-wrap">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Detalle</th>
+              <th>Método</th>
+              <th>Estado</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let v of historial" (click)="verVenta(v)">
+              <td>{{ formatearFecha(v.fecha) }}</td>
+              <td>{{ v.items.length }} ítem(s) · {{ v.nombreMascota || '—' }}</td>
+              <td><span class="badge-estado" [ngClass]="'badge-' + v.metodoPago">{{ metodosVenta(v) }}</span></td>
+              <td>
+                <span class="badge-estado" [ngClass]="v.estadoPago === 'pagado' ? 'badge-pagado' : (v.estadoPago === 'anulada' ? 'badge-anulada' : 'badge-pendiente')">
+                  {{ v.estadoPago | titlecase }}
+                </span>
+              </td>
+              <td class="mc-total">{{ v.total | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="historial.length === 0">
+      <ion-icon name="bag-check-outline"></ion-icon>
+      <h3>Aún no tienes compras</h3>
+      <p>Cuando adquieras productos o servicios en la veterinaria, aparecerán aquí.</p>
+    </div>
+  </div>
+
+  <!-- ── Modal detalle de venta ── -->
+  <ion-modal [isOpen]="!!ventaDetalle" (didDismiss)="cerrarDetalle()" [breakpoints]="[0, 1]" [initialBreakpoint]="1">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar color="primary">
+          <ion-title>Detalle de compra</ion-title>
+          <ion-buttons slot="end">
+            <ion-button color="light" (click)="cerrarDetalle()">Cerrar</ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="mc-content">
+        <div class="mc-detalle" *ngIf="ventaDetalle">
+
+          <div class="mc-detalle__info">
+            <div class="mc-detalle__fila">
+              <span>Fecha</span>
+              <span>{{ formatearFecha(ventaDetalle.fecha) }}</span>
+            </div>
+            <div class="mc-detalle__fila" *ngIf="ventaDetalle.nombreMascota">
+              <span>Mascota</span>
+              <span>{{ ventaDetalle.nombreMascota }}</span>
+            </div>
+            <div class="mc-detalle__fila">
+              <span>Método de pago</span>
+              <span>{{ metodosVenta(ventaDetalle) }}</span>
+            </div>
+          </div>
+
+          <div class="mc-detalle__titulo">Productos / servicios</div>
+
+          <div class="mc-item" *ngFor="let item of ventaDetalle.items">
+            <div class="mc-item__info">
+              <span class="mc-item__nombre">{{ item.nombre }}</span>
+              <span class="mc-item__detalle">
+                {{ item.cantidad }} × {{ item.precioUnitario | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </span>
+            </div>
+            <span class="mc-item__subtotal">{{ item.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+
+          <div class="mc-detalle__total" *ngIf="ventaDetalle.saldoAplicado > 0">
+            <span>Saldo a favor aplicado</span>
+            <span>− {{ ventaDetalle.saldoAplicado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="mc-detalle__total">
+            <span>Total</span>
+            <strong>{{ ventaDetalle.total | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+          </div>
+
+          <div class="mc-detalle__titulo" *ngIf="abonosDetalle.length > 0">Abonos realizados</div>
+          <div class="mc-abono" *ngFor="let a of abonosDetalle">
+            <span class="mc-abono__monto">{{ a.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+            <span class="mc-abono__fecha">{{ formatearFecha(a.fecha) }} · {{ metodoNombre(a.metodoPago) }}</span>
+          </div>
+
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</ion-content>

@@ -1,0 +1,66 @@
+<ion-menu contentId="dashboard-content" menuId="dashboardMenu">
+  <ion-header>
+    <ion-toolbar color="primary">
+      <ion-title>
+        <span class="menu-brand">
+          <ion-icon
+            *ngIf="configuracion?.logoTipo !== 'imagen'"
+            [name]="configuracion?.logoIcono || 'paw'"
+            [style.color]="configuracion?.logoColor || '#00897B'"
+            class="menu-brand__icon">
+          </ion-icon>
+          <img
+            *ngIf="configuracion?.logoTipo === 'imagen' && configuracion?.logoImagen"
+            [src]="configuracion?.logoImagen"
+            alt="Logo"
+            class="menu-brand__img" />
+          {{ configuracion?.nombre || 'Veterinaria Canes' }}
+        </span>
+      </ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content>
+
+    <!-- Avatar clicable → configuración -->
+    <div class="menu-header" (click)="irConfiguracion.emit()">
+      <div class="avatar-circle">
+        <img *ngIf="fotoUrl" [src]="fotoUrl" alt="Foto de {{ nombreUsuario }}" class="avatar-circle__img" />
+        <span *ngIf="!fotoUrl">{{ iniciales }}</span>
+      </div>
+      <div class="menu-header__info">
+        <p class="nombre">{{ nombreUsuario }}</p>
+        <ion-badge [color]="rol === 'administrador' ? 'success' :
+                            rol === 'veterinario'   ? 'primary' :
+                            rol === 'recepcionista' ? 'warning' : 'medium'">
+          {{ rol | titlecase }}
+        </ion-badge>
+      </div>
+      <ion-icon name="chevron-forward-outline" class="menu-header__arrow"></ion-icon>
+    </div>
+
+    <ng-container *ngFor="let seccion of secciones">
+      <ion-list lines="none" class="menu-section">
+        <ion-list-header class="menu-section__header">
+          {{ seccion }}
+        </ion-list-header>
+        <ion-item
+          *ngFor="let item of menuItemsSeccion(seccion)"
+          button
+          [routerLink]="item.ruta"
+          routerLinkActive="active-link">
+          <ion-icon [name]="item.icon" slot="start" [color]="item.color || 'primary'"></ion-icon>
+          <ion-label [color]="item.color || ''">{{ item.label }}</ion-label>
+        </ion-item>
+      </ion-list>
+    </ng-container>
+
+    <ion-list lines="none">
+      <ion-item button (click)="logout()">
+        <ion-icon name="log-out-outline" slot="start" color="danger"></ion-icon>
+        <ion-label color="danger">Cerrar Sesión</ion-label>
+      </ion-item>
+    </ion-list>
+
+  </ion-content>
+</ion-menu>

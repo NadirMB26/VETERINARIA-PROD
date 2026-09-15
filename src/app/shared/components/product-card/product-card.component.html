@@ -1,0 +1,64 @@
+<div class="pc" [class.pc--oferta]="tieneOferta()">
+
+  <!-- Imagen del producto -->
+  <div class="pc__img-wrap">
+    <img
+      *ngIf="producto.fotoUrl; else iconoCat"
+      [src]="producto.fotoUrl"
+      [alt]="producto.nombre"
+      class="pc__img" />
+    <ng-template #iconoCat>
+      <ion-icon [name]="iconoCategoria()" class="pc__img-icono"></ion-icon>
+    </ng-template>
+
+    <!-- Badge de oferta + countdown (esquina superior izquierda de la imagen) -->
+    <div class="pc__oferta" *ngIf="tieneOferta()">
+      <span class="pc__oferta-badge">
+        <ion-icon name="pricetag-outline"></ion-icon>
+        {{ producto.ofertaTipo === 'diaria' ? 'Oferta del día' : 'Oferta semanal' }}
+      </span>
+      <app-countdown *ngIf="producto.ofertaFin" [fechaFin]="producto.ofertaFin" class="pc__countdown"></app-countdown>
+    </div>
+
+    <!-- Badge de estado (esquina superior derecha) -->
+    <span class="pc__estado" [ngClass]="claseEstado()">{{ etiquetaEstado() }}</span>
+  </div>
+
+  <!-- Nombre -->
+  <div class="pc__nombre">{{ producto.nombre }}</div>
+
+  <!-- Precio anterior (solo con descuento) -->
+  <div class="pc__precio-anterior" *ngIf="precioAnteriorTexto()">{{ precioAnteriorTexto() }}</div>
+
+  <!-- Precio actual + badge % OFF (misma línea) -->
+  <div class="pc__precio-fila">
+    <span class="pc__precio">{{ precioTexto() }}</span>
+    <span class="pc__badge-off" *ngIf="descuento() !== null">{{ descuento() }}% OFF</span>
+  </div>
+
+  <!-- Cupón -->
+  <div class="pc__cupon" *ngIf="producto.cupon && tieneOferta()">{{ producto.cupon }}</div>
+
+  <!-- Línea verde de oferta (reemplaza "envío gratis" del spec) -->
+  <div class="pc__oferta-linea" *ngIf="tieneOferta()">
+    <ion-icon name="flash-outline"></ion-icon>
+    Precio oferta válido solo hoy
+  </div>
+
+  <!-- Footer funcional: stock + agregar al carrito -->
+  <div class="pc__footer">
+    <div class="pc__meta">
+      <span *ngIf="producto.tipo === 'producto'" class="pc__stock">Stock: {{ producto.stock }}</span>
+      <span *ngIf="producto.fechaVencimiento" class="pc__stock">Vence: {{ producto.fechaVencimiento }}</span>
+    </div>
+    <button
+      type="button"
+      class="pc__btn"
+      [disabled]="deshabilitado"
+      (click)="onAgregar()">
+      <ion-icon name="cart-outline"></ion-icon>
+      Agregar
+    </button>
+  </div>
+
+</div>

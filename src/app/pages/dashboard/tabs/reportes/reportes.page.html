@@ -1,0 +1,135 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Reportes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="rep-content">
+
+  <div class="empty-state" *ngIf="!puedeVerVentas">
+    <ion-icon name="lock-closed-outline"></ion-icon>
+    <h3>Sin permiso</h3>
+    <p>No tienes privilegios para ver los reportes de ventas.</p>
+  </div>
+
+  <ng-container *ngIf="puedeVerVentas">
+
+    <!-- Filtros -->
+    <div class="rep-toolbar">
+      <div class="rep-filtros">
+        <button
+          *ngFor="let p of presets"
+          type="button"
+          class="rep-chip"
+          [class.rep-chip--activo]="rango === p.id"
+          (click)="aplicarPreset(p.id)">
+          {{ p.label }}
+        </button>
+      </div>
+
+      <div class="rep-fechas">
+        <label class="rep-fecha">
+          <span>Desde</span>
+          <input type="date" [(ngModel)]="desdeIso" (ngModelChange)="onRangoPersonalizado()" />
+        </label>
+        <label class="rep-fecha">
+          <span>Hasta</span>
+          <input type="date" [(ngModel)]="hastaIso" (ngModelChange)="onRangoPersonalizado()" />
+        </label>
+        <ion-button size="small" fill="outline" (click)="exportarCSV()">
+          <ion-icon name="download-outline" slot="start"></ion-icon>
+          CSV
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Resumen -->
+    <div class="rep-resumen">
+      <div class="rep-resumen__card rep-resumen__card--total">
+        <ion-icon name="receipt-outline"></ion-icon>
+        <div>
+          <span>Ventas</span>
+          <strong>{{ totales.ventas }}</strong>
+        </div>
+      </div>
+      <div class="rep-resumen__card rep-resumen__card--valor">
+        <ion-icon name="cash-outline"></ion-icon>
+        <div>
+          <span>Total vendido</span>
+          <strong>{{ totales.total | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+      </div>
+      <div class="rep-resumen__card rep-resumen__card--cobrado">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <div>
+          <span>Cobrado</span>
+          <strong>{{ totales.cobrado | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+      </div>
+      <div class="rep-resumen__card rep-resumen__card--pendiente">
+        <ion-icon name="hourglass-outline"></ion-icon>
+        <div>
+          <span>Pendiente</span>
+          <strong>{{ totales.pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla por vendedor -->
+    <div class="table-container" *ngIf="porVendedor.length > 0">
+      <div class="table-wrap">
+        <table class="app-table">
+          <thead>
+            <tr>
+              <th>Vendedor</th>
+              <th class="rep-col-num">Ventas</th>
+              <th class="rep-col-num">Ítems</th>
+              <th class="rep-col-num">Total</th>
+              <th class="rep-col-num">Cobrado</th>
+              <th class="rep-col-num">Pendiente</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let f of porVendedor">
+              <td>
+                <div class="rep-vendedor">
+                  <span class="rep-vendedor__avatar">{{ (f.vendedor[0] || '?') | uppercase }}</span>
+                  <span>{{ f.vendedor }}</span>
+                </div>
+              </td>
+              <td class="rep-col-num">{{ f.ventas }}</td>
+              <td class="rep-col-num">{{ f.items }}</td>
+              <td class="rep-total">{{ f.total | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="rep-cobrado">{{ f.cobrado | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="rep-pendiente">{{ f.pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td>Total</td>
+              <td class="rep-col-num">{{ totales.ventas }}</td>
+              <td class="rep-col-num">{{ totales.items }}</td>
+              <td class="rep-total">{{ totales.total | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="rep-cobrado">{{ totales.cobrado | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+              <td class="rep-pendiente">{{ totales.pendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="ventas.length === 0">
+      <ion-icon name="bar-chart-outline"></ion-icon>
+      <h3>Sin datos</h3>
+      <p>Cuando se registren ventas, aquí verás el resumen por vendedor.</p>
+    </div>
+
+    <div class="empty-state" *ngIf="ventas.length > 0 && porVendedor.length === 0">
+      <ion-icon name="search-outline"></ion-icon>
+      <h3>Sin resultados</h3>
+      <p>No hay ventas en el rango de fechas seleccionado.</p>
+    </div>
+
+  </ng-container>
+
+</ion-content>

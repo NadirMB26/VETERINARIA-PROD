@@ -1,0 +1,224 @@
+// ════════════════════════════════════════════════════════════
+// ProductCard — réplica de la estructura visual de Mercado Libre
+// (tarjeta "Oferta del día"), adaptada al sistema de diseño de la app.
+// ════════════════════════════════════════════════════════════
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.pc {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  padding: 16px;
+  transition: box-shadow .15s, transform .15s;
+
+  &:hover {
+    box-shadow: 0 6px 18px rgba(0,0,0,.10);
+    transform: translateY(-2px);
+  }
+
+  // Resalta las tarjetas con oferta vigente sin romper la estructura.
+  &--oferta {
+    border-color: var(--app-success-light);
+  }
+
+  // Recuadro de imagen de tamaño fijo: la card no cambia según la foto.
+  &__img-wrap {
+    position: relative;
+    height: 170px;
+    border-radius: 8px;
+    background: var(--app-surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 10px;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+  }
+
+  // object-fit: contain para que la foto se vea completa, sin recortes.
+  &__img {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+    display: block;
+  }
+
+  &__img-icono {
+    font-size: 52px;
+    color: var(--app-primary);
+    opacity: .6;
+  }
+
+  // Badge "Oferta del día/semanal" + countdown, flotantes sobre la imagen.
+  &__oferta {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  &__oferta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--app-danger);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 6px;
+    padding: 3px 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.2);
+
+    ion-icon { font-size: 11px; }
+  }
+
+  &__countdown {
+    background: rgba(255,255,255,.95);
+    border: 1px solid var(--app-danger-light);
+    border-radius: 6px;
+  }
+
+  &__estado {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+  }
+
+  // Nombre: gris oscuro, máx 2 líneas con ellipsis.
+  &__nombre {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--app-text-2);
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-height: 2.7em;
+    margin-bottom: 8px;
+  }
+
+  // Precio anterior tachado, en su propia línea.
+  &__precio-anterior {
+    font-size: 13px;
+    color: var(--app-text-3);
+    text-decoration: line-through;
+    margin-bottom: 2px;
+  }
+
+  // Precio actual + badge % OFF en la MISMA línea.
+  &__precio-fila {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  &__precio {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--app-text-1);
+    line-height: 1.1;
+  }
+
+  &__badge-off {
+    background: var(--app-success);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 6px;
+    padding: 2px 8px;
+  }
+
+  // Cupón: azul sobre fondo azul claro.
+  &__cupon {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1d4ed8;
+    background: var(--app-info-light);
+    border-radius: 6px;
+    padding: 3px 10px;
+    margin-bottom: 6px;
+  }
+
+  // Línea verde (equivalente a "Envío gratis" del spec).
+  &__oferta-linea {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--app-success);
+    margin-bottom: 10px;
+
+    ion-icon { font-size: 14px; }
+  }
+
+  // Footer funcional: empuja al fondo para igualar alturas.
+  &__footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid var(--app-border);
+  }
+
+  &__meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  &__stock {
+    font-size: 11px;
+    color: var(--app-text-3);
+    background: var(--app-surface-2);
+    padding: 2px 8px;
+    border-radius: var(--app-radius-full);
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    border-radius: 10px;
+    background: var(--app-primary);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: background .15s;
+
+    &:hover:not(:disabled) { background: var(--app-primary-dark); }
+    &:disabled { opacity: .5; cursor: default; }
+
+    ion-icon { font-size: 15px; }
+  }
+}

@@ -1,0 +1,45 @@
+.hem-bloque {
+  margin-top: 4px;
+}
+
+.hem-label {
+  display: block;
+  font-size: .75rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: 6px;
+}
+
+.hem-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  background: #fafafa;
+}
+
+.hem-item__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.hem-item__tipo {
+  font-size: .8rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.hem-item__fecha {
+  font-size: .72rem;
+  color: #9ca3af;
+}
+
+.hem-item__resumen {
+  display: block;
+  font-size: .72rem;
+  color: #6b7280;
+  margin-top: 2px;
+}

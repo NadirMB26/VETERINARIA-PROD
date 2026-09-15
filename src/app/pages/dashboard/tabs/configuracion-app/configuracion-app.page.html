@@ -1,0 +1,218 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Configuración de la App</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="appcfg-content">
+  <div class="appcfg-wrapper" *ngIf="!cargando">
+
+    <!-- PREVIEW EN VIVO -->
+    <div class="appcfg-preview">
+      <div class="appcfg-preview__menu">
+        <span class="appcfg-preview__logo">
+          <ion-icon
+            *ngIf="configuracion.logoTipo !== 'imagen'"
+            [name]="configuracion.logoIcono"
+            [style.color]="configuracion.logoColor">
+          </ion-icon>
+          <img *ngIf="configuracion.logoTipo === 'imagen' && configuracion.logoImagen" [src]="configuracion.logoImagen" alt="Logo" />
+        </span>
+        <span class="appcfg-preview__nombre">{{ configuracion.nombre || 'Nombre de la app' }}</span>
+      </div>
+      <div class="appcfg-preview__login">
+        <div class="appcfg-preview__ring">
+          <ion-icon
+            *ngIf="configuracion.logoTipo !== 'imagen'"
+            [name]="configuracion.logoIcono"
+            [style.color]="configuracion.logoColor">
+          </ion-icon>
+          <img *ngIf="configuracion.logoTipo === 'imagen' && configuracion.logoImagen" [src]="configuracion.logoImagen" alt="Logo" />
+        </div>
+        <p class="appcfg-preview__brand">{{ configuracion.nombre || 'Nombre de la app' }}</p>
+        <p class="appcfg-preview__sub">{{ configuracion.subnombre || 'Subtítulo' }}</p>
+      </div>
+      <span class="appcfg-preview__label">Vista previa</span>
+    </div>
+
+    <!-- ↓ GRID DE DOS COLUMNAS EN DESKTOP ↓ -->
+    <div class="appcfg-grid">
+
+      <!-- Columna izquierda: Tema + Nombre -->
+      <div class="appcfg-col">
+        <div class="appcfg-card">
+          <div class="appcfg-card__head">
+            <ion-icon name="color-palette-outline" class="appcfg-card__icon"></ion-icon>
+            <span class="appcfg-card__title">Tema de color</span>
+          </div>
+
+          <div class="appcfg-temas">
+            <button
+              *ngFor="let t of temas"
+              type="button"
+              class="appcfg-tema"
+              [class.appcfg-tema--active]="esTemaActivo(t.id)"
+              (click)="seleccionarTema(t.id)">
+              <span class="appcfg-tema__preview">
+                <span class="appcfg-tema__dot" *ngFor="let c of t.colores" [style.background]="c"></span>
+              </span>
+              <span class="appcfg-tema__label">{{ t.nombre }}</span>
+              <ion-icon
+                class="appcfg-tema__check"
+                name="checkmark-circle"
+                *ngIf="configuracion.tema === t.id">
+              </ion-icon>
+            </button>
+          </div>
+
+          <div class="appcfg-card__head appcfg-card__head--mt">
+            <ion-icon name="text-outline" class="appcfg-card__icon"></ion-icon>
+            <span class="appcfg-card__title">Nombre de la app</span>
+          </div>
+
+          <div class="appcfg-field">
+            <label class="appcfg-label">Nombre</label>
+            <ion-input
+              [(ngModel)]="configuracion.nombre"
+              (ionChange)="modificado = true"
+              type="text"
+              placeholder="Veterinaria Canes"
+              class="appcfg-input">
+            </ion-input>
+          </div>
+
+          <div class="appcfg-field">
+            <label class="appcfg-label">Subtítulo</label>
+            <ion-input
+              [(ngModel)]="configuracion.subnombre"
+              (ionChange)="modificado = true"
+              type="text"
+              placeholder="Clínica Veterinaria"
+              class="appcfg-input">
+            </ion-input>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna derecha: Logo -->
+      <div class="appcfg-col">
+        <div class="appcfg-card">
+          <div class="appcfg-card__head">
+            <ion-icon name="image-outline" class="appcfg-card__icon"></ion-icon>
+            <span class="appcfg-card__title">Logo de la empresa</span>
+          </div>
+
+          <ion-segment
+            [(ngModel)]="configuracion.logoTipo"
+            (ionChange)="modificado = true">
+            <ion-segment-button value="icono">Icono</ion-segment-button>
+            <ion-segment-button value="imagen">Imagen</ion-segment-button>
+          </ion-segment>
+
+          <!-- Selector de icono -->
+          <div *ngIf="configuracion.logoTipo === 'icono'">
+            <div class="appcfg-logos">
+              <button
+                *ngFor="let i of iconos"
+                type="button"
+                class="appcfg-logo"
+                [class.appcfg-logo--active]="configuracion.logoIcono === i"
+                (click)="seleccionarIcono(i)">
+                <ion-icon [name]="i" [style.color]="configuracion.logoColor"></ion-icon>
+              </button>
+            </div>
+
+            <div class="appcfg-colores">
+              <button
+                *ngFor="let c of colores"
+                type="button"
+                class="appcfg-color"
+                [class.appcfg-color--active]="configuracion.logoColor === c"
+                [style.background]="c"
+                [attr.aria-label]="'Color ' + c"
+                (click)="seleccionarColor(c)">
+              </button>
+            </div>
+          </div>
+
+          <!-- Subir imagen -->
+          <div *ngIf="configuracion.logoTipo === 'imagen'" class="appcfg-upload">
+            <div class="appcfg-upload__preview" *ngIf="configuracion.logoImagen">
+              <img [src]="configuracion.logoImagen" alt="Logo actual" />
+              <button type="button" class="appcfg-upload__remove" (click)="quitarImagen()" aria-label="Quitar imagen">
+                <ion-icon name="close"></ion-icon>
+              </button>
+            </div>
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/svg+xml,image/webp"
+              (change)="onLogoSeleccionado($event)"
+              class="appcfg-upload__input" />
+            <span class="appcfg-hint">PNG, JPG, SVG o WEBP · máximo 300 KB</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ↓ GRID DE PERSONALIZACIÓN AVANZADA ↓ -->
+    <div class="appcfg-grid">
+
+      <!-- Columna izquierda: Personalizar colores -->
+      <div class="appcfg-col">
+        <div class="appcfg-card">
+          <div class="appcfg-card__head">
+            <ion-icon name="color-palette-outline" class="appcfg-card__icon"></ion-icon>
+            <span class="appcfg-card__title">Personalizar colores</span>
+          </div>
+
+          <button type="button" class="appcfg-color-row" (click)="abrirPickerColor()">
+            <span class="appcfg-color-swatch" [style.background]="colorActual"></span>
+            <span class="appcfg-color-texto">
+              <strong>Color primario</strong>
+              <span>{{ colorActual }}</span>
+            </span>
+            <ion-icon name="color-palette-outline" class="appcfg-color-icono"></ion-icon>
+          </button>
+
+          <span class="appcfg-hint">
+            Abre el círculo cromático para elegir el color; la paleta completa (oscuros, claros y acentos) se genera automáticamente.
+          </span>
+
+          <button type="button" class="appcfg-btn-reset" (click)="restablecerColores()">
+            <ion-icon name="refresh-outline"></ion-icon>
+            Restablecer colores por defecto
+          </button>
+        </div>
+      </div>
+
+      <!-- Columna derecha: Tipografía -->
+      <div class="appcfg-col">
+        <div class="appcfg-card">
+          <div class="appcfg-card__head">
+            <ion-icon name="text-outline" class="appcfg-card__icon"></ion-icon>
+            <span class="appcfg-card__title">Tipografía</span>
+          </div>
+
+          <app-font-picker
+            [seleccionada]="fontSeleccionada"
+            (seleccionChange)="onFontChange($event)"
+            (restablecer)="restablecerFuente()">
+          </app-font-picker>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer: guardar -->
+    <div class="appcfg-footer">
+      <ion-button
+        class="appcfg-btn-primary"
+        [disabled]="!modificado || guardando"
+        (click)="guardar()">
+        <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
+        {{ guardando ? 'Guardando…' : 'Guardar configuración' }}
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

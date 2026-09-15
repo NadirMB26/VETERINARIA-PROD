@@ -1,0 +1,1321 @@
+// ══════════════════════════════════════════════════════════════════
+// CALENDAR GRID — Paleta viva v2 (redesign)
+// ══════════════════════════════════════════════════════════════════
+
+// ── Wrapper principal ──────────────────────────────────────────────
+.cal-wrap {
+  display: flex;
+  height: calc(100vh - 56px);
+  overflow: hidden;
+  background: var(--app-page);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════════════════════════════
+.sidebar {
+  width: 230px;
+  min-width: 230px;
+  border-right: 1px solid var(--app-border);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow-y: auto;
+  background: var(--app-page);
+
+  &::-webkit-scrollbar       { width: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--app-border); border-radius: 2px; }
+}
+
+.sidebar-toggle { display: none; }
+.sidebar-overlay { display: none; }
+
+// Los divisores ya no aplican: las secciones ahora son tarjetas.
+.sidebar-divider {
+  display: none;
+}
+
+// ── Mini mes (tarjeta) ────────────────────────────────────────────
+.mini-month {
+  background: var(--app-surface);
+  border: 0.5px solid var(--app-border);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 12px 12px 0;
+}
+
+.mini-month-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.mini-month-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--app-text-1);
+  letter-spacing: .01em;
+}
+
+.mini-nav {
+  display: flex;
+  gap: 2px;
+
+  button {
+    background: var(--app-surface-2);
+    border: 1px solid var(--app-border);
+    cursor: pointer;
+    color: var(--app-text-3);
+    font-size: 13px;
+    padding: 2px 8px;
+    border-radius: 6px;
+    line-height: 1.2;
+    font-family: inherit;
+    transition: all .12s;
+
+    &:hover {
+      background: var(--app-primary-tint);
+      border-color: var(--app-primary);
+      color: var(--app-primary-dark);
+    }
+  }
+}
+
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  text-align: center;
+
+  .dow {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--app-text-3);
+    padding: 2px 0 6px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+  }
+}
+
+.mini-day {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--app-text-2);
+  font-size: 11px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 1px auto;
+  transition: all .12s;
+  position: relative;
+
+  &:hover        { background: var(--app-primary-tint); color: var(--app-primary-dark); }
+  &.today        { background: var(--app-primary); color: #fff; font-weight: 700; box-shadow: var(--app-shadow-primary); }
+  &.selected     { background: var(--app-primary-xlight); color: var(--app-primary); font-weight: 700; border: 1px solid var(--app-primary-tint); }
+  &.other-month  { color: var(--app-text-3); font-weight: 400; }
+
+  &.has-citas { font-weight: 700; }
+
+  .mini-dot {
+    position: absolute;
+    bottom: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--app-primary);
+  }
+
+  &.today .mini-dot,
+  &.selected .mini-dot {
+    background: var(--app-primary-dark);
+  }
+}
+
+// ── Secciones sidebar (tarjetas) ──────────────────────────────────
+.sidebar-section {
+  background: var(--app-surface);
+  border: 0.5px solid var(--app-border);
+  border-radius: 12px;
+  padding: 12px;
+  margin: 10px 12px 0;
+}
+
+.sidebar-label {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--app-text-3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  .sidebar-label-icon {
+    font-size: 13px;
+    color: var(--app-primary);
+  }
+}
+
+// ── Indicador de carga de horarios ───────────────────────────────
+.horario-loading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  background: var(--app-primary-xlight);
+  border: 1px solid var(--app-primary-tint);
+  border-radius: var(--app-radius-sm);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--app-primary-dark);
+  margin-bottom: 8px;
+
+  ion-spinner {
+    width: 13px;
+    height: 13px;
+    color: var(--app-primary);
+  }
+}
+
+// ── Lista de filtros ──────────────────────────────────────────────
+.filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.filter-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border-radius: var(--app-radius-sm);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--app-text-3);
+  transition: all .12s;
+  border: 1px solid transparent;
+
+  &:hover {
+    background: var(--app-surface);
+    color: var(--app-text-1);
+    border-color: var(--app-border);
+  }
+
+  &.active {
+    background: var(--app-primary-xlight);
+    color: var(--app-primary-dark);
+    font-weight: 700;
+    border-color: var(--app-primary-tint);
+
+    .filter-count {
+      background: var(--app-primary);
+      color: #fff;
+      border-color: transparent;
+    }
+  }
+
+  &.placeholder ion-skeleton-text { height: 12px; border-radius: 4px; }
+}
+
+.filter-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.filter-count {
+  font-size: 9px;
+  font-weight: 800;
+  background: var(--app-page);
+  color: var(--app-text-3);
+  padding: 2px 6px;
+  border-radius: 20px;
+  margin-left: auto;
+  flex-shrink: 0;
+  transition: all .12s;
+  border: 1px solid var(--app-border);
+}
+
+.filter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.all-dot {
+  background: conic-gradient(var(--app-primary) 33%, var(--app-success) 33% 66%, var(--app-warning) 66%);
+}
+
+.leyenda-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border-left: 3px solid transparent;
+  flex-shrink: 0;
+}
+
+// ── Filtros activos (tarjeta) ────────────────────────────────────
+.filtros-activos {
+  margin: 10px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--app-primary-xlight);
+  border: 1px solid var(--app-primary-tint);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.filtros-badge {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--app-primary-dark);
+}
+
+.limpiar-btn {
+  background: none;
+  border: 1px solid var(--app-border);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--app-text-2);
+  cursor: pointer;
+  padding: 3px 9px;
+  border-radius: var(--app-radius-sm);
+  font-family: inherit;
+  transition: all .12s;
+
+  &:hover {
+    background: var(--app-danger-light);
+    border-color: var(--app-danger);
+    color: var(--app-danger);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// CALENDARIO PRINCIPAL
+// ══════════════════════════════════════════════════════════════════
+.main-cal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  background: var(--app-surface);
+}
+
+// ── Header del calendario ─────────────────────────────────────────
+.cal-header {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--app-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--app-surface);
+  flex-shrink: 0;
+  min-height: 56px;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.nav-btn {
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  padding: 7px 11px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--app-text-2);
+  font-weight: 600;
+  line-height: 1.2;
+  font-family: inherit;
+  transition: all .12s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: var(--app-primary-tint);
+    border-color: var(--app-primary);
+    color: var(--app-primary-dark);
+  }
+
+  &.today-btn {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 7px 14px;
+    background: var(--app-primary);
+    color: #fff;
+    border-color: transparent;
+
+    &:hover {
+      background: var(--app-primary-dark);
+    }
+  }
+
+  ion-icon { font-size: 15px; }
+}
+
+.week-label {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--app-text-1);
+  flex: 1;
+  margin: 0;
+  white-space: nowrap;
+}
+
+// ── Chips de filtro en header ─────────────────────────────────────
+.header-filtros {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.header-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--app-primary-xlight);
+  border: 1.5px solid var(--app-primary-tint);
+  border-radius: 20px;
+  padding: 3px 9px 3px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--app-primary-dark);
+
+  button {
+    background: none;
+    border: none;
+    color: var(--app-primary);
+    cursor: pointer;
+    font-size: 10px;
+    padding: 0;
+    line-height: 1;
+    opacity: .6;
+    transition: opacity .1s;
+    &:hover { opacity: 1; }
+  }
+}
+
+.hc-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.view-btns {
+  display: flex;
+  gap: 2px;
+  background: var(--app-surface-2);
+  border: 1px solid var(--app-border);
+  border-radius: 10px;
+  padding: 3px;
+}
+
+.view-btn {
+  background: transparent;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--app-text-3);
+  font-family: inherit;
+  transition: all .15s;
+
+  &:hover {
+    background: var(--app-primary-tint);
+    color: var(--app-primary-dark);
+  }
+
+  &.active {
+    background: var(--app-primary);
+    color: #fff;
+    box-shadow: var(--app-shadow-primary);
+  }
+}
+
+// ── Leyenda de estados (pills) ────────────────────────────────────
+.cal-leyenda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px 10px;
+  flex-wrap: wrap;
+
+  .leyenda-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--app-text-2);
+    background: var(--app-surface-2);
+    border: 0.5px solid var(--app-border);
+    border-radius: 20px;
+    padding: 3px 10px;
+
+    &::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--app-text-3);
+    }
+  }
+
+  .leyenda-pendiente::before  { background: var(--app-warning); }
+  .leyenda-proceso::before    { background: var(--app-info); }
+  .leyenda-finalizada::before { background: var(--app-success); }
+  .leyenda-cancelada::before  { background: var(--app-text-3); }
+}
+
+// ── Área body del calendario ──────────────────────────────────────
+.cal-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+
+// ── Grid semanal ──────────────────────────────────────────────────
+.week-grid {
+  display: grid;
+  grid-template-columns: 48px repeat(7, 1fr);
+  flex-shrink: 0;
+  overflow-x: hidden;
+
+  &:has(.dia-unico) {
+    grid-template-columns: 48px 1fr;
+  }
+}
+
+.week-grid-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+
+  &::-webkit-scrollbar       { width: 4px; }
+  &::-webkit-scrollbar-track { background: var(--app-page); }
+  &::-webkit-scrollbar-thumb { background: var(--app-border); border-radius: 2px; }
+}
+
+// ── Columna de horas ──────────────────────────────────────────────
+.time-col {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--app-surface);
+  border-right: 1px solid var(--app-border);
+}
+
+.time-col-spacer {
+  height: 52px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
+}
+
+.time-slot-label {
+  height: 48px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding-right: 8px;
+  padding-top: 5px;
+  font-size: 9px;
+  color: var(--app-text-3);
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+
+// ── Columnas de días ──────────────────────────────────────────────
+.day-col {
+  border-left: 1px solid var(--app-border);
+  position: relative;
+  min-width: 0;
+  background: var(--app-surface);
+
+  &.today-col { background: #fafbff; }
+}
+
+.day-col-header {
+  height: 52px;
+  border-bottom: 1px solid var(--app-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: var(--app-surface);
+  z-index: 1;
+  cursor: pointer;
+  gap: 2px;
+  transition: background .12s;
+
+  &:hover { background: var(--app-primary-xlight); }
+
+  .dow {
+    font-size: 9px;
+    color: var(--app-text-3);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  .daynum {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--app-text-1);
+    line-height: 1;
+  }
+
+  &.today {
+    background: var(--app-primary-xlight);
+
+    .dow { color: var(--app-primary); }
+
+    .daynum {
+      background: var(--app-primary);
+      color: #fff;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: var(--app-shadow-primary);
+    }
+  }
+}
+
+.day-cita-count {
+  position: absolute;
+  top: 6px;
+  right: 7px;
+  background: var(--app-primary);
+  color: #fff;
+  font-size: 8px;
+  font-weight: 800;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0,0,0,.15);
+}
+
+.day-add {
+  position: absolute;
+  bottom: 3px;
+  right: 5px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--app-primary);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity .12s;
+  pointer-events: none;
+}
+
+.day-col-header:hover .day-add,
+.day-col-header:focus .day-add {
+  opacity: 1;
+}
+
+// ── Celdas de tiempo ──────────────────────────────────────────────
+.time-cells { position: relative; }
+
+// Línea "ahora"
+.now-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--app-danger);
+  z-index: 3;
+  pointer-events: none;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -3px;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--app-danger);
+  }
+}
+
+.time-cell {
+  height: 48px;
+  border-bottom: 1px solid var(--app-border);
+  cursor: pointer;
+  transition: background .1s;
+  position: relative; // necesario para el slot-lock-icon
+
+  &:hover { background: color-mix(in srgb, var(--app-primary) 5%, transparent); }
+  &:last-child { border-bottom: none; }
+}
+
+// "+" sutil al pasar sobre slots libres
+.time-cell.slot-libre,
+.time-cell.slot-sin-filtro {
+  &::after {
+    content: '+';
+    position: absolute;
+    right: 6px;
+    bottom: 4px;
+    font-size: 13px;
+    font-weight: 800;
+    color: transparent;
+    pointer-events: none;
+  }
+
+  &:hover::after {
+    color: color-mix(in srgb, var(--app-primary) 45%, transparent);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ESTADOS DE SLOT — HORARIO DEL VETERINARIO
+// ══════════════════════════════════════════════════════════════════
+
+// Slot dentro del horario y sin cita → clickeable normal
+.time-cell.slot-libre {
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--app-primary) 6%, transparent);
+  }
+}
+
+// Sin filtro de vet → comportamiento original
+.time-cell.slot-sin-filtro {
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--app-primary) 5%, transparent);
+  }
+}
+
+// Slot fuera del horario del vet → bloqueado
+.time-cell.slot-bloqueado {
+  cursor: not-allowed;
+  pointer-events: none; // deshabilita el click completamente
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 5px,
+    rgba(0, 0, 0, 0.028) 5px,
+    rgba(0, 0, 0, 0.028) 10px
+  );
+
+  // Sobreescribe el hover para que no cambie
+  &:hover { background-color: transparent; }
+
+  // Borde superior más suave para separar de slots activos
+  border-bottom-color: color-mix(in srgb, var(--app-border) 60%, transparent);
+}
+
+// Ícono de candado centrado en slots bloqueados (solo horas en punto)
+.slot-lock-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.13);
+  display: block;
+  pointer-events: none;
+}
+
+// ══════════════════════════════════════════════════════════════════
+// BLOQUES DE CITA — tarjeta blanca con borde de estado + chip de tipo
+// ══════════════════════════════════════════════════════════════════
+.cita-block {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  transition: box-shadow .15s, transform .15s;
+  border: 1px solid var(--app-border);
+  border-left: 3px solid var(--app-warning);
+  background: var(--app-surface);
+  color: var(--app-text-1);
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+  max-height: 100%;
+  box-sizing: border-box;
+
+  &:hover {
+    transform: scaleX(1.015) translateY(-1px);
+    box-shadow: var(--app-shadow-md);
+    z-index: 2;
+  }
+
+  &.dimmed {
+    opacity: .15;
+    pointer-events: none;
+    filter: grayscale(.6);
+  }
+
+  // ── Estados (colores semánticos del sistema) ──
+  &.cb-estado-pendiente {
+    border-left-color: var(--app-warning);
+  }
+
+  &.cb-estado-en-proceso {
+    border-left-color: var(--app-info);
+  }
+
+  &.cb-estado-finalizada {
+    opacity: .8;
+    border-left-color: var(--app-success);
+  }
+
+  &.cb-estado-cancelada,
+  &.cb-estado-no-asistio {
+    opacity: .5;
+    filter: grayscale(.7);
+    border-left-color: var(--app-text-3);
+  }
+
+  // Conflicto de horario (dos citas solapadas)
+  &.cb-conflicto {
+    border: 1.5px solid var(--app-danger);
+    box-shadow: 0 0 0 1px var(--app-danger-light);
+  }
+
+  // ── Tamaño XS (< 30px) ──
+  &.cb-xs {
+    align-items: center;
+    .cb-time    { flex-direction: row; gap: 3px; padding: 0 4px; min-width: 0; }
+    .cb-hora    { font-size: 10px; }
+    .cb-ampm    { font-size: 8px; margin-top: 0; }
+    .cb-divider,
+    .cb-info    { display: none; }
+  }
+
+  // ── Tamaño SM (30–54px) ──
+  &.cb-sm {
+    .cb-horario,
+    .cb-tipo,
+    .cb-vet     { display: none; }
+    .cb-time    { padding: 3px 3px 3px 4px; min-width: 26px; }
+    .cb-hora    { font-size: 10px; }
+    .cb-ampm    { font-size: 7px; }
+    .cb-info    { padding: 3px 4px; gap: 0; }
+    .cb-mascota { font-size: 10px; }
+  }
+
+  // ── Tamaño MD (54–80px) ──
+  &.cb-md {
+    .cb-vet { display: none; }
+  }
+}
+
+.cita-vet-bar {
+  width: 5px;
+  flex-shrink: 0;
+  border-radius: 8px 0 0 8px;
+}
+
+.cb-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 4px 3px 4px 6px;
+  min-width: 30px;
+  max-width: 36px;
+}
+
+.cb-hora {
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.3px;
+  white-space: nowrap;
+  color: var(--app-text-1);
+}
+
+.cb-ampm {
+  font-size: 7px;
+  font-weight: 700;
+  opacity: .7;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  line-height: 1;
+  margin-top: 1px;
+  white-space: nowrap;
+}
+
+.cb-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 6px 0;
+  background: var(--app-border);
+  flex-shrink: 0;
+}
+
+.cb-info {
+  flex: 1;
+  min-width: 0;
+  padding: 5px 6px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.cb-mascota {
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  letter-spacing: -.1px;
+  color: var(--app-text-1);
+}
+
+// Chip de tipo: color suave por tipo, sobre la tarjeta blanca.
+.cb-tipo {
+  display: inline-flex;
+  align-self: flex-start;
+  font-size: 8.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  line-height: 1.2;
+  padding: 1px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.cb-horario {
+  font-size: 9px;
+  font-weight: 600;
+  opacity: .7;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.cb-vet {
+  font-size: 8px;
+  opacity: .55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-style: italic;
+  line-height: 1.2;
+  margin-top: 1px;
+}
+
+// ── Colores del chip de tipo (familias de tokens del sistema) ─────
+.cita-consulta .cb-tipo { background: var(--app-info-light); color: #1d4ed8; }
+.cita-vacuna .cb-tipo   { background: var(--app-success-light); color: #065f46; }
+.cita-cirugia .cb-tipo  { background: var(--app-danger-light); color: #991b1b; }
+.cita-urgencia .cb-tipo { background: var(--app-warning-light); color: #92400e; }
+.cita-control .cb-tipo  { background: var(--app-purple-light); color: #4c1d95; }
+
+// ══════════════════════════════════════════════════════════════════
+// PANEL — COLA DE CITAS DE HOY
+// ══════════════════════════════════════════════════════════════════
+.today-queue {
+  flex-shrink: 0;
+  border-top: 1px solid var(--app-border);
+  background: var(--app-surface-2);
+  padding: 10px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 150px;
+  overflow: hidden;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.04);
+}
+
+.today-queue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.today-queue-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--app-text-3);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .tq-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--app-success);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-success) 25%, transparent);
+    animation: pulse-dot 2s infinite;
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 2px rgba(5, 150, 105, .25); }
+  50%       { box-shadow: 0 0 0 5px rgba(5, 150, 105, .0); }
+}
+
+.today-queue-count {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--app-text-3);
+}
+
+.today-queue-list {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  flex-shrink: 0;
+
+  &::-webkit-scrollbar       { height: 2px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--app-border); border-radius: 2px; }
+}
+
+.queue-card {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px 7px 7px;
+  border-radius: var(--app-radius-md);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  cursor: pointer;
+  transition: all .12s;
+  min-width: 165px;
+  max-width: 210px;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 0;
+  }
+
+  &:hover {
+    border-color: var(--app-primary-tint);
+    background: var(--app-primary-xlight);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,.07);
+  }
+
+  &.estado-pendiente  { &::before { background: var(--app-warning); } }
+  &.estado-en_proceso { &::before { background: var(--app-primary); } }
+  &.estado-finalizada { opacity: .55; &::before { background: var(--app-border-dark); } }
+  &.estado-cancelada  { opacity: .55; &::before { background: var(--app-danger); } }
+  &.estado-no_asistio { opacity: .5;  &::before { background: var(--app-text-3); } }
+
+  &.proxima {
+    border-color: var(--app-primary-tint);
+    background: var(--app-primary-xlight);
+    &::before { background: var(--app-primary); }
+  }
+}
+
+.qc-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 34px;
+}
+
+.qc-hora {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--app-text-1);
+  line-height: 1;
+}
+
+.qc-ampm {
+  font-size: 8px;
+  font-weight: 600;
+  color: var(--app-text-3);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.qc-divider {
+  width: 1px;
+  height: 26px;
+  background: var(--app-border);
+  flex-shrink: 0;
+}
+
+.qc-info { flex: 1; min-width: 0; }
+
+.qc-mascota {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--app-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.qc-tipo {
+  font-size: 10px;
+  color: var(--app-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.qc-vet {
+  font-size: 9px;
+  color: var(--app-text-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+  font-style: italic;
+}
+
+// Badge de estado en las tarjetas de la cola
+.qc-badge {
+  flex-shrink: 0;
+  font-size: 8.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: var(--app-surface-2);
+  border: 0.5px solid var(--app-border);
+  color: var(--app-text-2);
+
+  &--pendiente  { background: var(--app-warning-light); color: #92400e; border-color: transparent; }
+  &--en_proceso { background: var(--app-info-light); color: #1d4ed8; border-color: transparent; }
+  &--finalizada { background: var(--app-success-light); color: #065f46; border-color: transparent; }
+  &--cancelada  { background: var(--app-danger-light); color: #991b1b; border-color: transparent; }
+  &--no_asistio { background: var(--app-surface-2); color: var(--app-text-3); }
+}
+
+.today-queue-empty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--app-text-3);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 0;
+
+  .tq-empty-icon { font-size: 18px; opacity: .5; }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MEDIA QUERIES — MÓVIL
+// ══════════════════════════════════════════════════════════════════
+@media (max-width: 600px) {
+  .sidebar-toggle { display: inline-flex; }
+
+  .sidebar {
+    display: none;
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 280px;
+    max-width: 85vw;
+    z-index: 60;
+    overflow-y: auto;
+    background: var(--app-surface);
+    box-shadow: var(--app-shadow-lg);
+  }
+
+  .cal-wrap.sidebar-open {
+    .sidebar { display: block; }
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 55;
+      background: rgba(0, 0, 0, .35);
+    }
+  }
+
+  .cal-header {
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: auto;
+  }
+
+  .week-label {
+    font-size: 13px;
+    flex: 1 1 100%;
+    order: -1;
+    margin-bottom: 2px;
+  }
+
+  .week-grid {
+    grid-template-columns: 36px repeat(7, minmax(0, 1fr));
+  }
+
+  .time-col-spacer { height: 46px; }
+
+  .time-slot-label {
+    height: 48px;
+    font-size: 8px;
+    padding-right: 4px;
+  }
+
+  .day-col-header {
+    height: 46px;
+    .dow    { font-size: 8px; }
+    .daynum { font-size: 13px; }
+
+    &.today .daynum {
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+    }
+  }
+
+  .cita-block   { left: 1px; right: 1px; border-radius: 6px; }
+  .cita-vet-bar { width: 3px; }
+
+  .day-cita-count,
+  .header-filtros { display: none; }
+
+  .nav-btn {
+    padding: 6px 8px;
+    font-size: 13px;
+    &.today-btn { font-size: 11px; padding: 6px 10px; }
+  }
+
+  .view-btn { padding: 5px 10px; font-size: 11px; }
+
+  .today-queue { max-height: 130px; padding: 8px 10px 10px; }
+  .queue-card  { min-width: 150px; }
+  .qc-badge    { display: none; }
+}
+
+@media (max-width: 380px) {
+  .week-grid { grid-template-columns: 30px repeat(7, minmax(0, 1fr)); }
+  .view-btns  { display: none; }
+  .cal-header { padding: 6px 8px; }
+}
+
+// ── Media hora: borde punteado suave ─────────────────────────────
+.time-slot-label.half-hour {
+  color: transparent;
+  border-top: 1px dashed var(--app-border);
+}
+
+.time-cell.half-hour {
+  border-bottom: 1px dashed var(--app-border);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MULTI-SLOT
+// ══════════════════════════════════════════════════════════════════
+.cita-multi-slot {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-left: 3px solid var(--app-info);
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+  min-height: 44px;
+
+  &:hover {
+    transform: scaleX(1.015) translateY(-1px);
+    z-index: 3;
+    box-shadow: var(--app-shadow-md);
+  }
+}
+
+.multi-slot-dots {
+  width: 6px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: center;
+  padding: 6px 0;
+
+  .ms-dot {
+    flex: 1;
+    width: 100%;
+    border-radius: 3px;
+    min-height: 4px;
+  }
+}
+
+// ── Popover slot ─────────────────────────────────────────────────
+.citas-slot-popover {
+  --width: 310px;
+  --max-height: none;
+  --box-shadow: 0 8px 32px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.08);
+  --border-radius: 14px;
+  --backdrop-opacity: 0;
+
+  .popover-content {
+    border-radius: 14px !important;
+    border: 1.5px solid #e2e8f0 !important;
+    overflow: visible !important;
+  }
+}

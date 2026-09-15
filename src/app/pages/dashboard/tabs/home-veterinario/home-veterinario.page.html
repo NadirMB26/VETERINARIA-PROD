@@ -1,0 +1,119 @@
+<ion-content [fullscreen]="true">
+  <div class="hv-page">
+
+<div class="hv-hero">
+  <div class="hv-hero-text">
+    <p class="hv-saludo">{{ saludoHora }},</p>
+    <h1 class="hv-nombre">Dr. {{ vetNombre }} {{ vetApellido }}</h1>
+    <p class="hv-especialidad" *ngIf="vetEspecialidad">{{ vetEspecialidad }}</p>
+  </div>
+  <div class="hv-avatar">
+    <img *ngIf="vetFotoUrl" [src]="vetFotoUrl" alt="Foto de {{ vetNombre }} {{ vetApellido }}" class="hv-avatar__img" />
+    <span class="hv-avatar-icon" *ngIf="!vetFotoUrl">{{ inicialesVet }}</span>
+  </div>
+</div>
+
+    <!-- ALERTAS DE ESCALADO (groomers) -->
+    <app-alerta-escalado
+      [citas]="(escaladas$ | async) ?? []"
+      (asignada)="cargarEscaladas()">
+    </app-alerta-escalado>
+
+    <!-- MÉTRICAS -->
+    <section class="hv-metrics">
+      <div class="hv-metric-card hv-mc--hoy">
+        <span class="hv-mc-icon">📅</span>
+        <span class="hv-mc-num">{{ resumen.citasHoy }}</span>
+        <span class="hv-mc-label">Citas hoy</span>
+      </div>
+      <div class="hv-metric-card hv-mc--pendientes">
+        <span class="hv-mc-icon">⏳</span>
+        <span class="hv-mc-num">{{ resumen.citasPendientes }}</span>
+        <span class="hv-mc-label">Pendientes</span>
+      </div>
+      <div class="hv-metric-card hv-mc--atendidos">
+        <span class="hv-mc-icon">✅</span>
+        <span class="hv-mc-num">{{ resumen.pacientesAtendidos }}</span>
+        <span class="hv-mc-label">Finalizadas</span>
+      </div>
+    </section>
+
+<!-- PRÓXIMA CITA -->
+<section class="hv-proxima" *ngIf="resumen.proximaCita">
+  <div class="hv-proxima-label">
+    <span class="hv-proxima-dot"></span>
+    Próxima cita
+  </div>
+  <div class="hv-proxima-card">
+    <div class="hv-pc-time">
+      <span class="hv-pc-hora">{{ formatHora12(resumen.proximaCita!.horaInicio) }}</span>
+    </div>
+    <div class="hv-pc-sep"></div>
+    <div class="hv-pc-info">
+      <p class="hv-pc-mascota">{{ resumen.proximaCita!.nombreMascota }}</p>
+      <p class="hv-pc-tipo">{{ resumen.proximaCita!.tipo }}</p>
+      <p class="hv-pc-cliente">{{ resumen.proximaCita!.nombreCliente }}</p>
+    </div>
+    <span [class]="'hv-badge ' + badgeEstado(resumen.proximaCita!.estado)">
+      {{ textoEstado(resumen.proximaCita!.estado) }}
+    </span>
+  </div>
+
+  <!-- Botones de acción de la próxima cita -->
+  <div class="hv-proxima-acciones">
+    <button 
+      class="hv-btn-diagnosticar"
+      [disabled]="resumen.proximaCita!.estado === 'cancelada'"
+      (click)="onCitaClick(resumen.proximaCita!)">
+      <ion-icon name="medkit-outline"></ion-icon>
+      {{ resumen.proximaCita!.estado === 'finalizada' ? 'Ver / corregir registro clínico' : 'Iniciar diagnóstico' }}
+    </button>
+    <button class="hv-btn-expediente" (click)="verExpediente(resumen.proximaCita!)">
+      <ion-icon name="folder-open-outline"></ion-icon>
+      Ver expediente
+    </button>
+  </div>
+</section>
+
+    <div class="hv-sin-proxima" *ngIf="!resumen.proximaCita">
+      <span class="hv-sin-icon">🎉</span>
+      <span>Sin más citas pendientes por hoy</span>
+    </div>
+
+    <!-- CITAS DE HOY: atender o abrir expediente -->
+    <section class="hv-hoy" *ngIf="citasHoyPendientes.length">
+      <h2 class="hv-section-title">Citas de hoy ({{ citasHoyPendientes.length }})</h2>
+      <div class="hv-hoy-card" *ngFor="let c of citasHoyPendientes">
+        <div class="hv-hoy-hora">{{ formatHora12(c.horaInicio) }}</div>
+        <div class="hv-hoy-info">
+          <span class="hv-hoy-mascota">{{ c.nombreMascota }}</span>
+          <span class="hv-hoy-sub">{{ c.tipo }} · {{ c.nombreCliente }}</span>
+        </div>
+        <div class="hv-hoy-acciones">
+          <button class="hv-hoy-btn hv-hoy-btn--primary" (click)="onCitaClick(c)">
+            <ion-icon name="medkit-outline"></ion-icon>
+            Atender
+          </button>
+          <button class="hv-hoy-btn" (click)="verExpediente(c)">
+            <ion-icon name="folder-open-outline"></ion-icon>
+            Expediente
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CALENDARIO — va aquí, justo después de las métricas/próxima cita -->
+    <section class="hv-calendar-section">
+      <h2 class="hv-section-title">Mi agenda</h2>
+      <div class="hv-cal-wrapper">
+        <app-calendar-grid
+          [citas]="(todasCitas$ | async) ?? []"
+          [veterinarios]="(veterinarios$ | async) ?? []"
+          [mostrarFiltroVet]="false"
+          (citaClick)="onCitaClick($event)"
+          (slotClick)="onSlotClick($event)">
+        </app-calendar-grid>
+      </div>
+    </section>
+  </div>
+</ion-content>

@@ -1,0 +1,590 @@
+<ion-content class="cal-content">
+
+  <app-calendar-grid
+    [citas]="todasCitas"
+    [veterinarios]="veterinarios"
+    [mostrarFiltroVet]="rolActual !== 'veterinario'"
+    [vetPredefinido]="rolActual === 'veterinario' ? uidActual : ''"
+    (citaClick)="showDetail($event)"
+    (slotClick)="onSlotClick($event)">
+  </app-calendar-grid>
+
+  <ion-fab *ngIf="puedeCrearCitas" vertical="bottom" horizontal="end" slot="fixed" style="margin-bottom: 60px;">
+    <ion-fab-button color="primary" (click)="openNew()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+</ion-content>
+
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: Nueva / Editar Cita
+══════════════════════════════════════════════════ -->
+<ion-modal
+  *ngIf="puedeCrearCitas || puedeReprogramar"
+  [isOpen]="modalNuevaOpen"
+  (didDismiss)="closeModal()"
+  [breakpoints]="[0, 1]"
+  [initialBreakpoint]="1"
+  class="modal-cita">
+  <ng-template>
+
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title>{{ modalTitulo }}</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="modal-content">
+
+      <!-- Tip rápido -->
+      <div class="quick-tip" *ngIf="modo === 'crear'">
+        <ion-icon name="bulb-outline"></ion-icon>
+        <span>Toca cualquier horario del calendario para crear una cita rápida.</span>
+      </div>
+
+      <!-- Card 1: Paciente -->
+      <div class="form-card">
+        <p class="form-card-label">
+          <ion-icon name="paw-outline"></ion-icon>
+          Paciente
+        </p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="field-label">Cliente <span class="required">*</span></label>
+            <div class="custom-select-wrap">
+              <select [(ngModel)]="idCliente" (change)="onClienteChange()" class="custom-select">
+                <option value="">Seleccionar...</option>
+                <option *ngFor="let c of clientes" [value]="c.uid ?? c.idCliente">
+                  {{ c.Nombre ?? c.nombre }} {{ c.Apellido ?? c.apellido }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="field-label">Mascota <span class="required">*</span></label>
+            <div class="custom-select-wrap">
+              <select [(ngModel)]="idMascota" (change)="validarFormulario()" class="custom-select" [disabled]="!idCliente">
+                <option value="">Seleccionar...</option>
+                <option *ngFor="let m of mascotas" [value]="m.idMascota">
+                  {{ m.nombre }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quién atiende: veterinario médico o estética (groomer) -->
+        <div class="form-group">
+          <label class="field-label">Profesional</label>
+          <div class="canal-chips">
+            <button
+              type="button"
+              class="canal-chip"
+              [class.activo]="canal === 'veterinario'"
+              (click)="seleccionarCanal('veterinario')">
+              <ion-icon name="medkit-outline"></ion-icon>
+              Veterinario
+            </button>
+            <button
+              type="button"
+              class="canal-chip"
+              [class.activo]="canal === 'estetica'"
+              (click)="seleccionarCanal('estetica')">
+              <ion-icon name="cut-outline"></ion-icon>
+              Estética
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0" *ngIf="canal === 'veterinario'">
+          <label class="field-label">
+            Veterinario <span class="required">*</span>
+            <span class="field-locked" *ngIf="modo === 'editar'">
+              <ion-icon name="lock-closed-outline"></ion-icon> Usa "Reasignar" para cambiar
+            </span>
+          </label>
+          <div class="custom-select-wrap">
+            <select [(ngModel)]="idVeterinario" (change)="onVeterinarioChange()" class="custom-select" [disabled]="modo === 'editar'">
+              <option value="">Seleccionar...</option>
+              <option *ngFor="let v of veterinariosDisponibles" [value]="v.uid ?? v.idVeterinario">
+                {{ labelOpcionProfesional(v) }}
+              </option>
+            </select>
+          </div>
+          <span class="field-hint" *ngIf="!tipo && veterinarios.length">
+            Elige el veterinario y luego el tipo de cita según sus especialidades.
+          </span>
+        </div>
+
+        <!-- Estética: se asigna groomer en lugar de veterinario (Fase 2) -->
+        <div class="form-group" style="margin-bottom:0" *ngIf="canal === 'estetica'">
+          <label class="field-label">
+            Groomer <span class="required">*</span>
+          </label>
+          <div class="custom-select-wrap">
+            <select [(ngModel)]="idGroomer" (change)="onGroomerChange()" class="custom-select" [disabled]="groomers.length === 0">
+              <option value="">Seleccionar...</option>
+              <option *ngFor="let g of groomers" [value]="g.uid ?? g.idGroomer">
+                {{ g.Nombre }} {{ g.Apellido }}
+              </option>
+            </select>
+          </div>
+          <span class="field-hint">Los servicios de estética los realiza un groomer, no un veterinario.</span>
+        </div>
+      </div>
+
+      <!-- ══ Card 2: Fecha y Hora ══ -->
+      <div class="form-card">
+        <p class="form-card-label">
+          <ion-icon name="calendar-outline"></ion-icon>
+          Fecha y Hora
+        </p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="field-label">Fecha <span class="required">*</span></label>
+            <input
+              *ngIf="modo === 'crear'"
+              type="date"
+              [(ngModel)]="fecha"
+              [min]="hoy"
+              class="custom-input"
+              [class.input-error]="esFechaPasada"
+              (change)="onFechaChange()">
+            <input
+              *ngIf="modo === 'editar'"
+              type="date"
+              [(ngModel)]="fecha"
+              [min]="hoy"
+              class="custom-input"
+              [class.input-error]="esFechaPasada"
+              (change)="onFechaChange()">
+            <span class="field-error" *ngIf="esFechaPasada">
+              ⚠ No se permiten fechas pasadas
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label class="field-label">Fin estimado</label>
+            <input type="text" [value]="formatHora12Slot(horaFin)" readonly placeholder="—" class="custom-input readonly-input">
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0">
+          <label class="field-label">
+            Hora de inicio <span class="required">*</span>
+            <span class="slots-hint" *ngIf="horasSeleccionadas.length > 1">
+              · {{ horasSeleccionadas.length }} bloques
+              ({{ formatHora12Slot(horaInicio) }} – {{ formatHora12Slot(horaFin) }})
+            </span>
+          </label>
+
+          <!-- Sin asignado o sin fecha todavía -->
+          <div class="slots-aviso slots-aviso-neutral" *ngIf="!mostrarSelectorSlots">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <span>{{ esEstetica ? 'Selecciona un groomer y una fecha para ver los horarios' : 'Selecciona un veterinario y una fecha para ver los horarios disponibles' }}</span>
+          </div>
+
+          <!-- Vet+fecha seleccionados pero ese día no trabaja -->
+          <div class="slots-aviso slots-aviso-warning"
+            *ngIf="sinHorarioAsignado">
+            <ion-icon name="calendar-clear-outline"></ion-icon>
+            <span>Este veterinario no tiene horario asignado para ese día</span>
+          </div>
+
+          <!-- Grid de chips — solo si hay slots habilitados -->
+          <div class="slots-grid" *ngIf="mostrarSlots">
+            <div
+              *ngFor="let slot of slotsHora"
+              class="slot-chip"
+              [class.active]="horasSeleccionadas.includes(slot)"
+              [class.ocupado]="isSlotOcupado(slot)"
+              [class.fuera-horario]="!esEstetica && !slotsHabilitadosVet.has(slot)"
+              (click)="toggleSlot(slot)">
+              {{ formatHora12Slot(slot) }}
+            </div>
+          </div>
+
+          <!-- Leyenda — solo cuando hay chips visibles -->
+          <div class="slots-leyenda" *ngIf="mostrarSlots">
+            <span class="sl-item sl-libre">Disponible</span>
+            <span class="sl-item sl-sel">Seleccionado</span>
+            <span class="sl-item sl-ocup">Ocupado</span>
+            <span class="sl-item sl-fuera" *ngIf="!esEstetica">Fuera de horario</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Tipo y Estado -->
+      <div class="form-card">
+        <p class="form-card-label">
+          <ion-icon name="medkit-outline"></ion-icon>
+          Tipo de cita
+        </p>
+
+        <div class="form-group">
+          <label class="field-label">Tipo de cita <span class="required">*</span></label>
+
+          <!-- Aviso: vet elegido no cubre el tipo -->
+          <div class="aviso-incompat" *ngIf="veterinarioIncompatible">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>El veterinario elegido no cubre {{ tipo }} según su especialidad. Elige otro veterinario o cambia el tipo.</span>
+          </div>
+
+          <div class="tipo-chips">
+            <div
+              *ngFor="let t of tiposDisponibles"
+              class="tipo-chip"
+              [ngClass]="'c-' + t.clase"
+              [class.active]="tipo === t.value"
+              (click)="seleccionarTipo(t)">
+              {{ t.label }}
+            </div>
+          </div>
+          <span class="field-hint" *ngIf="canal === 'veterinario' && veterinarios.length && tipo">
+            Tipos de cita limitados a las especialidades del veterinario elegido.
+          </span>
+          <span class="field-hint" *ngIf="canal === 'estetica'">
+            El servicio estético queda registrado en el historial del expediente, sin diagnóstico clínico.
+          </span>
+        </div>
+
+        <!-- Estética (Fase 2): tipo de servicio y observaciones del cliente -->
+        <div class="form-group" *ngIf="esEstetica">
+          <label class="field-label">Tipo de servicio <span class="required">*</span></label>
+          <div class="custom-select-wrap">
+            <select [(ngModel)]="tipoServicio" (change)="onTipoServicioChange()" class="custom-select">
+              <option value="">Seleccionar...</option>
+              <option *ngFor="let s of TIPOS_SERVICIO" [value]="s.value">{{ s.label }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="esEstetica">
+          <label class="field-label">Observaciones del cliente</label>
+          <textarea
+            [(ngModel)]="observacionesCliente"
+            rows="2"
+            class="custom-textarea"
+            placeholder="Pelo, alergias, cuidados especiales al agendar...">
+          </textarea>
+        </div>
+
+        <div class="form-group" *ngIf="esEstetica">
+          <label class="field-label">Notas de recepción</label>
+          <textarea
+            [(ngModel)]="notasRecepcion"
+            rows="2"
+            class="custom-textarea"
+            placeholder="Indicaciones internas antes del servicio (lo ve el groomer)...">
+          </textarea>
+        </div>
+
+        <div class="form-group" *ngIf="modo === 'editar'" style="margin-bottom:0">
+          <label class="field-label">Estado</label>
+          <div class="custom-select-wrap estado-select-wrap">
+            <select [(ngModel)]="estado" class="custom-select">
+              <option value="pendiente">Pendiente</option>
+              <option value="en_proceso">En proceso</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3.5: Servicios de la cita (obligatorio) -->
+      <div class="form-card">
+        <p class="form-card-label">
+          <ion-icon name="pricetags-outline"></ion-icon>
+          Servicios de la cita <span class="required">*</span>
+        </p>
+        <span class="field-hint" style="display:block; margin-bottom: 8px;">
+          Toda cita queda ligada a uno o más servicios del catálogo y genera su cuenta por cobrar.
+        </span>
+
+        <div class="servicios-lista" *ngIf="serviciosDisponibles.length; else sinServicios">
+          <button
+            type="button"
+            *ngFor="let s of serviciosDisponibles"
+            class="servicio-item"
+            [class.activo]="cantidadDe(s.idProducto) > 0"
+            (click)="toggleServicio(s)">
+            <span class="servicio-item__check">
+              <ion-icon [name]="cantidadDe(s.idProducto) > 0 ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+            </span>
+            <span class="servicio-item__info">
+              <span class="servicio-item__nombre">{{ s.nombre }}</span>
+              <span class="servicio-item__meta">
+                {{ s.precio | currency:'COP':'symbol-narrow':'1.0-0' }}
+                <ng-container *ngIf="s.duracionMin"> · {{ s.duracionMin }} min</ng-container>
+                <ng-container *ngIf="etiquetaServicioCatalogo(s)"> · {{ etiquetaServicioCatalogo(s) }}</ng-container>
+              </span>
+            </span>
+            <span class="servicio-item__cant" *ngIf="cantidadDe(s.idProducto) > 0" (click)="$event.stopPropagation()">
+              <button type="button" (click)="cambiarCantidad(s.idProducto, -1)">−</button>
+              <span>{{ cantidadDe(s.idProducto) }}</span>
+              <button type="button" (click)="cambiarCantidad(s.idProducto, 1)">+</button>
+            </span>
+          </button>
+        </div>
+        <ng-template #sinServicios>
+          <div class="slots-aviso slots-aviso-warning">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            <span>No hay servicios activos para este tipo. Regístralos en el catálogo de Servicios.</span>
+          </div>
+        </ng-template>
+
+        <div class="servicios-total" *ngIf="seleccionServicios.length">
+          <span>{{ seleccionServicios.length }} servicio(s)</span>
+          <strong>{{ totalServicios | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+        </div>
+      </div>
+
+      <!-- Card 4: Notas -->
+      <div class="form-card" style="margin-bottom: 16px;">
+        <p class="form-card-label">
+          <ion-icon name="document-text-outline"></ion-icon>
+          Notas
+        </p>
+        <div class="form-group" style="margin-bottom:0">
+          <textarea [(ngModel)]="notas" rows="3" placeholder="Observaciones adicionales..." class="custom-textarea"></textarea>
+        </div>
+      </div>
+
+    </ion-content>
+
+    <ion-footer class="modal-footer-custom">
+      <button class="btn-cancel-custom" (click)="closeModal()">Cancelar</button>
+      <button
+        class="btn-save-custom"
+        [disabled]="!formularioEsValido"
+        (click)="guardar()">
+        <ion-icon name="checkmark-outline"></ion-icon>
+        {{ modo === 'crear' ? 'Registrar cita' : 'Actualizar cita' }}
+      </button>
+    </ion-footer>
+
+  </ng-template>
+</ion-modal>
+
+
+<!-- ══════════════════════════════════════════════════
+     MODAL: Detalle de Cita
+══════════════════════════════════════════════════ -->
+<ion-modal
+  *ngIf="puedeVerCitas"
+  [isOpen]="modalDetalleOpen"
+  (didDismiss)="closeDetail()"
+  [breakpoints]="[0, 1]"
+  [initialBreakpoint]="1"
+  class="modal-detalle">
+  <ng-template>
+
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title>Detalle de cita</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeDetail()">
+            <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content *ngIf="citaDetalle">
+
+      <div style="padding: 14px 14px 0;">
+        <div class="detail-badge" [ngClass]="'badge-' + getClaseTipo(citaDetalle.tipo)">
+          {{ citaDetalle.tipo }}
+        </div>
+      </div>
+
+      <div class="detail-card" style="margin-bottom: 16px;">
+        <div class="detail-rows">
+
+          <div class="detail-row">
+            <span class="detail-label">Cliente</span>
+            <span class="detail-val">{{ citaDetalle.nombreCliente }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Mascota</span>
+            <span class="detail-val">{{ citaDetalle.nombreMascota }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="!esEsteticaDetalle">
+            <span class="detail-label">Veterinario</span>
+            <span class="detail-val">{{ citaDetalle.nombreVeterinario }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="esEsteticaDetalle">
+            <span class="detail-label">Groomer</span>
+            <span class="detail-val">{{ citaDetalle.nombreGroomer || 'Sin asignar' }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="esEsteticaDetalle && citaDetalle.tipoServicio">
+            <span class="detail-label">Servicio</span>
+            <span class="detail-val">{{ labelTipoServicioDetalle }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="citaDetalle.observacionesCliente">
+            <span class="detail-label">Obs. del cliente</span>
+            <span class="detail-val notas-val">{{ citaDetalle.observacionesCliente }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="citaDetalle.notasRecepcion">
+            <span class="detail-label">Notas recepción</span>
+            <span class="detail-val notas-val">{{ citaDetalle.notasRecepcion }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="citaDetalle.notasServicio">
+            <span class="detail-label">Notas del servicio</span>
+            <span class="detail-val notas-val">{{ citaDetalle.notasServicio }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="esEsteticaDetalle && citaDetalle.escaladoAVeterinario">
+            <span class="detail-label">Escalado</span>
+            <span class="detail-val">
+              <ion-badge color="warning">Escalada a veterinario</ion-badge>
+            </span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Fecha</span>
+            <span class="detail-val">{{ citaDetalle.fecha }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">Horario</span>
+            <span class="detail-val">
+              {{ formatHora12Slot(citaDetalle.horaInicio) }} – {{ formatHora12Slot(citaDetalle.horaFin) }}
+            </span>
+          </div>
+
+          <div class="detail-row" *ngIf="citaDetalle.estado">
+            <span class="detail-label">Estado</span>
+            <span class="detail-val">
+              <ion-badge [color]="getBadgeColor(citaDetalle.estado)">{{ textoEstado(citaDetalle.estado) }}</ion-badge>
+            </span>
+          </div>
+
+          <div class="detail-row" *ngIf="citaDetalle.notas">
+            <span class="detail-label">Notas</span>
+            <span class="detail-val notas-val">{{ citaDetalle.notas }}</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Servicios agendados y su cuenta por cobrar -->
+      <div class="detail-card" style="margin-bottom: 16px;" *ngIf="citaDetalle.itemsServicio?.length || ventaDeCita">
+        <div class="detail-rows">
+          <div class="detail-row" *ngFor="let it of citaDetalle.itemsServicio">
+            <span class="detail-label">{{ it.cantidad }} × {{ it.nombre }}</span>
+            <span class="detail-val">{{ it.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+          <div class="detail-row" *ngIf="citaDetalle.totalEstimado !== undefined">
+            <span class="detail-label">Total servicios</span>
+            <span class="detail-val"><strong>{{ citaDetalle.totalEstimado | currency:'COP':'symbol-narrow':'1.0-0' }}</strong></span>
+          </div>
+          <div class="detail-row" *ngIf="ventaDeCita">
+            <span class="detail-label">Cuenta por cobrar</span>
+            <span class="detail-val">
+              <ion-badge
+                [color]="ventaDeCita.estadoPago === 'pagado' ? 'success' : (ventaDeCita.estadoPago === 'anulada' ? 'medium' : 'warning')">
+                {{ ventaDeCita.estadoPago === 'pagado'
+                  ? 'Pagada'
+                  : (ventaDeCita.estadoPago === 'anulada'
+                    ? 'Anulada'
+                    : 'Pendiente · ' + (saldoDeVenta(ventaDeCita) | currency:'COP':'symbol-narrow':'1.0-0')) }}
+              </ion-badge>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 0 14px 14px;">
+        <button class="btn-save-custom btn-outline" (click)="verExpedienteDesdeCita()">
+          <ion-icon name="folder-open-outline"></ion-icon>
+          Ver expediente
+        </button>
+      </div>
+
+      <div class="diagnostico-section" *ngIf="citaDetalle && !esEsteticaDetalle">
+
+        <ng-container *ngIf="esVeterinarioAsignado()">
+          <button
+            class="btn-save-custom"
+            [disabled]="citaDetalle.estado === 'cancelada' || citaDetalle.estado === 'no_asistio'"
+            (click)="abrirDiagnosticoModal(false)">
+            <ion-icon name="medkit-outline"></ion-icon>
+            {{ existeDiagnostico ? 'Ver / corregir registro' : 'Agregar diagnóstico' }}
+          </button>
+          <p class="diag-hint" *ngIf="citaDetalle.estado === 'cancelada'">Esta cita fue cancelada.</p>
+          <p class="diag-hint" *ngIf="citaDetalle.estado === 'no_asistio'">El cliente no asistió a esta cita.</p>
+          <p class="diag-hint" *ngIf="citaDetalle.estado === 'finalizada'">Cita finalizada: las correcciones al registro clínico quedan auditadas.</p>
+          <p class="diag-hint" *ngIf="citaDetalle.estado === 'en_proceso'">Esta cita está en proceso.</p>
+        </ng-container>
+
+        <ng-container *ngIf="!esVeterinarioAsignado() && citaDetalle.estado === 'finalizada'">
+          <button
+            class="btn-save-custom btn-outline"
+            [disabled]="!existeDiagnostico"
+            (click)="abrirDiagnosticoModal(true)">
+            <ion-icon name="eye-outline"></ion-icon>
+            {{ existeDiagnostico ? 'Ver diagnóstico' : 'Sin diagnóstico registrado' }}
+          </button>
+        </ng-container>
+
+      </div>
+
+    </ion-content>
+
+    <ion-footer class="modal-footer-custom">
+      <button class="btn-cancel-custom" (click)="closeDetail()">Cerrar</button>
+      <button
+        *ngIf="puedeCancelarCitas
+              && citaDetalle?.estado === 'pendiente'"
+        class="btn-save-custom btn-outline"
+        (click)="marcarNoAsistio()">
+        <ion-icon name="person-remove-outline"></ion-icon>
+        No asistió
+      </button>
+      <button
+        *ngIf="puedeCancelarCitas
+              && citaDetalle?.estado === 'pendiente'"
+        class="btn-save-custom btn-outline"
+        (click)="cancelarCita()">
+        <ion-icon name="close-circle-outline"></ion-icon>
+        Cancelar cita
+      </button>
+      <button
+        *ngIf="(puedeReprogramar)
+              && citaDetalle?.estado !== 'cancelada'
+              && citaDetalle?.estado !== 'finalizada'
+              && citaDetalle?.estado !== 'no_asistio'"
+        class="btn-save-custom btn-outline"
+        (click)="abrirReasignacion()">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        Reasignar
+      </button>
+      <button
+        *ngIf="puedeReprogramar"
+        class="btn-save-custom"
+        [class.btn-disabled-custom]="!puedeEditar"
+        (click)="editFromDetail()">
+        <ion-icon [name]="puedeEditar ? 'create-outline' : 'lock-closed-outline'"></ion-icon>
+        {{ puedeEditar ? 'Editar' : 'No editable' }}
+      </button>
+    </ion-footer>
+
+  </ng-template>
+</ion-modal>

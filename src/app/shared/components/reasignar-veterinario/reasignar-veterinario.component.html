@@ -1,0 +1,165 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Reasignar veterinario</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="reasignar-content">
+
+  <!-- Hero -->
+  <div class="reasignar-hero">
+    <div class="hero-icon-wrap">
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="hero-icon">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+      </div>
+    </div>
+    <h2 class="hero-title">Reasignación</h2>
+    <p class="hero-sub">Selecciona el veterinario sustituto</p>
+  </div>
+
+  <!-- Card: cita afectada -->
+  <div class="seccion-card">
+    <p class="seccion-label">
+      <ion-icon name="calendar-outline"></ion-icon>
+      Cita afectada
+    </p>
+    <div class="cita-row">
+      <div class="cita-avatar">
+        <ion-icon name="paw-outline"></ion-icon>
+      </div>
+      <div class="cita-info">
+        <strong>{{ cita.nombreMascota }}</strong>
+        <span class="cita-tipo">{{ cita.tipo }}</span>
+        <span class="cita-fecha">{{ cita.fecha }} · {{ cita.horaInicio }} – {{ cita.horaFin }}</span>
+        <span class="cita-vet-actual">
+          <ion-icon name="person-outline"></ion-icon>
+          {{ nombreVeterinarioActual }}
+        </span>
+      </div>
+      <div class="cita-badge">Activa</div>
+    </div>
+  </div>
+
+  <!-- Card: motivo -->
+  <div class="seccion-card">
+    <p class="seccion-label">
+      <ion-icon name="document-text-outline"></ion-icon>
+      Motivo de ausencia
+    </p>
+    <div class="campo">
+      <div class="input-wrap">
+        <ion-icon name="alert-circle-outline" class="input-icon"></ion-icon>
+        <input
+          [(ngModel)]="motivoReasignacion"
+          placeholder="Ej: enfermedad, emergencia, vacaciones..."
+          class="custom-input">
+      </div>
+    </div>
+  </div>
+
+  <!-- Card: veterinario sustituto -->
+  <div class="seccion-card">
+    <p class="seccion-label">
+      <ion-icon name="people-outline"></ion-icon>
+      Veterinario sustituto
+    </p>
+
+    <!-- Buscador -->
+    <div class="campo">
+      <div class="input-wrap">
+        <ion-icon name="search-outline" class="input-icon"></ion-icon>
+        <input
+          (input)="filtrar($event)"
+          placeholder="Buscar por nombre o especialidad..."
+          class="custom-input">
+      </div>
+    </div>
+
+    <!-- Esqueleto mientras carga disponibilidad -->
+    <div class="vet-list" *ngIf="cargandoDisponibilidad">
+      <div class="vet-item vet-skeleton" *ngFor="let i of [1,2,3]">
+        <div class="vet-avatar vet-avatar-skeleton"></div>
+        <div class="vet-info">
+          <ion-skeleton-text [animated]="true" style="width:55%;height:13px;border-radius:6px"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width:38%;height:11px;border-radius:6px;margin-top:4px"></ion-skeleton-text>
+        </div>
+        <ion-skeleton-text [animated]="true" style="width:52px;height:22px;border-radius:20px"></ion-skeleton-text>
+      </div>
+    </div>
+
+    <!-- Lista real -->
+    <div class="vet-list" *ngIf="!cargandoDisponibilidad">
+      <div
+        *ngFor="let vet of veterinariosFiltrados"
+        class="vet-item"
+        [class.vet-selected]="veterinarioSeleccionado?.idVeterinario === vet.idVeterinario"
+        [class.vet-ocupado]="!estaDisponible(vet)"
+        (click)="seleccionar(vet)">
+
+        <div class="vet-avatar" [class.vet-avatar-ocupado]="!estaDisponible(vet)">
+          {{ iniciales(vet) }}
+        </div>
+
+        <div class="vet-info">
+          <strong>{{ vet.Nombre }} {{ vet.Apellido }}</strong>
+          <span *ngIf="vet.Especialidad">{{ vet.Especialidad }}</span>
+          <span *ngIf="!vet.Especialidad" class="sin-esp">Sin especialidad registrada</span>
+
+          <!-- Aviso de conflicto de horario -->
+        <span class="vet-conflicto" *ngIf="!estaDisponible(vet)">
+          <ion-icon [name]="razonBloqueo.get(vet.idVeterinario) === 'horario' 
+                            ? 'calendar-clear-outline' : 'time-outline'">
+          </ion-icon>
+          {{ getMotivoBloqueo(vet) }}
+        </span>
+        </div>
+
+        <!-- Badge disponible / ocupado -->
+        <span class="vet-badge vet-badge-disponible" *ngIf="estaDisponible(vet)">
+          Disponible
+        </span>
+        <span class="vet-badge vet-badge-ocupado" *ngIf="!estaDisponible(vet)">
+          Ocupado
+        </span>
+
+        <ion-icon
+          *ngIf="veterinarioSeleccionado?.idVeterinario === vet.idVeterinario"
+          name="checkmark-circle"
+          class="vet-check">
+        </ion-icon>
+
+      </div>
+
+      <div class="vet-empty" *ngIf="veterinariosFiltrados.length === 0">
+        <ion-icon name="person-outline"></ion-icon>
+        <span>No se encontraron veterinarios disponibles</span>
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+
+<ion-footer class="reasignar-footer">
+  <div class="destino-info" *ngIf="veterinarioSeleccionado">
+    <ion-icon name="swap-horizontal-outline"></ion-icon>
+    <span>
+      {{ nombreVeterinarioActual }} →
+      <strong>{{ veterinarioSeleccionado.Nombre }} {{ veterinarioSeleccionado.Apellido }}</strong>
+    </span>
+  </div>
+  <button
+    class="btn-confirmar"
+    [disabled]="!veterinarioSeleccionado"
+    (click)="reasignar()">
+    <ion-icon name="swap-horizontal-outline"></ion-icon>
+    Confirmar reasignación
+  </button>
+</ion-footer>
+

@@ -1,0 +1,28 @@
+ion-toolbar {
+  --min-height: 56px;
+  --background: var(--app-surface);
+}
+
+ion-title {
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--app-text-1);
+}
+
+.dh-campana-btn {
+  position: relative;
+}
+
+.dh-campana-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 16px;
+  border-radius: 10px;
+  pointer-events: none;
+}

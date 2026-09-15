@@ -1,0 +1,36 @@
+<div class="kpi-card">
+  <div class="kpi-card__top">
+    <div class="kpi-card__icono" [ngClass]="'kpi-card__icono--' + kpi.color">
+      <ion-icon [name]="kpi.icono"></ion-icon>
+    </div>
+    <span class="kpi-card__label">{{ kpi.label }}</span>
+    <span
+      *ngIf="tieneVariacion"
+      class="kpi-card__variacion"
+      [ngClass]="variacionClase">
+      <ion-icon [name]="variacionIcono"></ion-icon>
+      {{ absVariacion }}{{ kpi.variacionSufijo ?? '%' }}
+    </span>
+  </div>
+
+  <h3 class="kpi-card__titulo">{{ kpi.titulo }}</h3>
+  <p class="kpi-card__valor">{{ kpi.valor }}</p>
+
+  <div class="kpi-card__bottom">
+    <svg
+      *ngIf="kpi.sparkline && kpi.sparkline.length > 1"
+      class="kpi-card__spark"
+      [ngClass]="sparkClase"
+      viewBox="0 0 100 30"
+      preserveAspectRatio="none">
+      <polyline
+        [attr.points]="puntosSparkline()"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round" />
+    </svg>
+    <span class="kpi-card__fuente" *ngIf="kpi.fuente">{{ kpi.fuente }}</span>
+  </div>
+</div>

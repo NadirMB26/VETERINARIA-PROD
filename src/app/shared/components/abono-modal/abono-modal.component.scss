@@ -1,0 +1,132 @@
+.abm-content {
+  --background: var(--app-page);
+}
+
+.abm-wrapper {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+// ── Resumen ────────────────────────────────────────
+.abm-resumen {
+  background: var(--app-surface);
+  border-radius: var(--app-radius-lg);
+  border: 0.5px solid var(--app-border);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &__fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--app-text-2);
+
+    strong { color: var(--app-text-1); }
+
+    &--saldo {
+      border-top: 0.5px solid var(--app-border);
+      padding-top: 8px;
+      font-size: 15px;
+
+      strong { color: var(--app-danger); }
+    }
+  }
+}
+
+// ── Campos ─────────────────────────────────────────
+.abm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.abm-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--app-text-2);
+}
+
+.abm-input {
+  --background: var(--app-surface);
+  --border-radius: 10px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --min-height: 42px;
+  font-size: 14px;
+  background: var(--app-surface);
+  border-radius: 10px;
+
+  &--area {
+    --padding-top: 10px;
+  }
+}
+
+.abm-hint {
+  font-size: 11px;
+  color: var(--app-text-3);
+}
+
+.abm-segment {
+  --background: var(--app-surface);
+  border-radius: 10px;
+}
+
+.abm-file {
+  font-size: 12px;
+  color: var(--app-text-2);
+}
+
+// ── Soporte ────────────────────────────────────────
+.abm-soporte {
+  position: relative;
+  width: 96px;
+  height: 96px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--app-radius-md);
+    border: 1px solid var(--app-border);
+  }
+
+  &__quitar {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: none;
+    background: var(--app-danger);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    ion-icon { font-size: 12px; }
+  }
+}
+
+// ── Footer ─────────────────────────────────────────
+.abm-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 0.5px solid var(--app-border);
+}
+
+.abm-btn {
+  --border-radius: 10px;
+  font-size: 13px;
+  height: 40px;
+}

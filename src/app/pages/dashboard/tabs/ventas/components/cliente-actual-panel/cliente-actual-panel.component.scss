@@ -1,0 +1,106 @@
+// Panel de cliente de la venta en curso: visualmente diferenciado de los filtros.
+.cap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: var(--app-radius-lg);
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-dark));
+  color: #fff;
+  box-shadow: var(--app-shadow-primary);
+
+  &--vacio {
+    background: var(--app-surface-2);
+    border: 1px dashed var(--app-border-dark);
+    color: var(--app-text-2);
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    opacity: .85;
+
+    ion-icon { font-size: 15px; }
+  }
+
+  &__nombre {
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  &__detalles {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 12px;
+    opacity: .92;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    ion-icon { font-size: 13px; }
+  }
+
+  &__saldo { font-weight: 700; }
+
+  &__acciones {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+  }
+
+  &__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid rgba(255,255,255,.45);
+    background: rgba(255,255,255,.12);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: var(--app-radius-full);
+    cursor: pointer;
+    transition: background .15s;
+
+    &:hover { background: rgba(255,255,255,.25); }
+
+    ion-icon { font-size: 13px; }
+
+    &--peligro { border-color: rgba(255,255,255,.25); }
+  }
+
+  &__btn-primario {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    border: none;
+    background: var(--app-primary);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+
+    &:hover { background: var(--app-primary-dark); }
+
+    ion-icon { font-size: 15px; }
+  }
+
+  &__vacio-texto {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+  }
+}

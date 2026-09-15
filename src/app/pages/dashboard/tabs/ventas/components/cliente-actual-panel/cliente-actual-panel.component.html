@@ -1,0 +1,48 @@
+<div class="cap" [class.cap--vacio]="!cliente">
+
+  <div class="cap__head">
+    <ion-icon name="person-circle-outline"></ion-icon>
+    <span>Venta actual</span>
+  </div>
+
+  <!-- Con cliente -->
+  <ng-container *ngIf="cliente">
+    <div class="cap__nombre">
+      {{ cliente.Nombre }} {{ cliente.Apellido }}
+    </div>
+    <div class="cap__detalles">
+      <span *ngIf="cliente.Telefono">
+        <ion-icon name="call-outline"></ion-icon>
+        {{ cliente.Telefono }}
+      </span>
+      <span *ngIf="cliente.saldoFavor > 0" class="cap__saldo">
+        <ion-icon name="wallet-outline"></ion-icon>
+        Saldo a favor: {{ cliente.saldoFavor | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </span>
+      <span class="cap__items">
+        <ion-icon name="cart-outline"></ion-icon>
+        {{ cantidadItems }} ítem{{ cantidadItems !== 1 ? 's' : '' }}
+      </span>
+    </div>
+    <div class="cap__acciones">
+      <button type="button" class="cap__btn" (click)="onCambiar()">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        Cambiar
+      </button>
+      <button type="button" class="cap__btn cap__btn--peligro" (click)="onCerrar()">
+        <ion-icon name="close-outline"></ion-icon>
+        Cerrar
+      </button>
+    </div>
+  </ng-container>
+
+  <!-- Sin cliente -->
+  <ng-container *ngIf="!cliente">
+    <p class="cap__vacio-texto">Sin cliente asignado</p>
+    <button type="button" class="cap__btn-primario" (click)="onSeleccionar()">
+      <ion-icon name="person-add-outline"></ion-icon>
+      Seleccionar cliente
+    </button>
+  </ng-container>
+
+</div>

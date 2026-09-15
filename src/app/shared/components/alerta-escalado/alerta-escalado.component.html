@@ -1,0 +1,25 @@
+<section class="ae-panel" *ngIf="citas.length">
+  <div class="ae-head">
+    <ion-icon name="warning-outline"></ion-icon>
+    <span>Escalados de estética ({{ citas.length }})</span>
+  </div>
+
+  <div class="ae-card" *ngFor="let c of citas">
+    <div class="ae-card__info">
+      <span class="ae-card__pet">{{ c.nombreMascota }}</span>
+      <span class="ae-card__sub">{{ c.tipo }} · {{ c.nombreCliente }}</span>
+      <span class="ae-card__hora">{{ c.fecha }} · {{ formatHora(c.horaInicio) }}</span>
+      <span class="ae-card__notas" *ngIf="c.notas">{{ c.notas }}</span>
+    </div>
+    <div class="ae-card__acciones">
+      <button type="button" class="ae-btn ae-btn--primary" (click)="asignarme(c)">
+        <ion-icon name="hand-left-outline"></ion-icon>
+        Asignarme
+      </button>
+      <button type="button" class="ae-btn ae-btn--ghost" (click)="asignarA(c)">
+        <ion-icon name="people-outline"></ion-icon>
+        Asignar a...
+      </button>
+    </div>
+  </div>
+</section>

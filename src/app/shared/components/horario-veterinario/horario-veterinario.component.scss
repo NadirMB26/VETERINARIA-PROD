@@ -1,0 +1,260 @@
+// src/app/features/horarios/horario-veterinario/horario-veterinario.component.scss
+
+// ── Toolbar ──────────────────────────────────────────────────────────────────
+.hv-toolbar {
+  --background: var(--app-surface);
+  --border-color: var(--app-border);
+  box-shadow: 0 1px 0 var(--app-border);
+}
+
+.hv-title {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+
+  &-main {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--app-text-1);
+    letter-spacing: -0.3px;
+  }
+
+  &-sub {
+    font-size: 12px;
+    color: var(--app-primary);
+    font-weight: 500;
+  }
+}
+
+.hv-copy-btn {
+  font-size: 12px;
+  --color: var(--app-primary);
+  margin-right: 4px;
+}
+
+// ── Content ──────────────────────────────────────────────────────────────────
+.hv-content {
+  --background: var(--app-page);
+}
+
+.hv-skeleton-wrap,
+.hv-dias-wrap {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+// ── Día card ─────────────────────────────────────────────────────────────────
+.hv-dia-card {
+  background: var(--app-surface);
+  border-radius: var(--app-radius-lg);
+  border: 1.5px solid var(--app-border);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &.hv-dia-activo {
+    border-color: var(--app-primary);
+    box-shadow: 0 2px 12px rgba(var(--app-primary-rgb), 0.10);
+  }
+
+  &.hv-dia-inactivo {
+    opacity: 0.72;
+  }
+}
+
+// ── Header del día ────────────────────────────────────────────────────────────
+.hv-dia-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  gap: 12px;
+}
+
+.hv-dia-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.hv-dia-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--app-text-1);
+  letter-spacing: -0.2px;
+}
+
+.hv-dia-preview {
+  font-size: 12px;
+  color: var(--app-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hv-toggle {
+  flex-shrink: 0;
+}
+
+// ── Cuerpo del día ────────────────────────────────────────────────────────────
+.hv-dia-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--app-border);
+}
+
+// ── Presets ───────────────────────────────────────────────────────────────────
+.hv-presets-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--app-text-2);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.hv-preset-btns {
+  display: flex;
+  gap: 10px;
+}
+
+.hv-preset-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 8px;
+  border-radius: var(--app-radius-md);
+  border: 1.5px solid var(--app-border);
+  background: var(--app-surface-2);
+  cursor: pointer;
+  transition: all 0.18s;
+
+  ion-icon {
+    font-size: 20px;
+    color: var(--app-text-2);
+    transition: color 0.18s;
+  }
+
+  span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--app-text-1);
+  }
+
+  small {
+    font-size: 11px;
+    color: var(--app-text-2);
+  }
+
+  &:active { transform: scale(0.97); }
+
+  &.hv-preset-on {
+    background: var(--app-primary-xlight);
+    border-color: var(--app-primary);
+
+    ion-icon { color: var(--app-primary); }
+    span      { color: var(--app-primary); }
+    small     { color: var(--app-primary); opacity: 0.8; }
+  }
+}
+
+// ── Separador ─────────────────────────────────────────────────────────────────
+.hv-sep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--app-text-2);
+  font-size: 11px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--app-border);
+  }
+}
+
+// ── Slots grid ────────────────────────────────────────────────────────────────
+.hv-slots-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hv-slot-chip {
+  padding: 6px 12px;
+  border-radius: var(--app-radius-xl);
+  border: 1.5px solid var(--app-border);
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  background: var(--app-surface);
+  color: var(--app-text-1);
+  transition: all 0.15s;
+  user-select: none;
+
+  &:hover {
+    background: var(--app-primary-xlight);
+    border-color: var(--app-primary);
+    color: var(--app-primary);
+  }
+
+  &.active {
+    background: var(--app-primary);
+    color: #fff;
+    border-color: transparent;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(var(--app-primary-rgb), 0.30);
+  }
+}
+
+// ── Resumen de turnos ─────────────────────────────────────────────────────────
+.hv-turnos-resumen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hv-turno-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: var(--app-radius-xl);
+  background: var(--app-success-light);
+  border: 1.5px solid var(--app-success);
+  color: var(--app-success);
+  font-size: 11px;
+  font-weight: 600;
+
+  ion-icon { font-size: 12px; }
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+.hv-footer ion-toolbar {
+  --background: var(--app-surface);
+  padding: 8px 16px;
+  box-shadow: 0 -1px 0 var(--app-border);
+}
+
+.hv-save-btn {
+  --background: var(--app-primary);
+  --border-radius: var(--app-radius-md);
+  --color: #FFFFFF;
+  font-weight: 700;
+  font-size: 15px;
+  height: 52px;
+  letter-spacing: -0.2px;
+}

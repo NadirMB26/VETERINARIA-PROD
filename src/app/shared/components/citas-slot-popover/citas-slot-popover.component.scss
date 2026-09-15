@@ -1,0 +1,277 @@
+.pop-wrapper {
+  width: 100%;
+  background: var(--ion-background-color, var(--app-surface));
+  border-radius: 14px;
+  overflow: visible;
+}
+
+/* ── HEADER ── */
+.pop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid var(--ion-color-light-shade, var(--app-surface-2));
+  background: var(--ion-color-light, var(--app-surface-2));
+}
+
+.pop-title-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pop-clock-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--app-primary-xlight);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.pop-time-label {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ion-text-color, var(--app-text-1));
+  line-height: 1;
+}
+
+.pop-time-sub {
+  font-size: 11px;
+  color: var(--ion-color-medium, var(--app-text-3));
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+.pop-close {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  border: 1.5px solid var(--ion-color-light-shade, var(--app-border));
+  background: var(--ion-background-color, var(--app-surface));
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ion-color-medium, var(--app-text-2));
+  font-size: 13px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--app-danger-light);
+    border-color: var(--app-danger);
+    color: var(--app-danger);
+  }
+}
+
+/* ── COUNT ROW ── */
+.pop-count-row {
+  padding: 8px 16px 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pop-count-pill {
+  background: var(--app-primary-xlight);
+  color: var(--app-primary-dark);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.pop-count-label {
+  font-size: 11px;
+  color: var(--ion-color-medium, var(--app-text-3));
+  font-weight: 500;
+}
+
+/* ── BODY / CARDS ── */
+.pop-body {
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pop-card {
+  display: flex;
+  align-items: stretch;
+  border-radius: 10px;
+  border: 1.5px solid var(--ion-color-light-shade, var(--app-surface-2));
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: var(--ion-background-color, var(--app-surface));
+
+  &:hover {
+    border-color: var(--app-primary-light);
+    box-shadow: 0 2px 8px rgba(var(--app-primary-rgb), 0.12);
+    transform: translateY(-1px);
+  }
+}
+
+.pop-card-bar {
+  width: 5px;
+  flex-shrink: 0;
+}
+
+.pop-card-body {
+  flex: 1;
+  padding: 9px 11px;
+  min-width: 0;
+}
+
+.pop-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.pop-mascota {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ion-text-color, var(--app-text-1));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pop-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &.badge-consulta { background: var(--app-primary-xlight); color: var(--app-primary-dark); }
+  &.badge-vacuna   { background: var(--app-success-light); color: #065f46; }
+  &.badge-cirugia  { background: var(--app-danger-light); color: #991b1b; }
+  &.badge-urgencia { background: var(--app-warning-light); color: #92400e; }
+  &.badge-control  { background: var(--app-purple-light); color: #5b21b6; }
+}
+
+/* ── ESTADO (fila propia) ── */
+.pop-card-middle {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.pop-estado {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.estado-pendiente  { background: var(--app-warning-light); color: #92400E; }
+.estado-proceso    { background: var(--app-primary-xlight); color: var(--app-primary-dark); }
+.estado-finalizada { background: #DCFCE7; color: #166534; }
+.estado-cancelada  { background: var(--app-danger-light); color: #991B1B; }
+.estado-no-asistio { background: var(--app-border); color: var(--app-text-1); }
+
+/* ── VET (fila inferior) ── */
+.pop-card-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pop-vet-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pop-vet-name {
+  font-size: 11px;
+  color: var(--ion-color-medium, var(--app-text-2));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── CARD ACTION ── */
+.pop-card-action {
+  width: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ion-color-medium, var(--app-text-3));
+  font-size: 14px;
+  border-left: 1px solid var(--ion-color-light-shade, var(--app-surface-2));
+  transition: all 0.15s;
+  background: var(--ion-color-light, var(--app-surface-2));
+
+  .pop-card:hover & {
+    background: var(--app-primary-xlight);
+    color: var(--app-primary);
+    border-left-color: var(--app-primary-light);
+  }
+}
+
+/* ── FOOTER ── */
+.pop-footer {
+  padding: 8px 12px 12px;
+  display: flex;
+  gap: 6px;
+}
+
+.pop-btn-new {
+  flex: 1;
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-dark));
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-family: inherit;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(var(--app-primary-rgb), 0.4);
+    transform: translateY(-1px);
+  }
+}
+
+.pop-btn-sec {
+  background: var(--ion-color-light, var(--app-surface-2));
+  color: var(--ion-color-medium, var(--app-text-2));
+  border: 1.5px solid var(--ion-color-light-shade, var(--app-border));
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 9px 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+
+  &:hover {
+    border-color: var(--app-primary-light);
+    color: var(--app-primary-dark);
+    background: var(--app-primary-xlight);
+  }
+}

@@ -1,0 +1,233 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      <div class="header-title">
+        <ion-icon name="people"></ion-icon>
+        <span>Gestión de Usuarios</span>
+      </div>
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="usuarios-content">
+
+  <div class="search-hero">
+    <ion-searchbar
+      [(ngModel)]="filtroBusqueda"
+      (ionInput)="filtrar()"
+      placeholder="Buscar nombre, apellido, correo o cédula..."
+      animated
+      class="custom-searchbar">
+    </ion-searchbar>
+
+    <div class="filtros-scroll">
+      <button class="chip-filtro" [class.activo]="filtroEstado==='todos'"
+        (click)="filtroEstado='todos'; filtrar()">
+        <ion-icon name="people-outline"></ion-icon> Todos
+      </button>
+      <button class="chip-filtro" [class.activo]="filtroEstado==='activo'"
+        (click)="filtroEstado='activo'; filtrar()">
+        <ion-icon name="checkmark-circle-outline"></ion-icon> Activos
+      </button>
+      <button class="chip-filtro" [class.activo]="filtroEstado==='inactivo'"
+        (click)="filtroEstado='inactivo'; filtrar()">
+        <ion-icon name="pause-circle-outline"></ion-icon> Inactivos
+      </button>
+      <button class="chip-filtro" [class.activo]="filtroSinDocumento"
+        (click)="filtroSinDocumento = !filtroSinDocumento; filtrar()">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        Sin documento ({{ totalSinDocumento }})
+      </button>
+    </div>
+
+    <div class="filtros-scroll">
+      <button class="chip-filtro" [class.activo]="filtroRol==='todos'"
+        (click)="filtroRol='todos'; filtrar()">
+        <ion-icon name="people-outline"></ion-icon> Todos
+      </button>
+      <button class="chip-filtro" [class.activo]="filtroRol==='administrador'"
+        (click)="filtroRol='administrador'; filtrar()">
+        <ion-icon name="shield-outline"></ion-icon> Admin
+      </button>
+      <button class="chip-filtro" [class.activo]="filtroRol==='recepcionista'"
+        (click)="filtroRol='recepcionista'; filtrar()">
+        <ion-icon name="headset-outline"></ion-icon> Recep.
+      </button>
+      <button class="chip-filtro" [class.activo]="filtroRol==='veterinario'"
+        (click)="filtroRol='veterinario'; filtrar()">
+        <ion-icon name="medkit-outline"></ion-icon> Vet.
+      </button>
+      <button class="chip-filtro" [class.activo]="filtroRol==='groomer'"
+        (click)="filtroRol='groomer'; filtrar()">
+        <ion-icon name="cut-outline"></ion-icon> Groomer
+      </button>
+      <button class="chip-filtro" [class.activo]="filtroRol==='cliente'"
+        (click)="filtroRol='cliente'; filtrar()">
+        <ion-icon name="person-outline"></ion-icon> Cliente
+      </button>
+    </div>
+
+    <div class="contador-resultados" *ngIf="!cargando">
+      {{ usuariosFiltrados.length }} usuario{{ usuariosFiltrados.length !== 1 ? 's' : '' }} encontrado{{ usuariosFiltrados.length !== 1 ? 's' : '' }}
+    </div>
+  </div>
+
+  <div *ngIf="cargando" class="loading-container">
+    <div class="loading-card">
+      <ion-spinner name="crescent" color="primary"></ion-spinner>
+      <p>Cargando usuarios...</p>
+    </div>
+  </div>
+
+  <div class="tabla-wrapper" *ngIf="!cargando && usuariosFiltrados.length > 0">
+    <table class="tabla-usuarios">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Usuario</th>
+          <th>Contacto</th>
+          <th>Detalles</th>
+          <th>Registrado</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let u of usuariosFiltrados; let i = index"
+          class="fila-usuario"
+          [class.fila-clickable]="puedeEditarUsuario(u)"
+          (click)="validarEdicion(u)">
+
+          <td class="col-num" data-label="#">{{ i + 1 }}</td>
+
+          <td class="col-usuario" data-label="Usuario">
+            <div class="usuario-info">
+              <div class="avatar-circle" [ngClass]="'avatar-' + u.rol">
+                <img *ngIf="u.fotoUrl" [src]="u.fotoUrl" alt="Foto de {{ u.Nombre }}" class="avatar-circle__img" (error)="u.fotoUrl = ''" />
+                <span *ngIf="!u.fotoUrl">{{ inicialesDe(u) }}</span>
+              </div>
+              <div class="usuario-texto">
+                <strong>{{ u.Nombre }} {{ u.Apellido }}</strong>
+                <span class="badge-rol" [ngClass]="'badge-' + u.rol">
+                  {{ u.rol | titlecase }}
+                </span>
+              </div>
+            </div>
+          </td>
+
+          <td class="col-contacto" data-label="Contacto">
+            <div class="dato-linea">
+              <ion-icon name="mail-outline"></ion-icon>
+              <span>{{ u.Correo }}</span>
+            </div>
+            <div class="dato-linea" *ngIf="u.Telefono">
+              <ion-icon name="call-outline"></ion-icon>
+              <span>{{ u.Telefono }}</span>
+            </div>
+          </td>
+
+          <td class="col-detalles" data-label="Detalles">
+            <div class="dato-linea" *ngIf="u.Cedula">
+              <ion-icon name="card-outline"></ion-icon>
+              <span>CC: {{ u.Cedula }}</span>
+            </div>
+            <div class="dato-linea" *ngIf="!u.Cedula">
+              <span class="badge-sin-doc">
+                <ion-icon name="alert-circle-outline"></ion-icon>
+                Sin documento
+              </span>
+            </div>
+            <div class="dato-linea especialidad-tag" *ngIf="u.Especialidad">
+              <ion-icon name="medkit-outline"></ion-icon>
+              <span>{{ u.Especialidad }}</span>
+            </div>
+            <div class="dato-linea supervisor-tag" *ngIf="u.idAdministrador">
+              <ion-icon name="person-circle-outline"></ion-icon>
+              <span>Supervisor: {{ getNombreSupervisor(u.idAdministrador) }}</span>
+            </div>
+          </td>
+
+          <td class="col-registrado" data-label="Registrado">
+            {{ formatearFechaRegistro(u.fechaRegistro) }}
+          </td>
+
+          <td class="col-estado" data-label="Estado">
+            <span class="badge-estado"
+              [ngClass]="u.estado === 'activo' ? 'estado-activo' : 'estado-inactivo'">
+              <span class="punto-estado"></span>
+              {{ u.estado | titlecase }}
+            </span>
+          </td>
+
+          <!-- Acciones -->
+          <td class="col-acciones" data-label="Acciones">
+
+            <!-- Usuario en línea -->
+            <div *ngIf="u.uid === authService.getUidActual(); else accionesTpl">
+              <span class="badge-en-linea">
+                <ion-icon name="radio-outline"></ion-icon>
+                En línea
+              </span>
+            </div>
+
+            <!-- Acciones normales -->
+            <ng-template #accionesTpl>
+              <div class="acciones-btns">
+                <button
+                  class="btn-accion btn-resetear"
+                  *ngIf="rolActual === 'administrador' && u.uid !== authService.getUidActual()"
+                  (click)="resetearContrasena(u, $event)"
+                  title="Resetear contraseña">
+                  <ion-icon name="key-outline"></ion-icon>
+                  <span>R-Contraseña</span>
+                </button>
+                <button
+                  *ngIf="rolActual === 'administrador' && (u.rol === 'recepcionista' || u.rol === 'veterinario')"
+                  class="btn-accion btn-permisos"
+                  (click)="abrirPermisos(u); $event.stopPropagation()"
+                  title="Gestionar permisos">
+                  <ion-icon name="shield-checkmark-outline"></ion-icon>
+                  <span>Permisos</span>
+                </button>
+                <button
+                  *ngIf="u.rol === 'veterinario' && (rolActual === 'administrador')"
+                  class="btn-accion btn-horarios"
+                  (click)="abrirHorarios(u); $event.stopPropagation()"
+                  title="Ver horarios">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span>Horarios</span>
+                </button>
+                <button
+                  class="btn-accion" *ngIf="rolActual === 'administrador'"
+                  [ngClass]="u.estado === 'activo' ? 'btn-pausar' : 'btn-activar'"
+                  (click)="cambiarEstado(u); $event.stopPropagation()"
+                  [title]="u.estado === 'activo' ? 'Desactivar' : 'Activar'">
+                  <ion-icon [name]="u.estado === 'activo' ? 'pause-circle-outline' : 'play-circle-outline'"></ion-icon>
+                  <span>{{ u.estado === 'activo' ? 'Pausar' : 'Activar' }}</span>
+                </button>
+              </div>
+            </ng-template>
+
+          </td>
+
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!cargando && usuariosFiltrados.length === 0" class="empty-state">
+    <ion-icon name="people-outline"></ion-icon>
+    <h3>Sin resultados</h3>
+    <p>No se encontraron usuarios con ese criterio</p>
+  </div>
+
+<ion-fab vertical="bottom" horizontal="end" slot="fixed" style="margin-bottom: 60px;">
+  <ion-fab-button color="primary"  *ngIf="puedeCrearUsuarios" (click)="nuevoUsuario()">
+    <ion-icon name="person-add"></ion-icon>
+  </ion-fab-button>
+</ion-fab>
+
+</ion-content>

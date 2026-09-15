@@ -1,0 +1,148 @@
+// ── Header ────────────────────────────────────────
+.cs-header {
+  ion-toolbar {
+    --min-height: 50px;
+    --background: var(--app-surface);
+    --border-width: 0 0 1px 0;
+    --border-color: var(--app-border);
+  }
+
+  ion-title {
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  ion-button {
+    --color: var(--app-text-3);
+    font-size: 18px;
+  }
+}
+
+// ── Búsqueda ──────────────────────────────────────
+.cs-search {
+  padding: 12px 12px 4px;
+  background: var(--app-surface);
+}
+
+.cs-searchbar {
+  --background: var(--app-surface-2);
+  --border-radius: 12px;
+  --box-shadow: none;
+  border: 0.5px solid var(--app-border);
+  padding-inline-start: 0;
+  padding-inline-end: 0;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.cs-count {
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--app-text-3);
+  background: var(--app-surface);
+}
+
+// ── Lista ─────────────────────────────────────────
+.cs-list {
+  max-height: min(360px, 60vh);
+  overflow-y: auto;
+  background: var(--app-surface);
+  padding: 4px 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cs-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--app-radius-md);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--ion-font-family);
+  transition: background var(--app-transition);
+
+  &:hover { background: var(--app-primary-xlight); }
+  &:active { background: var(--app-primary-tint); }
+}
+
+.cs-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-dark));
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(var(--app-primary-rgb), 0.3);
+}
+
+.cs-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cs-nombre {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--app-text-1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-detalle {
+  font-size: 12px;
+  color: var(--app-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-chevron {
+  font-size: 16px;
+  color: var(--app-text-3);
+  flex-shrink: 0;
+}
+
+// ── Estados (cargando / vacío) ────────────────────
+.cs-estado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 36px 16px;
+  color: var(--app-text-3);
+  font-size: 13px;
+  font-weight: 600;
+
+  ion-icon {
+    font-size: 40px;
+    color: var(--app-primary);
+    opacity: .25;
+  }
+
+  ion-spinner { width: 28px; height: 28px; }
+
+  small {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--app-text-3);
+  }
+}

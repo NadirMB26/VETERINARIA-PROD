@@ -1,0 +1,199 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Configuración de perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="cfg-content">
+  <div class="cfg-wrapper">
+
+    <!-- Perfil no disponible -->
+    <div class="cfg-empty" *ngIf="perfilNoEncontrado()">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <h3>No se encontró tu perfil</h3>
+      <p>Contacta al administrador para revisar tu cuenta.</p>
+    </div>
+
+    <ng-container *ngIf="!perfilNoEncontrado()">
+
+    <!-- AVATAR + IDENTIDAD -->
+    <div class="cfg-hero">
+      <div class="cfg-avatar">
+        <img *ngIf="perfil?.fotoUrl" [src]="perfil?.fotoUrl" alt="Foto de perfil" class="cfg-avatar__img" />
+        <span class="cfg-avatar__initials" *ngIf="!perfil?.fotoUrl">{{ iniciales }}</span>
+        <input
+          type="file"
+          #fotoInput
+          accept="image/png,image/jpeg,image/webp"
+          hidden
+          (change)="onFotoSeleccionada($event)" />
+        <button
+          class="cfg-avatar__cam"
+          aria-label="Cambiar foto de perfil"
+          [disabled]="subiendoFoto()"
+          (click)="fotoInput.click()">
+          <ion-spinner *ngIf="subiendoFoto()" name="crescent" color="light"></ion-spinner>
+          <ion-icon *ngIf="!subiendoFoto()" name="camera-outline"></ion-icon>
+        </button>
+      </div>
+      <div class="cfg-hero__info">
+        <h2 class="cfg-hero__name">{{ perfil?.Nombre }} {{ perfil?.Apellido }}</h2>
+        <span class="cfg-hero__rol">{{ rolLabel }}</span>
+        <p class="cfg-hero__email">{{ perfil?.Correo }}</p>
+        <button *ngIf="perfil?.fotoUrl" class="cfg-avatar__quitar" (click)="quitarFoto()">
+          <ion-icon name="trash-outline"></ion-icon>
+          Quitar foto
+        </button>
+      </div>
+    </div>
+
+    <!-- ↓ GRID DE DOS COLUMNAS EN DESKTOP ↓ -->
+    <div class="cfg-grid">
+
+      <!-- Columna izquierda -->
+      <div class="cfg-col">
+        <div class="cfg-card">
+          <div class="cfg-card__head">
+            <ion-icon name="person-outline" class="cfg-card__icon"></ion-icon>
+            <span class="cfg-card__title">Datos personales</span>
+          </div>
+
+          <div class="cfg-field">
+            <label class="cfg-label">Correo electrónico</label>
+            <ion-input
+              [value]="perfil?.Correo"
+              readonly
+              class="cfg-input cfg-input--disabled">
+            </ion-input>
+            <span class="cfg-hint">El correo no puede modificarse desde aquí.</span>
+          </div>
+
+          <div class="cfg-row2">
+            <div class="cfg-field">
+              <label class="cfg-label">Nombre</label>
+              <ion-input [(ngModel)]="editNombre" type="text" placeholder="Nombre" class="cfg-input"></ion-input>
+            </div>
+            <div class="cfg-field">
+              <label class="cfg-label">Apellido</label>
+              <ion-input [(ngModel)]="editApellido" type="text" placeholder="Apellido" class="cfg-input"></ion-input>
+            </div>
+          </div>
+
+          <div class="cfg-field">
+            <label class="cfg-label">Teléfono</label>
+            <ion-input [(ngModel)]="editTelefono" type="tel" placeholder="Número de contacto" class="cfg-input"></ion-input>
+          </div>
+
+          <div class="cfg-field">
+            <label class="cfg-label">
+              Cédula / documento
+              <span class="cfg-badge cfg-badge--blue">Obligatorio</span>
+            </label>
+            <ion-input
+              [ngModel]="editCedula"
+              (ngModelChange)="onCedulaChange($event)"
+              type="text"
+              inputmode="numeric"
+              maxlength="10"
+              placeholder="Número de cédula"
+              class="cfg-input">
+            </ion-input>
+            <span class="cfg-hint" *ngIf="perfil?.Cedula">Solo números, 8 a 10 dígitos.</span>
+            <span class="cfg-hint cfg-hint--warn" *ngIf="!perfil?.Cedula">Te falta registrar tu documento (8 a 10 dígitos).</span>
+          </div>
+
+          <div class="cfg-field" *ngIf="perfil?.rol === 'veterinario'">
+            <label class="cfg-label">
+              Especialidades
+              <span class="cfg-badge cfg-badge--blue">Veterinario</span>
+            </label>
+            <div class="cfg-chips">
+              <button
+                type="button"
+                *ngFor="let esp of especialidadesCatalogo"
+                class="cfg-chip"
+                [class.cfg-chip--activo]="editEspecialidades.includes(esp)"
+                (click)="toggleEspecialidad(esp)">
+                <ion-icon name="checkmark" *ngIf="editEspecialidades.includes(esp)"></ion-icon>
+                {{ esp }}
+              </button>
+            </div>
+            <span class="cfg-hint">Define qué tipos de cita puedes atender.</span>
+          </div>
+
+          <div class="cfg-card__footer">
+            <ion-button
+              class="cfg-btn-primary"
+              [disabled]="!datosModificados || guardandoPerfil()"
+              (click)="guardarPerfil()">
+              <ion-spinner *ngIf="guardandoPerfil()" name="crescent" slot="start"></ion-spinner>
+              {{ guardandoPerfil() ? 'Guardando…' : 'Guardar cambios' }}
+            </ion-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna derecha -->
+      <div class="cfg-col">
+        <div class="cfg-card">
+          <div class="cfg-card__head">
+            <ion-icon name="lock-closed-outline" class="cfg-card__icon"></ion-icon>
+            <span class="cfg-card__title">Seguridad</span>
+          </div>
+
+          <div class="cfg-field">
+            <label class="cfg-label">Contraseña actual</label>
+            <div class="cfg-pass-row">
+              <ion-input
+                [(ngModel)]="passActual"
+                [type]="mostrarPass() ? 'text' : 'password'"
+                placeholder="••••••••"
+                class="cfg-input">
+              </ion-input>
+              <button class="cfg-pass-eye" (click)="mostrarPass.set(!mostrarPass())" aria-label="Mostrar contraseña">
+                <ion-icon [name]="mostrarPass() ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="cfg-field">
+            <label class="cfg-label">Nueva contraseña</label>
+            <ion-input
+              [(ngModel)]="passNueva"
+              [type]="mostrarPass() ? 'text' : 'password'"
+              placeholder="Mínimo 6 caracteres"
+              class="cfg-input">
+            </ion-input>
+          </div>
+
+          <div class="cfg-field">
+            <label class="cfg-label">Confirmar nueva contraseña</label>
+            <ion-input
+              [(ngModel)]="passConfirmar"
+              [type]="mostrarPass() ? 'text' : 'password'"
+              placeholder="Repite la nueva contraseña"
+              class="cfg-input"
+              [class.cfg-input--error]="passNoCoinciden">
+            </ion-input>
+            <span class="cfg-error" *ngIf="passNoCoinciden">Las contraseñas no coinciden</span>
+            <span class="cfg-error" *ngIf="passIgualActual">La nueva contraseña debe ser diferente a la actual</span>
+          </div>
+
+          <div class="cfg-card__footer">
+            <ion-button
+              class="cfg-btn-primary"
+              [disabled]="!passValida || guardandoPass()"
+              (click)="cambiarPassword()">
+              <ion-spinner *ngIf="guardandoPass()" name="crescent" slot="start"></ion-spinner>
+              {{ guardandoPass() ? 'Actualizando…' : 'Actualizar contraseña' }}
+            </ion-button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    </ng-container>
+
+  </div>
+</ion-content>

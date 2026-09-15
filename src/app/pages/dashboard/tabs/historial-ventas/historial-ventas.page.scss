@@ -1,0 +1,121 @@
+// ── Contenido ──────────────────────────────────────
+.hv-content {
+  --background: var(--app-page);
+}
+
+// ── Toolbar: búsqueda, filtros, exportar ───────────
+.hv-toolbar {
+  padding: 12px 16px 8px;
+}
+
+.hv-search {
+  --background: var(--app-surface);
+  --border-radius: 12px;
+  --box-shadow: none;
+  border: 0.5px solid var(--app-border);
+}
+
+.hv-filtros {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 2px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar { display: none; }
+}
+
+.hv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: var(--app-radius-full);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text-2);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all .15s;
+
+  ion-icon { font-size: 13px; }
+
+  &--activo {
+    background: var(--app-primary);
+    border-color: var(--app-primary);
+    color: #fff;
+  }
+}
+
+.hv-exportar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px 8px;
+
+  &__label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--app-text-3);
+    margin-right: 4px;
+  }
+
+  ion-button {
+    --border-radius: 8px;
+    font-size: 12px;
+    height: 32px;
+  }
+}
+
+// ── Tabla ──────────────────────────────────────────
+.table-container {
+  margin: 0 16px 24px;
+}
+
+.hv-id {
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--app-text-2);
+}
+
+.hv-total {
+  font-weight: 700;
+  color: var(--app-primary-dark);
+}
+
+.hv-col-total {
+  text-align: right;
+}
+
+.hv-ver {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--app-radius-sm);
+  border: none;
+  background: var(--app-info-light);
+  color: var(--app-info);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--app-transition), background var(--app-transition);
+
+  &:hover { background: var(--app-info); color: #fff; }
+  &:active { transform: scale(0.92); }
+
+  ion-icon { font-size: 15px; }
+}
+
+// ── Desktop ────────────────────────────────────────
+@media (min-width: 1024px) {
+  .hv-toolbar {
+    padding: 16px 24px 8px;
+  }
+
+  .table-container {
+    margin: 0 24px 32px;
+  }
+}

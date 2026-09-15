@@ -1,0 +1,181 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/layout/home" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Mascotas</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        *ngIf="rolActual === 'administrador'"
+        fill="clear"
+        (click)="abrirMigracion()"
+        title="Migrar mascota">
+        <ion-icon slot="icon-only" name="swap-horizontal-outline"></ion-icon>
+      </ion-button>
+
+      <ion-button
+        *ngIf="puedeCrear"
+        fill="solid"
+        color="primary"
+        shape="round"
+        (click)="nuevaMascota()"
+        class="btn-nueva">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Nueva
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+
+  <ion-toolbar class="toolbar-filtros">
+    <ion-searchbar
+      [(ngModel)]="filtroBusqueda"
+      (ionInput)="filtrar()"
+      placeholder="Buscar por nombre, raza, especie..."
+      debounce="300"
+      animated>
+    </ion-searchbar>
+
+    <div class="filtros-chips">
+      <ion-chip
+        *ngIf="rolActual === 'veterinario'"
+        [class.chip-activo]="mostrarSoloMisPacientes"
+        (click)="toggleMisPacientes()">
+        <ion-icon name="medkit-outline" slot="start"></ion-icon>
+        <ion-label>Mis pacientes</ion-label>
+      </ion-chip>
+      <ion-chip
+        [class.chip-activo]="filtroEspecie === 'todos'"
+        (click)="setFiltroEspecie('todos')">
+        <ion-label>Todos</ion-label>
+      </ion-chip>
+      <ion-chip
+        *ngFor="let esp of especiesDisponibles"
+        [class.chip-activo]="filtroEspecie === esp"
+        (click)="setFiltroEspecie(esp)">
+        <ion-icon [name]="getIconoEspecie(esp)" slot="start"></ion-icon>
+        <ion-label>{{ esp | titlecase }}</ion-label>
+      </ion-chip>
+    </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="mascotas-content">
+
+  <!-- Estado: cargando -->
+  <div *ngIf="cargando" class="estado-vacio">
+    <ion-spinner name="crescent" color="primary"></ion-spinner>
+    <p>Cargando mascotas...</p>
+  </div>
+
+  <!-- Estado: sin resultados -->
+  <div *ngIf="!cargando && mascotasFiltradas.length === 0" class="estado-vacio">
+    <ion-icon name="paw-outline" color="medium"></ion-icon>
+    <p>No se encontraron mascotas</p>
+    <ion-button *ngIf="puedeCrear" fill="outline" (click)="nuevaMascota()">
+      Registrar mascota
+    </ion-button>
+  </div>
+
+  <!-- Lista de mascotas -->
+  <ion-grid
+    *ngIf="!cargando && mascotasFiltradas.length > 0"
+    class="mascotas-grid"
+    style="padding-bottom: 80px;">
+    <ion-row>
+      <ion-col
+        size="12"
+        size-md="6"
+        size-lg="4"
+        *ngFor="let mascota of mascotasFiltradas; trackBy: trackById">
+
+        <ion-card
+          *ngIf="puedeVer"
+          class="mascota-card"
+          [class.mascota-inactiva]="mascota.estado === 'inactivo'"
+          button
+          (click)="verDetalleMascota(mascota)"
+          [attr.aria-label]="'Ver detalles de ' + mascota.nombre">
+
+          <div class="badge-estado" [class.badge-inactivo]="mascota.estado === 'inactivo'">
+            {{ mascota.estado === 'activo' ? 'Activa' : 'Inactiva' }}
+          </div>
+
+          <div class="mascota-avatar">
+            <img *ngIf="mascota.fotoUrl" [src]="mascota.fotoUrl" alt="{{ mascota.nombre }}" class="mascota-foto" />
+            <div class="avatar-placeholder" *ngIf="!mascota.fotoUrl">
+              <ion-icon [name]="getIconoEspecie(mascota.especie)"></ion-icon>
+            </div>
+          </div>
+
+          <ion-card-header>
+            <ion-card-title>{{ mascota.nombre }}</ion-card-title>
+            <ion-card-subtitle>
+              {{ mascota.especie | titlecase }} · {{ mascota.raza }}
+            </ion-card-subtitle>
+          </ion-card-header>
+
+          <ion-card-content>
+            <div class="mascota-info">
+              <span class="info-chip">
+                <ion-icon name="scale-outline"></ion-icon>
+                {{ mascota.peso }} kg
+              </span>
+              <span class="info-chip">
+                <ion-icon name="calendar-outline"></ion-icon>
+                {{ calcularEdad(mascota.fechaNacimiento) }} año{{ calcularEdad(mascota.fechaNacimiento) !== 1 ? 's' : '' }}
+              </span>
+              <span class="info-chip" *ngIf="mascota.color">
+                <ion-icon name="color-palette-outline"></ion-icon>
+                {{ mascota.color }}
+              </span>
+            </div>
+
+            <div class="mascota-dueno">
+              <ion-icon name="person-outline"></ion-icon>
+              <span>{{ nombresClientes[mascota.idCliente] || '—' }}</span>
+            </div>
+          </ion-card-content>
+
+          <!-- Botones de acción -->
+          <div class="mascota-acciones" (click)="$event.stopPropagation()">
+            <ion-button *ngIf="puedeEditar" fill="clear" size="small" color="primary"
+              (click)="editarMascota(mascota)">
+              <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+            </ion-button>
+
+            <ion-button *ngIf="puedeEditar" fill="clear" size="small" color="tertiary"
+              (click)="abrirMigracionDirecta(mascota)">
+              <ion-icon slot="icon-only" name="swap-horizontal-outline"></ion-icon>
+            </ion-button>
+
+            <ion-button *ngIf="puedeEditar" fill="clear" size="small"
+              [color]="mascota.estado === 'activo' ? 'warning' : 'success'"
+              (click)="cambiarEstado(mascota)">
+              <ion-icon slot="icon-only"
+                [name]="mascota.estado === 'activo' ? 'pause-circle-outline' : 'play-circle-outline'">
+              </ion-icon>
+            </ion-button>
+
+            <ion-button *ngIf=" rolActual === 'administrador'" fill="clear" size="small" color="danger"
+              (click)="eliminarMascota(mascota)">
+              <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <ion-fab
+    *ngIf="puedeCrear"
+    vertical="bottom"
+    horizontal="end"
+    slot="fixed"
+    style="margin-bottom: 60px;">
+    <ion-fab-button color="primary" (click)="nuevaMascota()">
+      <ion-icon name="paw"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+
+</ion-content>

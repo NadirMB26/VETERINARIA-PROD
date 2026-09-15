@@ -1,0 +1,446 @@
+// ── Página ────────────────────────────────────────────────────────
+// ion-content maneja el scroll; .hv-page solo organiza el contenido
+.hv-page {
+  background: var(--app-primary-xlight);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-bottom: 80px; // espacio para tab bar
+  font-family: var(--ion-font-family);
+  min-height: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden; // evita scroll horizontal
+}
+
+// ══ HERO ══════════════════════════════════════════════════════════
+.hv-hero {
+  background: linear-gradient(135deg, var(--app-primary) 0%, var(--app-primary-shade) 100%);
+  padding: 52px 20px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-radius: 0 0 24px 24px;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    right: -40px;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    pointer-events: none;
+  }
+}
+
+.hv-saludo {
+  font-size: 13px;
+  color: rgba(255,255,255,0.72);
+  margin: 0 0 2px;
+  font-weight: 600;
+}
+
+.hv-nombre {
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 4px;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
+}
+
+.hv-especialidad {
+  font-size: 12px;
+  color: rgba(255,255,255,0.65);
+  margin: 0;
+  font-weight: 600;
+}
+
+.hv-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(255,255,255,0.30);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+
+  &__img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+.hv-avatar-icon { font-size: 26px; }
+
+// ══ MÉTRICAS ══════════════════════════════════════════════════════
+.hv-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 16px 16px 0;
+  box-sizing: border-box;
+}
+
+.hv-metric-card {
+  background: var(--app-surface);
+  border-radius: 14px;
+  border: 1.5px solid var(--app-primary-xlight);
+  padding: 12px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-align: center;
+  min-width: 0; // evita que desborde el grid
+}
+
+.hv-mc-icon  { font-size: 18px; }
+
+.hv-mc-num {
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--app-text-1);
+  line-height: 1;
+}
+
+.hv-mc-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--app-text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.hv-mc--hoy        .hv-mc-num { color: var(--app-primary); }
+.hv-mc--pendientes .hv-mc-num { color: #E65100; }
+.hv-mc--atendidos  .hv-mc-num { color: #2E7D32; }
+
+// ══ PRÓXIMA CITA ══════════════════════════════════════════════════
+.hv-proxima {
+  padding: 16px 16px 0;
+  box-sizing: border-box;
+}
+
+.hv-proxima-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--app-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.hv-proxima-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--app-primary);
+  flex-shrink: 0;
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.45); opacity: 0.6; }
+}
+
+.hv-proxima-card {
+  background: var(--app-surface);
+  border-radius: 14px;
+  border: 1.5px solid var(--app-primary-light);
+  padding: 14px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.hv-pc-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.hv-pc-hora {
+  font-size: 16px;
+  font-weight: 900;
+  color: var(--app-primary-dark);
+  white-space: nowrap;
+}
+
+.hv-pc-sep {
+  width: 1.5px;
+  height: 40px;
+  background: var(--app-primary-xlight);
+  border-radius: 100px;
+  flex-shrink: 0;
+}
+
+.hv-pc-info {
+  flex: 1;
+  min-width: 0; // permite text-overflow
+}
+
+.hv-pc-mascota {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--app-text-1);
+  margin: 0 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hv-pc-tipo    { font-size: 11px; color: var(--app-text-2); margin: 0 0 1px; }
+.hv-pc-cliente { font-size: 10px; color: var(--app-text-3); margin: 0; }
+
+// ── Badges ────────────────────────────────────────────────────────
+.hv-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &.badge-pendiente  { background: #FFF3E0; color: #E65100; }
+  &.badge-confirmada { background: #E0F2F1; color: #00695C; }
+  &.badge-finalizada { background: #E8F5E9; color: #2E7D32; }
+  &.badge-cancelada  { background: #FFEBEE; color: #B71C1C; }
+}
+
+// ── Sin próxima cita ──────────────────────────────────────────────
+.hv-sin-proxima {
+  margin: 16px 16px 0;
+  background: var(--app-surface);
+  border: 1.5px dashed var(--app-primary-light);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--app-text-2);
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.hv-sin-icon { font-size: 18px; flex-shrink: 0; }
+
+// ══ CALENDARIO ════════════════════════════════════════════════════
+.hv-calendar-section {
+  padding: 20px 16px 0;
+  box-sizing: border-box;
+}
+
+.hv-section-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--app-text-1);
+  letter-spacing: 0.2px;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+// El wrapper contiene el scroll horizontal del CalendarGrid
+.hv-cal-wrapper {
+  background: var(--app-surface);
+  border-radius: 16px;
+  border: 1.5px solid var(--app-primary-xlight);
+  overflow: hidden;      // clip del borde redondeado
+  width: 100%;
+  box-sizing: border-box;
+
+  // El CalendarGrid tiene su propio scroll interno horizontal
+  // No ponemos overflow-x aquí para no bloquear el scroll del grid
+  app-calendar-grid {
+    display: block;
+    width: 100%;
+  }
+}
+
+// ══ ACCIONES RÁPIDAS ══════════════════════════════════════════════
+.hv-acciones {
+  padding: 20px 16px 0;
+  box-sizing: border-box;
+}
+
+.hv-acciones-row {
+  display: flex;
+  gap: 8px;
+}
+
+.hv-accion-card {
+  flex: 1;
+  min-width: 0; // evita overflow en flex
+  background: var(--app-surface);
+  border-radius: 14px;
+  border: 1.5px solid var(--app-primary-xlight);
+  padding: 14px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 0.18s, transform 0.18s;
+
+  &:active { transform: scale(0.96); }
+}
+
+.hv-ac-icon  { font-size: 22px; }
+
+.hv-ac-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--app-text-1);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.hv-ac-sub {
+  font-size: 8px;
+  color: var(--app-text-2);
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.3;
+  // permite wrap en pantallas pequeñas
+  white-space: normal;
+  word-break: break-word;
+}
+.hv-hero {
+  padding: 72px 20px 28px; // ← era 52px, súbelo hasta que quede visible
+}
+.hv-btn-diagnosticar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: none;
+  background: var(--ion-color-primary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  justify-content: center;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  ion-icon {
+    font-size: 1.1rem;
+  }
+}
+// -- Acciones de la pr�xima cita -------------------------
+.hv-proxima-acciones {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+
+  .hv-btn-diagnosticar { margin-top: 0; flex: 1; }
+}
+
+.hv-btn-expediente {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--ion-color-primary);
+  background: #fff;
+  color: var(--ion-color-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+// -- Citas de hoy ----------------------------------------
+.hv-hoy {
+  margin-top: 8px;
+}
+
+.hv-hoy-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+
+.hv-hoy-hora {
+  font-weight: 700;
+  color: var(--ion-color-primary);
+  font-size: 0.82rem;
+  min-width: 62px;
+}
+
+.hv-hoy-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.hv-hoy-mascota {
+  font-weight: 600;
+  color: #111827;
+  font-size: 0.86rem;
+}
+
+.hv-hoy-sub {
+  font-size: 0.72rem;
+  color: #6b7280;
+}
+
+.hv-hoy-acciones {
+  display: flex;
+  gap: 6px;
+}
+
+.hv-hoy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  border-radius: 10px;
+  padding: 7px 9px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &--primary {
+    border-color: var(--ion-color-primary);
+    background: var(--ion-color-primary);
+    color: #fff;
+  }
+}

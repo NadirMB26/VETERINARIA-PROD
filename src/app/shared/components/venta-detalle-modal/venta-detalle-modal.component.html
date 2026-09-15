@@ -1,0 +1,149 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Detalle de venta</ion-title>
+    <ion-buttons slot="end">
+      <ion-button color="light" (click)="cerrar()">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="vd-content">
+
+  <!-- Resumen -->
+  <div class="vd-hero">
+    <div class="vd-hero__id">{{ venta.idVenta }}</div>
+    <div class="vd-hero__fecha">{{ formatearFecha(venta.fecha) }}</div>
+    <div class="vd-hero__badges">
+      <span class="badge-estado" [ngClass]="venta.estadoPago === 'pagado' ? 'badge-pagado' : (venta.estadoPago === 'anulada' ? 'badge-anulada' : 'badge-pendiente')">
+        {{ venta.estadoPago | titlecase }}
+      </span>
+      <span class="badge-estado" [ngClass]="'badge-' + venta.metodoPago">{{ metodosTexto() }}</span>
+    </div>
+  </div>
+
+  <!-- Quién vendió -->
+  <div class="vd-card">
+    <div class="vd-card__titulo">
+      <ion-icon name="storefront-outline"></ion-icon>
+      Quién vendió
+    </div>
+    <div class="vd-persona">
+      <div class="vd-persona__avatar">{{ iniciales(venta.nombreVendedor) }}</div>
+      <div class="vd-persona__info">
+        <strong>{{ venta.nombreVendedor || 'Sin vendedor' }}</strong>
+        <span>{{ venta.idVendedor }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quién compró -->
+  <div class="vd-card">
+    <div class="vd-card__titulo">
+      <ion-icon name="person-outline"></ion-icon>
+      Quién compró
+    </div>
+    <div class="vd-persona">
+      <div class="vd-persona__avatar vd-persona__avatar--cliente">{{ iniciales(venta.nombreCliente) }}</div>
+      <div class="vd-persona__info">
+        <strong>{{ venta.nombreCliente }}</strong>
+        <span>{{ venta.idCliente }}</span>
+        <span class="vd-persona__mascota" *ngIf="venta.nombreMascota">
+          <ion-icon name="paw-outline"></ion-icon>
+          {{ venta.nombreMascota }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Qué compró -->
+  <div class="vd-card">
+    <div class="vd-card__titulo">
+      <ion-icon name="bag-handle-outline"></ion-icon>
+      Qué compró ({{ venta.items.length }})
+    </div>
+    <div class="vd-items">
+      <div class="vd-item" *ngFor="let item of venta.items">
+        <div class="vd-item__info">
+          <span class="vd-item__nombre">{{ item.nombre }}</span>
+          <span class="vd-item__detalle">
+            {{ item.cantidad }} × {{ item.precioUnitario | currency:'COP':'symbol-narrow':'1.0-0' }}
+            <span class="vd-item__tipo">{{ item.tipo }}</span>
+          </span>
+        </div>
+        <span class="vd-item__subtotal">{{ item.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagos -->
+  <div class="vd-card">
+    <div class="vd-card__titulo">
+      <ion-icon name="card-outline"></ion-icon>
+      Pagos
+    </div>
+    <ng-container *ngIf="venta.pagos && venta.pagos.length > 0">
+      <div class="vd-pago" *ngFor="let p of venta.pagos">
+        <div class="vd-pago__info">
+          <ion-icon [name]="metodoIcono(p.metodoPago)"></ion-icon>
+          <span>{{ metodoNombre(p.metodoPago) }}</span>
+          <img *ngIf="p.soportePago" [src]="p.soportePago" class="vd-pago__soporte" alt="Soporte de pago" />
+        </div>
+        <div class="vd-pago__der">
+          <span class="vd-pago__monto">{{ p.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          <span class="vd-pago__vuelto" *ngIf="vueltoDe(p) > 0">
+            Vuelto {{ vueltoDe(p) | currency:'COP':'symbol-narrow':'1.0-0' }}
+            ({{ p.vueltoDestino === 'saldo' ? 'saldo a favor' : 'en efectivo' }})
+          </span>
+        </div>
+      </div>
+    </ng-container>
+    <div class="vd-pago" *ngIf="!venta.pagos || venta.pagos.length === 0">
+      <div class="vd-pago__info">
+        <ion-icon [name]="metodoIcono(venta.metodoPago)"></ion-icon>
+        <span>{{ metodosTexto() }}</span>
+      </div>
+      <span class="vd-pago__monto">{{ venta.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+  </div>
+
+  <!-- Totales -->
+  <div class="vd-card vd-totales">
+    <div class="vd-fila">
+      <span>Subtotal</span>
+      <span>{{ venta.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="vd-fila" *ngIf="venta.saldoAplicado > 0">
+      <span>Saldo a favor aplicado</span>
+      <span class="vd-fila__menos">− {{ venta.saldoAplicado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="vd-fila vd-fila--total">
+      <span>Total</span>
+      <span>{{ venta.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="vd-fila" *ngIf="venta.abonado > 0">
+      <span>Abonado</span>
+      <span>{{ venta.abonado | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+    <div class="vd-fila vd-fila--pendiente" *ngIf="saldo() > 0">
+      <span>Saldo pendiente</span>
+      <span>{{ saldo() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+  </div>
+
+  <!-- Abonos -->
+  <div class="vd-card" *ngIf="abonos.length > 0">
+    <div class="vd-card__titulo">
+      <ion-icon name="cash-outline"></ion-icon>
+      Abonos realizados
+    </div>
+    <div class="vd-abono" *ngFor="let a of abonos">
+      <div class="vd-abono__info">
+        <span class="vd-abono__monto">{{ a.monto | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+        <span class="vd-abono__detalle">
+          {{ formatearFecha(a.fecha) }} · {{ metodoNombre(a.metodoPago) }} · {{ a.nombreVendedor }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+</ion-content>

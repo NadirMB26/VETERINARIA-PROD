@@ -1,0 +1,98 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="success">
+    <ion-title>
+      <div class="cvm-title">
+        <ion-icon name="receipt-outline"></ion-icon>
+        <span>Cuenta por cobrar</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()" fill="clear" color="light">
+        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="cvm-content ion-padding">
+
+  <div class="cvm-ok" *ngIf="esGratis">
+    <ion-icon name="checkmark-done-outline"></ion-icon>
+    <span>Cita registrada sin costo. No genera cuenta por cobrar.</span>
+  </div>
+
+  <div class="cvm-resumen">
+    <div class="cvm-resumen__head">
+      <span>{{ venta.nombreMascota || 'Servicios de la cita' }}</span>
+      <span class="cvm-resumen__cliente">{{ venta.nombreCliente }}</span>
+    </div>
+    <div class="cvm-item" *ngFor="let it of venta.items">
+      <span>{{ it.cantidad }} × {{ it.nombre }}</span>
+      <strong>{{ precio(it.subtotal) }}</strong>
+    </div>
+    <div class="cvm-total">
+      <span>Total</span>
+      <strong>{{ precio(total) }}</strong>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!esGratis && !yaPagada">
+    <div class="cvm-bloque">
+      <label class="cvm-label">Método de pago</label>
+      <div class="cvm-metodos">
+        <button
+          type="button"
+          *ngFor="let m of metodos"
+          class="cvm-metodo"
+          [class.activo]="metodoPago === m.id"
+          (click)="metodoPago = m.id">
+          <ion-icon [name]="m.icon"></ion-icon>
+          {{ m.nombre }}
+        </button>
+      </div>
+    </div>
+
+    <div class="cvm-bloque">
+      <label class="cvm-label">Monto a cobrar (saldo: {{ precio(saldo) }})</label>
+      <div class="cvm-monto">
+        <ion-input
+          [ngModel]="monto"
+          (ngModelChange)="onMonto($event)"
+          type="number"
+          min="0"
+          inputmode="numeric"
+          class="cvm-input">
+        </ion-input>
+        <button type="button" class="cvm-total-btn" (click)="usarTotal()">Total</button>
+      </div>
+    </div>
+
+    <div class="cvm-bloque" *ngIf="requiereSoporte">
+      <label class="cvm-label">Soporte de pago (obligatorio)</label>
+      <ion-input [(ngModel)]="soportePago" type="text" placeholder="Nº de referencia o comprobante" class="cvm-input"></ion-input>
+    </div>
+
+    <p class="cvm-hint" *ngIf="monto < saldo">
+      Quedarán {{ precio(saldo - monto) }} pendientes en Cobranza.
+    </p>
+  </ng-container>
+
+  <div class="cvm-aviso cvm-aviso--ok" *ngIf="yaPagada && !esGratis">
+    <ion-icon name="checkmark-circle-outline"></ion-icon>
+    <span>Venta pagada.</span>
+  </div>
+
+</ion-content>
+
+<ion-footer class="cvm-footer ion-no-border" *ngIf="!esGratis && !yaPagada">
+  <div class="cvm-footer-inner">
+    <button class="cvm-btn cvm-btn--ghost" (click)="cerrar()" [disabled]="guardando">
+      Dejar en cuenta por cobrar
+    </button>
+    <button class="cvm-btn cvm-btn--primary" (click)="cobrar()" [disabled]="!puedeCobrar">
+      <ion-spinner *ngIf="guardando" name="crescent" style="width:16px;height:16px;margin-right:6px;"></ion-spinner>
+      <ion-icon *ngIf="!guardando" name="cash-outline"></ion-icon>
+      Cobrar ahora
+    </button>
+  </div>
+</ion-footer>

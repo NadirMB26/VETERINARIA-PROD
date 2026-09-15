@@ -1,0 +1,180 @@
+<ion-header>
+  <ion-toolbar class="dh-toolbar">
+    <ion-buttons slot="start">
+      <ion-menu-button color="light"></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Dashboard</ion-title>
+    <ion-buttons slot="end">
+      <ion-button
+        *ngIf="puedeVerVentas"
+        class="dh-reportes"
+        (click)="irAReportes()">
+        <ion-icon name="bar-chart-outline" slot="start"></ion-icon>
+        Reportes
+      </ion-button>
+      <div class="dh-user">
+        <div class="dh-user__avatar" *ngIf="!fotoUrl">{{ iniciales }}</div>
+        <img *ngIf="fotoUrl" [src]="fotoUrl" class="dh-user__avatar dh-user__avatar--img" alt="Avatar" />
+        <span class="dh-user__nombre">{{ nombreUsuario }}</span>
+      </div>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="dh-content">
+  <div class="dh-body">
+
+    <!-- Hero -->
+    <div class="dh-hero">
+      <div class="dh-hero__info">
+        <div class="dh-hero__avatar">
+          <div class="dh-hero__avatar-iniciales" *ngIf="!fotoUrl">{{ iniciales }}</div>
+          <img *ngIf="fotoUrl" [src]="fotoUrl" class="dh-hero__avatar-img" alt="Avatar" />
+        </div>
+        <div class="dh-hero__texto">
+          <span class="dh-hero__saludo">{{ saludo }},</span>
+          <h1 class="dh-hero__nombre">{{ nombreUsuario }}</h1>
+          <p class="dh-hero__fecha">{{ fechaHoy }}</p>
+          <p class="dh-hero__sub">{{ subtituloHero }}</p>
+        </div>
+      </div>
+      <div class="dh-hero__acciones">
+        <button type="button" class="dh-accion" *ngIf="puedeVender" (click)="irAVentas()">
+          <ion-icon name="cart-outline"></ion-icon>
+          Nueva venta
+        </button>
+        <button type="button" class="dh-accion" (click)="irACitas()">
+          <ion-icon name="calendar-outline"></ion-icon>
+          Nueva cita
+        </button>
+        <button type="button" class="dh-accion dh-accion--ghost" *ngIf="puedeVerVentas" (click)="irAReportes()">
+          <ion-icon name="bar-chart-outline"></ion-icon>
+          Reportes
+        </button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="dh-seccion">
+      <div class="dh-seccion__titulo">
+        <ion-icon name="stats-chart-outline"></ion-icon>
+        Resumen de rendimiento
+      </div>
+
+      <div class="dh-kpis" *ngIf="!cargando; else kpiSkeleton">
+        <app-dashboard-kpi-card *ngFor="let k of kpis" [kpi]="k"></app-dashboard-kpi-card>
+      </div>
+      <ng-template #kpiSkeleton>
+        <div class="dh-kpis">
+          <div class="dh-kpi-skeleton skeleton" *ngFor="let i of [0,1,2,3,4,5,6,7]"></div>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="dh-seccion">
+      <div class="dh-seccion__titulo">
+        <ion-icon name="pulse-outline"></ion-icon>
+        Analítica
+      </div>
+
+      <div class="dh-graficos" *ngIf="!cargando; else grafSkeleton">
+        <app-dashboard-chart-card
+          titulo="Citas por mes"
+          subtitulo="Año actual vs año anterior"
+          tipo="bar"
+          [labels]="labelsMeses"
+          [datasets]="datasetCitas"
+          [altura]="240">
+        </app-dashboard-chart-card>
+
+        <app-dashboard-chart-card
+          titulo="Ingresos por consultas y productos"
+          subtitulo="Últimos 6 meses"
+          tipo="line"
+          [labels]="labelsUltimos6"
+          [datasets]="datasetIngresos"
+          [altura]="240">
+        </app-dashboard-chart-card>
+
+        <app-dashboard-chart-card
+          titulo="Consultas por tipo"
+          subtitulo="Mes actual"
+          tipo="doughnut"
+          [labels]="labelsTipos"
+          [datasets]="datasetTipos"
+          [totalCentro]="totalConsultasMes"
+          [altura]="240">
+        </app-dashboard-chart-card>
+
+        <app-dashboard-calendar [eventos]="citasCalendario"></app-dashboard-calendar>
+      </div>
+      <ng-template #grafSkeleton>
+        <div class="dh-graficos">
+          <div class="dh-grafico-skeleton skeleton" *ngFor="let i of [0,1,2,3]"></div>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Actividad reciente -->
+    <div class="dh-seccion">
+      <div class="dh-seccion__titulo">
+        <ion-icon name="time-outline"></ion-icon>
+        Actividad reciente
+      </div>
+
+      <div class="dh-recientes">
+        <div class="dh-reciente-card">
+          <div class="dh-reciente-card__head">
+            <span>
+              <ion-icon name="fitness-outline"></ion-icon>
+              Últimas consultas
+            </span>
+            <button type="button" (click)="irACitas()">Ver todas</button>
+          </div>
+
+          <div class="dh-reciente" *ngFor="let c of citasRecientes">
+            <div class="dh-reciente__icono">
+              <ion-icon name="paw-outline"></ion-icon>
+            </div>
+            <div class="dh-reciente__info">
+              <strong>{{ c.nombreMascota }}</strong>
+              <span>{{ c.tipo | titlecase }} · {{ c.nombreVeterinario }}</span>
+            </div>
+            <span class="dh-reciente__fecha">{{ formatearFecha(c.fecha) }}</span>
+          </div>
+
+          <div class="dh-vacio" *ngIf="citasRecientes.length === 0">
+            Sin consultas finalizadas recientemente.
+          </div>
+        </div>
+
+        <div class="dh-reciente-card">
+          <div class="dh-reciente-card__head">
+            <span>
+              <ion-icon name="receipt-outline"></ion-icon>
+              Últimas ventas
+            </span>
+            <button type="button" (click)="irAHistorial()">Ver todas</button>
+          </div>
+
+          <div class="dh-reciente" *ngFor="let v of ventasRecientes">
+            <div class="dh-reciente__icono dh-reciente__icono--venta">
+              <ion-icon name="bag-handle-outline"></ion-icon>
+            </div>
+            <div class="dh-reciente__info">
+              <strong>{{ v.nombreCliente }}</strong>
+              <span>{{ metodosVentaTexto(v) }}</span>
+            </div>
+            <span class="dh-reciente__monto">{{ v.total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+          </div>
+
+          <div class="dh-vacio" *ngIf="ventasRecientes.length === 0">
+            Sin ventas registradas aún.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</ion-content>

@@ -1,0 +1,89 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>
+      <div class="drm-title">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <span>Detalle del registro</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()" fill="clear" color="light">
+        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="drm-content ion-padding">
+
+  <div class="drm-resumen">
+    <div class="drm-fila">
+      <ion-icon name="paw-outline" color="primary"></ion-icon>
+      <span class="drm-val">{{ mascotaResumen?.nombre ?? 'Paciente' }}</span>
+      <ion-badge [color]="colorCategoria" class="drm-badge">{{ labelCategoria }}</ion-badge>
+    </div>
+    <div class="drm-fila">
+      <ion-icon name="calendar-outline" color="medium"></ion-icon>
+      <span class="drm-sub">{{ fechaDisplay }}</span>
+    </div>
+    <div class="drm-fila">
+      <ion-icon name="person-outline" color="medium"></ion-icon>
+      <span class="drm-sub">{{ registro.nombreVeterinario || '—' }}</span>
+      <span class="drm-sep">·</span>
+      <span class="drm-sub" *ngIf="cita">{{ cita.tipo }}</span>
+    </div>
+  </div>
+
+  <ng-container *ngIf="registro.anamnesis">
+    <p class="drm-label">Anamnesis</p>
+    <div class="drm-caja">{{ registro.anamnesis }}</div>
+  </ng-container>
+
+  <ng-container *ngIf="registro.examenFisico">
+    <p class="drm-label">Examen físico</p>
+    <div class="drm-caja">{{ registro.examenFisico }}</div>
+  </ng-container>
+
+  <ng-container *ngIf="registro.diagnostico">
+    <p class="drm-label">Diagnóstico</p>
+    <div class="drm-caja">{{ registro.diagnostico }}</div>
+  </ng-container>
+
+  <ng-container *ngIf="registro.tratamiento">
+    <p class="drm-label">Tratamiento</p>
+    <div class="drm-caja">{{ registro.tratamiento }}</div>
+  </ng-container>
+
+  <ng-container *ngIf="registro.medicamentos">
+    <p class="drm-label">Medicamentos</p>
+    <div class="drm-caja">{{ registro.medicamentos }}</div>
+  </ng-container>
+
+  <ng-container *ngIf="registro.observaciones">
+    <p class="drm-label">Observaciones</p>
+    <div class="drm-caja">{{ registro.observaciones }}</div>
+  </ng-container>
+
+  <div class="drm-corregido" *ngIf="registro.motivoUltimaCorreccion">
+    <ion-icon name="create-outline"></ion-icon>
+    <span>Última corrección: {{ registro.motivoUltimaCorreccion }}</span>
+  </div>
+
+</ion-content>
+
+<ion-footer class="drm-footer ion-no-border" *ngIf="esStaff || puedeEditar">
+  <div class="drm-footer-inner">
+    <button class="drm-btn drm-btn--ghost" (click)="enviarPorCorreo()">
+      <ion-icon name="mail-outline"></ion-icon>
+      Correo
+    </button>
+    <button class="drm-btn drm-btn--ghost" (click)="generarPDF()">
+      <ion-icon name="download-outline"></ion-icon>
+      PDF
+    </button>
+    <button class="drm-btn drm-btn--primary" *ngIf="puedeEditar" (click)="editar()">
+      <ion-icon name="create-outline"></ion-icon>
+      Corregir registro
+    </button>
+  </div>
+</ion-footer>

@@ -1,0 +1,59 @@
+<div class="pop-wrapper">
+
+  <!-- HEADER -->
+  <div class="pop-header">
+    <div class="pop-title-row">
+      <div class="pop-clock-icon">🕐</div>
+      <div>
+        <div class="pop-time-label">{{ citas[0].horaInicio }}</div>
+        <div class="pop-time-sub">{{ citas.length }} cita{{ citas.length !== 1 ? 's' : '' }} en este horario</div>
+      </div>
+    </div>
+    <button class="pop-close" (click)="cerrar()" title="Cerrar">✕</button>
+  </div>
+
+  <!-- COUNT ROW -->
+  <div class="pop-count-row">
+    <span class="pop-count-pill">{{ citas.length }}</span>
+    <span class="pop-count-label">citas en este horario</span>
+  </div>
+
+  <!-- BODY: CARDS -->
+  <div class="pop-body">
+    <div
+      class="pop-card"
+      *ngFor="let cita of citas"
+      (click)="seleccionar(cita)">
+      <div class="pop-card-bar" [style.background]="getColor(cita)"></div>
+      <div class="pop-card-body">
+
+        <!-- FILA 1: nombre mascota + badge tipo -->
+        <div class="pop-card-top">
+          <span class="pop-mascota">{{ cita.nombreMascota }}</span>
+          <span class="pop-estado" [ngClass]="getEstadoClass(cita.estado)" >{{ getEstadoLabel(cita.estado) }}</span>
+        </div>
+
+        <!-- FILA 2: estado (pill) -->
+        <div class="pop-card-middle">
+          <span class="pop-badge" [ngClass]="getBadgeClass(cita.tipo)">
+           {{ cita.tipo }} 
+          </span>
+        </div>
+
+        <!-- FILA 3: vet -->
+        <div class="pop-card-bottom">
+          <div class="pop-vet-dot" [style.background]="getColor(cita)"></div>
+          <span class="pop-vet-name">{{ cita.nombreVeterinario }}</span>
+        </div>
+
+      </div>
+      <div class="pop-card-action">›</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="pop-footer">
+    <button class="pop-btn-new" (click)="nuevaCita()">＋ Nueva cita aquí</button>
+  </div>
+
+</div>

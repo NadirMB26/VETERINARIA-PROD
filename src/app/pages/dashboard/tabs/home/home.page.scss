@@ -1,0 +1,417 @@
+// ══════════════════════════════════════════════════════════════
+// Dashboard principal (staff) — solo tokens de global.scss
+// ══════════════════════════════════════════════════════════════
+
+// ── Contenido ──────────────────────────────────────
+.dh-content {
+  --background: var(--app-page);
+}
+
+.dh-body {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 16px 16px 32px;
+}
+
+// ── Toolbar ────────────────────────────────────────
+.dh-toolbar {
+  --background: linear-gradient(135deg, var(--app-primary), var(--app-primary-shade));
+  --border-width: 0;
+  color: #fff;
+
+  ion-title { color: #fff; font-weight: 800; }
+}
+
+.dh-reportes {
+  --border-radius: var(--app-radius-full);
+  --background: rgba(255, 255, 255, .16);
+  --color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  height: 34px;
+  margin-right: 6px;
+}
+
+.dh-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, .14);
+  border-radius: var(--app-radius-full);
+  padding: 4px 12px 4px 4px;
+
+  &__avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, .4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    color: var(--app-primary-dark);
+    font-size: 11px;
+    font-weight: 800;
+
+    &--img {
+      display: block;
+    }
+  }
+
+  &__nombre {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ── Hero ───────────────────────────────────────────
+.dh-hero {
+  background: linear-gradient(135deg, var(--app-primary), var(--app-primary-shade));
+  border-radius: var(--app-radius-2xl);
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: var(--app-shadow-primary);
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 220px;
+    height: 220px;
+    background: rgba(255, 255, 255, .07);
+    border-radius: 50%;
+    top: -80px;
+    right: -60px;
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  &__avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, .6);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, .2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__avatar-iniciales {
+    font-size: 22px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: .5px;
+  }
+
+  &__texto {
+    min-width: 0;
+  }
+
+  &__saludo {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, .85);
+    text-transform: uppercase;
+    letter-spacing: .8px;
+  }
+
+  &__nombre {
+    font-size: 22px;
+    font-weight: 900;
+    color: #fff;
+    margin: 2px 0 4px;
+    letter-spacing: -0.3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__fecha {
+    font-size: 12px;
+    color: rgba(255, 255, 255, .85);
+    margin: 0;
+    text-transform: capitalize;
+  }
+
+  &__sub {
+    font-size: 11px;
+    color: rgba(255, 255, 255, .7);
+    margin: 4px 0 0;
+  }
+
+  &__acciones {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.dh-accion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--app-radius-full);
+  background: #fff;
+  color: var(--app-primary-dark);
+  font-size: 12px;
+  font-weight: 800;
+  font-family: var(--ion-font-family);
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: transform var(--app-transition), box-shadow var(--app-transition);
+  box-shadow: var(--app-shadow-sm);
+
+  ion-icon { font-size: 15px; }
+
+  &:hover { transform: translateY(-1px); box-shadow: var(--app-shadow-md); }
+  &:active { transform: scale(0.97); }
+
+  &--ghost {
+    background: rgba(255, 255, 255, .16);
+    color: #fff;
+    box-shadow: none;
+
+    &:hover { background: rgba(255, 255, 255, .26); }
+  }
+}
+
+// ── Secciones ──────────────────────────────────────
+.dh-seccion {
+  margin-bottom: 24px;
+}
+
+.dh-seccion__titulo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--app-text-2);
+  margin-bottom: 12px;
+
+  ion-icon { font-size: 15px; color: var(--app-primary); }
+}
+
+// ── Grid de KPIs ───────────────────────────────────
+.dh-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.dh-kpi-skeleton {
+  height: 150px;
+  border-radius: var(--app-radius-xl);
+}
+
+// ── Gráficos ───────────────────────────────────────
+.dh-graficos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dh-grafico-skeleton {
+  height: 300px;
+  border-radius: var(--app-radius-xl);
+}
+
+// ── Actividad reciente ─────────────────────────────
+.dh-recientes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dh-reciente-card {
+  background: var(--app-surface);
+  border-radius: var(--app-radius-xl);
+  border: 0.5px solid var(--app-border);
+  box-shadow: var(--app-shadow-sm);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+
+    span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--app-text-2);
+
+      ion-icon { font-size: 14px; color: var(--app-primary); }
+    }
+
+    button {
+      border: none;
+      background: none;
+      color: var(--app-primary);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--ion-font-family);
+      padding: 4px 8px;
+      border-radius: var(--app-radius-sm);
+      transition: background var(--app-transition);
+
+      &:hover { background: var(--app-primary-xlight); }
+    }
+  }
+}
+
+.dh-reciente {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--app-border);
+
+  &:last-child { border-bottom: none; }
+
+  &__icono {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: var(--app-primary-xlight);
+    color: var(--app-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    ion-icon { font-size: 17px; }
+
+    &--venta {
+      background: var(--app-success-light);
+      color: #065f46;
+    }
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+
+    strong {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--app-text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    span {
+      font-size: 11px;
+      color: var(--app-text-3);
+    }
+  }
+
+  &__fecha {
+    font-size: 11px;
+    color: var(--app-text-3);
+    white-space: nowrap;
+  }
+
+  &__monto {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--app-primary-dark);
+    white-space: nowrap;
+  }
+}
+
+.dh-vacio {
+  font-size: 12px;
+  color: var(--app-text-3);
+  padding: 14px 0;
+  text-align: center;
+}
+
+// ── Responsive ─────────────────────────────────────
+@media (max-width: 1100px) {
+  .dh-kpis {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .dh-graficos,
+  .dh-recientes {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .dh-hero {
+    padding: 16px;
+  }
+
+  .dh-hero__avatar {
+    width: 52px;
+    height: 52px;
+  }
+
+  .dh-hero__nombre {
+    font-size: 18px;
+  }
+
+  .dh-kpis {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .dh-kpis {
+    grid-template-columns: 1fr;
+  }
+
+  .dh-user__nombre {
+    display: none;
+  }
+}

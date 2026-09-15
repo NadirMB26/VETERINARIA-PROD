@@ -1,0 +1,135 @@
+<div class="gh-page">
+
+  <!-- Header -->
+  <div class="gh-header">
+    <div class="gh-avatar">{{ iniciales }}</div>
+    <div class="gh-identidad">
+      <h1 class="gh-saludo">{{ groomerNombre ? 'Hola, ' + groomerNombre : 'Mis servicios' }}</h1>
+      <p class="gh-sub">Estética y grooming · {{ hoy }}</p>
+    </div>
+    <div class="gh-vista">
+      <button type="button" class="gh-vista-btn" [class.activo]="vista === 'agenda'" (click)="vista = 'agenda'">
+        <ion-icon name="list-outline"></ion-icon>
+      </button>
+      <button type="button" class="gh-vista-btn" [class.activo]="vista === 'calendario'" (click)="vista = 'calendario'">
+        <ion-icon name="calendar-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Calendario compartido en modo estética -->
+  <section class="gh-cal" *ngIf="vista === 'calendario'">
+    <app-calendar-grid
+      [citas]="todas"
+      [veterinarios]="sinProfesionales"
+      [mostrarFiltroVet]="false"
+      modo="estetica"
+      (citaClick)="abrirCita($event)"
+      (slotClick)="onSlotClick($event)">
+    </app-calendar-grid>
+  </section>
+
+  <ng-container *ngIf="vista === 'agenda'">
+
+    <!-- Próximo servicio -->
+    <div class="gh-proxima" *ngIf="proximaCita">
+      <div class="gh-proxima-info">
+        <span class="gh-proxima-label">Próximo servicio</span>
+        <span class="gh-proxima-pet">{{ proximaCita.nombreMascota }}</span>
+        <span class="gh-proxima-sub">
+          {{ labelServicio(proximaCita.tipoServicio ?? '') }} · {{ proximaCita.fecha }} {{ formatHora12(proximaCita.horaInicio) }}
+        </span>
+        <span class="gh-proxima-serv" *ngIf="resumenChecklist(proximaCita)">{{ resumenChecklist(proximaCita) }}</span>
+      </div>
+      <button class="gh-btn-atender" (click)="abrirCita(proximaCita)">
+        <ion-icon name="cut-outline"></ion-icon>
+        Atender
+      </button>
+    </div>
+
+    <!-- Escaladas -->
+    <section class="gh-seccion gh-seccion--escaladas" *ngIf="escaladas.length">
+      <h2 class="gh-titulo">
+        <ion-icon name="warning-outline"></ion-icon>
+        Escaladas a veterinario ({{ escaladas.length }})
+      </h2>
+      <div class="gh-card gh-card--escalada" *ngFor="let c of escaladas" (click)="abrirCita(c)">
+        <div class="gh-card-info">
+          <span class="gh-card-nombre">{{ c.nombreMascota }}</span>
+          <span class="gh-card-sub">{{ labelServicio(c.tipoServicio ?? '') }} · {{ c.fecha }}</span>
+          <span class="gh-card-nota">Cita médica generada · solo lectura</span>
+        </div>
+        <ion-badge color="warning" class="gh-card-badge">Escalada</ion-badge>
+      </div>
+    </section>
+
+    <!-- En proceso -->
+    <section class="gh-seccion" *ngIf="enProceso.length">
+      <h2 class="gh-titulo gh-titulo--proceso">En proceso ({{ enProceso.length }})</h2>
+      <div class="gh-card gh-card--proceso" *ngFor="let c of enProceso" (click)="abrirCita(c)">
+        <div class="gh-card-icono gh-card-icono--proceso">
+          <ion-icon name="cut-outline"></ion-icon>
+        </div>
+        <div class="gh-card-info">
+          <span class="gh-card-nombre">{{ c.nombreMascota }}</span>
+          <span class="gh-card-sub">{{ labelServicio(c.tipoServicio ?? '') }} · {{ c.nombreCliente }}</span>
+          <span class="gh-card-serv" *ngIf="resumenChecklist(c)">{{ resumenChecklist(c) }}</span>
+        </div>
+        <ion-badge color="primary" class="gh-card-badge">{{ textoEstado(c.estado) }}</ion-badge>
+      </div>
+    </section>
+
+    <!-- Por iniciar -->
+    <section class="gh-seccion" *ngIf="porIniciar.length">
+      <h2 class="gh-titulo">Por iniciar ({{ porIniciar.length }})</h2>
+      <div class="gh-card" *ngFor="let c of porIniciar" (click)="abrirCita(c)">
+        <div class="gh-card-icono">
+          <ion-icon name="paw-outline"></ion-icon>
+        </div>
+        <div class="gh-card-info">
+          <span class="gh-card-nombre">{{ c.nombreMascota }}</span>
+          <span class="gh-card-sub">{{ labelServicio(c.tipoServicio ?? '') }} · {{ c.nombreCliente }}</span>
+          <span class="gh-card-hora">{{ c.fecha }} · {{ formatHora12(c.horaInicio) }} – {{ formatHora12(c.horaFin) }}</span>
+          <span class="gh-card-serv" *ngIf="resumenChecklist(c)">{{ resumenChecklist(c) }}</span>
+        </div>
+        <ion-badge [color]="colorEstado(c.estado)" class="gh-card-badge">{{ textoEstado(c.estado) }}</ion-badge>
+      </div>
+    </section>
+
+    <div class="gh-vacio" *ngIf="!porIniciar.length && !enProceso.length">
+      <ion-icon name="sparkles-outline"></ion-icon>
+      <span>Sin servicios pendientes. ¡Todo al día!</span>
+    </div>
+
+    <!-- Atendidas hoy -->
+    <section class="gh-seccion" *ngIf="finalizadasHoy.length">
+      <h2 class="gh-titulo">Atendidas hoy ({{ finalizadasHoy.length }})</h2>
+      <div class="gh-card gh-card--quieta" *ngFor="let c of finalizadasHoy" (click)="abrirCita(c)">
+        <div class="gh-card-icono gh-card-icono--ok">
+          <ion-icon name="checkmark-outline"></ion-icon>
+        </div>
+        <div class="gh-card-info">
+          <span class="gh-card-nombre">{{ c.nombreMascota }}</span>
+          <span class="gh-card-sub">{{ labelServicio(c.tipoServicio ?? '') }}</span>
+        </div>
+        <ion-badge color="success" class="gh-card-badge">Atendida</ion-badge>
+      </div>
+    </section>
+
+    <!-- Historial reciente -->
+    <section class="gh-seccion" *ngIf="historial.length">
+      <h2 class="gh-titulo">Servicios anteriores</h2>
+      <div class="gh-card gh-card--quieta" *ngFor="let c of historial" (click)="abrirCita(c)">
+        <div class="gh-card-icono gh-card-icono--ok">
+          <ion-icon name="checkmark-outline"></ion-icon>
+        </div>
+        <div class="gh-card-info">
+          <span class="gh-card-nombre">{{ c.nombreMascota }}</span>
+          <span class="gh-card-sub">{{ labelServicio(c.tipoServicio ?? '') }} · {{ c.fecha }}</span>
+        </div>
+      </div>
+    </section>
+
+  </ng-container>
+
+</div>

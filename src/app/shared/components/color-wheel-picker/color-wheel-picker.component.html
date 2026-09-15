@@ -1,0 +1,83 @@
+<div class="cwp">
+
+  <!-- Rueda de matiz -->
+  <div class="cwp__rueda">
+    <div class="cwp__anillo" (pointerdown)="onAnilloDown($event)">
+      <div
+        class="cwp__marcador"
+        [style.transform]="'rotate(' + angulo + 'deg)'">
+        <span class="cwp__marcador-punto"></span>
+      </div>
+
+      <!-- Cuadro de saturación/valor -->
+      <div class="cwp__box" (pointerdown)="onBoxDown($event)">
+        <div
+          class="cwp__box-grad"
+          [style.background]="gradientes.horizontal">
+        </div>
+        <div
+          class="cwp__box-grad cwp__box-grad--vertical"
+          [style.background]="gradientes.vertical">
+        </div>
+        <div
+          class="cwp__punto"
+          [style.left.%]="sx"
+          [style.top.%]="sy">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview actual + anterior -->
+  <div class="cwp__previews">
+    <div class="cwp__preview">
+      <span class="cwp__preview-label">Anterior</span>
+      <span class="cwp__swatch" [style.background]="colorAnteriorHex"></span>
+    </div>
+    <div class="cwp__preview">
+      <span class="cwp__preview-label">Nuevo</span>
+      <span class="cwp__swatch" [style.background]="colorHex"></span>
+    </div>
+    <span class="cwp__hex">{{ colorHex }}</span>
+  </div>
+
+  <!-- Inputs numéricos H/S/V -->
+  <div class="cwp__inputs">
+    <label class="cwp__input">
+      <span>H</span>
+      <ion-input
+        type="text"
+        inputmode="numeric"
+        [ngModel]="Math.round(hsv.h)"
+        (ngModelChange)="onHueInput($event)"
+        placeholder="0-360">
+      </ion-input>
+    </label>
+    <label class="cwp__input">
+      <span>S</span>
+      <ion-input
+        type="text"
+        inputmode="numeric"
+        [ngModel]="Math.round(hsv.s * 100)"
+        (ngModelChange)="onSatInput($event)"
+        placeholder="0-100">
+      </ion-input>
+    </label>
+    <label class="cwp__input">
+      <span>V</span>
+      <ion-input
+        type="text"
+        inputmode="numeric"
+        [ngModel]="Math.round(hsv.v * 100)"
+        (ngModelChange)="onValInput($event)"
+        placeholder="0-100">
+      </ion-input>
+    </label>
+  </div>
+
+  <ion-button expand="block" color="primary" (click)="confirmar()">
+    <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+    Aplicar color
+  </ion-button>
+
+</div>

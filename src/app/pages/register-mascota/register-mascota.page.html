@@ -1,0 +1,283 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button fill="clear" (click)="cerrarModal(false)">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>{{ modoEdicion ? 'Editar Mascota' : 'Nueva Mascota' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="guardar()" [disabled]="guardando">
+        <ion-icon slot="icon-only" name="checkmark-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="nueva-mascota-content">
+
+  <!-- ── Hero ── -->
+  <div class="mascota-hero">
+    <div class="hero-icon-mascota">
+      <ion-icon name="paw"></ion-icon>
+    </div>
+    <h2 class="hero-title-mascota">
+      {{ modoEdicion ? 'Editar mascota' : 'Nueva mascota' }}
+    </h2>
+    <p class="hero-sub-mascota">
+      {{ modoEdicion ? 'Actualiza los datos del paciente' : 'Registra un nuevo paciente' }}
+    </p>
+  </div>
+
+  <form [formGroup]="form" class="form-mascota">
+
+    <!-- ── Propietario ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+        <h3>Propietario</h3>
+      </div>
+
+      <!-- Modo CREACIÓN: selector interactivo (oculto para clientes) -->
+      <div *ngIf="!modoEdicion && !esCliente"
+           class="campo-cliente"
+           (click)="abrirSelectorCliente($event)">
+        <div class="cliente-info" *ngIf="clienteSeleccionado; else sinCliente">
+          <div class="cliente-avatar-sm">
+            {{ clienteSeleccionado.Nombre?.charAt(0) }}{{ clienteSeleccionado.Apellido?.charAt(0) }}
+          </div>
+          <div class="cliente-datos">
+            <span class="cliente-nombre">{{ clienteSeleccionado.Nombre }} {{ clienteSeleccionado.Apellido }}</span>
+            <span class="cliente-correo">{{ clienteSeleccionado.Correo }}</span>
+          </div>
+          <ion-icon name="chevron-down-outline" class="campo-icono"></ion-icon>
+        </div>
+        <ng-template #sinCliente>
+          <div class="cliente-placeholder">
+            <ion-icon name="search-outline"></ion-icon>
+            <span>Buscar y seleccionar cliente...</span>
+            <ion-icon name="chevron-down-outline" class="campo-icono"></ion-icon>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Error solo en creación -->
+      <div *ngIf="!modoEdicion && formSubmitted && !clienteSeleccionado" class="error-msg">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        Debes seleccionar un cliente
+      </div>
+
+      <!-- Cliente: propietario fijo (solo mascotas propias) -->
+      <div *ngIf="!modoEdicion && esCliente" class="campo-cliente">
+        <div class="cliente-info">
+          <div class="cliente-avatar-sm">Yo</div>
+          <div class="cliente-datos">
+            <span class="cliente-nombre">Mascota propia</span>
+            <span class="cliente-correo">Se registrará a tu nombre</span>
+          </div>
+          <ion-icon name="lock-closed-outline" class="campo-icono" color="medium"></ion-icon>
+        </div>
+      </div>
+
+      <!-- Modo EDICIÓN: cliente de solo lectura -->
+      <div *ngIf="modoEdicion" class="campo-cliente">
+        <div class="cliente-info" *ngIf="clienteSeleccionado; else cargandoCliente">
+          <div class="cliente-avatar-sm">
+            {{ clienteSeleccionado.Nombre?.charAt(0) }}{{ clienteSeleccionado.Apellido?.charAt(0) }}
+          </div>
+          <div class="cliente-datos">
+            <span class="cliente-nombre">{{ clienteSeleccionado.Nombre }} {{ clienteSeleccionado.Apellido }}</span>
+            <span class="cliente-correo">{{ clienteSeleccionado.Correo }}</span>
+          </div>
+          <ion-icon name="lock-closed-outline" class="campo-icono" color="medium"></ion-icon>
+        </div>
+        <ng-template #cargandoCliente>
+          <div class="cliente-placeholder">
+            <ion-spinner name="dots" color="primary"></ion-spinner>
+            <span>Cargando propietario...</span>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- ── Foto del paciente ── -->
+  <div class="form-section">
+    <div class="section-header">
+      <div class="section-icon-wrap">
+        <ion-icon name="camera-outline"></ion-icon>
+      </div>
+      <h3>Foto del paciente</h3>
+    </div>
+
+    <div class="foto-paciente">
+      <div class="foto-paciente__preview">
+        <img *ngIf="fotoPreview" [src]="fotoPreview" alt="Foto de la mascota" />
+        <ion-icon *ngIf="!fotoPreview" name="paw-outline"></ion-icon>
+      </div>
+      <div class="foto-paciente__acciones">
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="onImagenSeleccionado($event)"
+          class="foto-paciente__input" />
+        <ion-button
+          *ngIf="fotoPreview"
+          size="small"
+          fill="clear"
+          color="danger"
+          (click)="quitarImagen()">
+          Quitar foto
+        </ion-button>
+        <span class="foto-paciente__hint">PNG, JPG o WEBP · máximo 500 KB · opcional</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Información básica ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <ion-icon name="paw-outline"></ion-icon>
+        </div>
+        <h3>Información básica</h3>
+      </div>
+
+      <!-- Nombre -->
+      <ion-item class="campo-item" lines="none">
+        <ion-label position="stacked">Nombre <span class="req">*</span></ion-label>
+        <ion-input formControlName="nombre"
+          placeholder="Ej: Max, Luna, Rocky..."
+          autocapitalize="words">
+        </ion-input>
+      </ion-item>
+      <div *ngIf="fc['nombre'].invalid && formSubmitted" class="error-msg">
+        <ion-icon name="alert-circle-outline"></ion-icon> El nombre es requerido
+      </div>
+
+      <!-- Especie -->
+      <ion-item class="campo-item" lines="none">
+        <ion-label position="stacked">Especie <span class="req">*</span></ion-label>
+        <ion-select formControlName="especie"
+          placeholder="Seleccionar especie"
+          interface="action-sheet"
+          (ionChange)="onEspecieChange()">
+          <ion-select-option *ngFor="let esp of especies" [value]="esp">
+            {{ esp | titlecase }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      <div *ngIf="fc['especie'].invalid && formSubmitted" class="error-msg">
+        <ion-icon name="alert-circle-outline"></ion-icon> La especie es requerida
+      </div>
+
+      <!-- Raza: cargando -->
+      <ion-item class="campo-item" lines="none" *ngIf="cargandoRazas">
+        <ion-label position="stacked">Raza</ion-label>
+        <div class="razas-loading">
+          <ion-spinner name="dots" color="primary"></ion-spinner>
+          <span>Cargando razas...</span>
+        </div>
+      </ion-item>
+
+      <!-- Raza: select -->
+      <ion-item class="campo-item" lines="none"
+        *ngIf="!cargandoRazas && razasDisponibles.length > 0">
+        <ion-label position="stacked">Raza <span class="req">*</span></ion-label>
+        <ion-select formControlName="raza"
+          placeholder="Seleccionar raza"
+          interface="alert"
+          [interfaceOptions]="{ header: 'Seleccionar raza' }">
+          <ion-select-option *ngFor="let r of razasDisponibles" [value]="r">
+            {{ r }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+
+      <!-- Raza: input libre -->
+      <ion-item class="campo-item" lines="none"
+        *ngIf="!cargandoRazas && razasDisponibles.length === 0 && fc['especie'].value">
+        <ion-label position="stacked">Raza <span class="req">*</span></ion-label>
+        <ion-input formControlName="raza"
+          placeholder="Escribe la raza..."
+          autocapitalize="words">
+        </ion-input>
+      </ion-item>
+      <div *ngIf="fc['raza'].invalid && formSubmitted" class="error-msg">
+        <ion-icon name="alert-circle-outline"></ion-icon> La raza es requerida
+      </div>
+
+      <!-- Sexo -->
+      <ion-item class="campo-item" lines="none">
+        <ion-label position="stacked">Sexo <span class="req">*</span></ion-label>
+        <ion-select formControlName="sexo" interface="popover">
+          <ion-select-option value="macho">Macho</ion-select-option>
+          <ion-select-option value="hembra">Hembra</ion-select-option>
+        </ion-select>
+      </ion-item>
+      <div *ngIf="fc['sexo'].invalid && formSubmitted" class="error-msg">
+        <ion-icon name="alert-circle-outline"></ion-icon> El sexo es requerido
+      </div>
+
+      <!-- Color -->
+      <ion-item class="campo-item" lines="none">
+        <ion-label position="stacked">Color / Pelaje</ion-label>
+        <ion-input formControlName="color"
+          placeholder="Ej: Marrón con blanco, Negro..."
+          autocapitalize="words">
+        </ion-input>
+      </ion-item>
+    </div>
+
+    <!-- ── Datos físicos ── -->
+    <div class="form-section">
+      <div class="section-header">
+        <div class="section-icon-wrap">
+          <ion-icon name="fitness-outline"></ion-icon>
+        </div>
+        <h3>Datos físicos</h3>
+      </div>
+
+      <!-- Peso -->
+      <ion-item class="campo-item" lines="none">
+        <ion-label position="stacked">Peso (kg) <span class="req">*</span></ion-label>
+        <ion-input formControlName="peso"
+          type="number" min="0" step="0.1"
+          placeholder="0.0">
+        </ion-input>
+      </ion-item>
+      <div *ngIf="fc['peso'].invalid && formSubmitted" class="error-msg">
+        <ion-icon name="alert-circle-outline"></ion-icon> El peso es requerido
+      </div>
+
+      <!-- Fecha de nacimiento -->
+      <ion-item class="campo-item" lines="none">
+        <ion-label position="stacked">
+          Fecha de nacimiento <span class="req">*</span>
+        </ion-label>
+        <input
+          type="date"
+          class="fecha-input-nativa"
+          [max]="hoySimple"
+          [value]="fc['fechaNacimiento'].value"
+          (change)="onFechaNativaChange($event)"
+        />
+      </ion-item>
+      <div *ngIf="fc['fechaNacimiento'].invalid && formSubmitted" class="error-msg">
+        <ion-icon name="alert-circle-outline"></ion-icon> La fecha de nacimiento es requerida
+      </div>
+    </div>
+
+    <!-- ── Botón guardar ── -->
+    <div class="btn-guardar-wrap">
+      <ion-button expand="block" shape="round" color="primary"
+        [disabled]="guardando" (click)="guardar()">
+        <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
+        <ion-icon *ngIf="!guardando" name="save-outline" slot="start"></ion-icon>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar cambios' : 'Registrar mascota') }}
+      </ion-button>
+    </div>
+
+  </form>
+</ion-content>

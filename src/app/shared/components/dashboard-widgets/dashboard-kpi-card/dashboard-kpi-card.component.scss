@@ -1,0 +1,107 @@
+.kpi-card {
+  background: var(--app-surface);
+  border-radius: var(--app-radius-xl);
+  border: 0.5px solid var(--app-border);
+  box-shadow: var(--app-shadow-sm);
+  padding: 14px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 150px;
+  transition: box-shadow var(--app-transition), transform var(--app-transition);
+
+  &:hover {
+    box-shadow: var(--app-shadow-md);
+    transform: translateY(-2px);
+  }
+}
+
+.kpi-card__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kpi-card__icono {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon { font-size: 18px; color: #fff; }
+
+  &--primary { background: linear-gradient(135deg, var(--app-primary), var(--app-primary-dark)); }
+  &--success { background: linear-gradient(135deg, var(--app-success), #059669); }
+  &--warning { background: linear-gradient(135deg, var(--app-warning), #e67e22); }
+  &--info    { background: linear-gradient(135deg, var(--app-info), #2563eb); }
+  &--purple  { background: linear-gradient(135deg, var(--app-purple), #6d28d9); }
+  &--pink    { background: linear-gradient(135deg, var(--app-pink), #db2777); }
+}
+
+.kpi-card__label {
+  flex: 1;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .7px;
+  color: var(--app-text-3);
+}
+
+.kpi-card__variacion {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: var(--app-radius-full);
+
+  ion-icon { font-size: 12px; }
+
+  &--up   { background: var(--app-success-light); color: #065f46; }
+  &--down { background: var(--app-danger-light);  color: #991b1b; }
+  &--flat { background: var(--app-surface-2);     color: var(--app-text-3); }
+}
+
+.kpi-card__titulo {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text-2);
+  margin: 2px 0 0;
+}
+
+.kpi-card__valor {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  color: var(--app-text-1);
+  margin: 0;
+  line-height: 1.1;
+}
+
+.kpi-card__bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.kpi-card__spark {
+  width: 74px;
+  height: 26px;
+  display: block;
+
+  &--up   { color: var(--app-success); }
+  &--down { color: var(--app-danger); }
+  &--flat { color: var(--app-text-3); }
+}
+
+.kpi-card__fuente {
+  font-size: 10px;
+  color: var(--app-text-3);
+  white-space: nowrap;
+}

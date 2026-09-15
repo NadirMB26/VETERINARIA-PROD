@@ -1,0 +1,396 @@
+// ── Contenedor general ─────────────────────────────────
+.cfg-content {
+  --background: var(--ion-color-light, #f4f4f4);
+}
+
+.cfg-wrapper {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// ── Hero: avatar + nombre ──────────────────────────────
+.cfg-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px;
+  background: var(--ion-background-color, #fff);
+  border-radius: 16px;
+  border: 0.5px solid rgba(0,0,0,.08);
+}
+
+.cfg-avatar {
+  position: relative;
+  flex-shrink: 0;
+
+  &__initials {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #e1f5ee;
+    color: #085041;
+    font-size: 22px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: .5px;
+  }
+
+  &__img {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+  }
+
+  &__cam {
+    position: absolute;
+    bottom: 0; right: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--ion-color-primary);
+    border: 2px solid #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+
+    ion-icon { color: #fff; font-size: 13px; }
+  }
+
+  &__quitar {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border: none;
+    background: transparent;
+    color: var(--ion-color-danger);
+    font-size: 12px;
+    cursor: pointer;
+    align-self: flex-start;
+
+    ion-icon { font-size: 14px; }
+  }
+}
+
+.cfg-hero__info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cfg-hero__name {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ion-text-color);
+  margin: 0;
+}
+
+.cfg-hero__rol {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: #eeedfe;
+  color: #3c3489;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.cfg-hero__email {
+  font-size: 13px;
+  color: var(--ion-color-medium);
+  margin: 0;
+}
+
+// ── Tarjeta de sección ─────────────────────────────────
+.cfg-card {
+  background: var(--ion-background-color, #fff);
+  border-radius: 16px;
+  border: 0.5px solid rgba(0,0,0,.08);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__icon {
+    font-size: 18px;
+    color: var(--ion-color-primary);
+  }
+
+  &__title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--ion-text-color);
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 4px;
+    border-top: 0.5px solid rgba(0,0,0,.07);
+  }
+}
+
+// ── Campos ─────────────────────────────────────────────
+.cfg-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.cfg-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--ion-color-medium);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cfg-input {
+  --background: var(--ion-color-light, #f4f4f4);
+  --border-radius: 10px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --min-height: 40px;
+  font-size: 14px;
+
+  &--disabled {
+    opacity: .6;
+    pointer-events: none;
+  }
+
+  &--error {
+    --background: #fcebeb;
+    --border-color: #e24b4a;
+  }
+}
+
+.cfg-row2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cfg-hint {
+  font-size: 11px;
+  color: var(--ion-color-medium);
+
+  &--warn {
+    color: var(--ion-color-warning);
+    font-weight: 600;
+  }
+}
+
+.cfg-error {
+  font-size: 12px;
+  color: var(--ion-color-danger);
+}
+
+// ── Chips de especialidades ────────────────────────────
+.cfg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cfg-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1.5px solid var(--app-border);
+  background: var(--ion-color-light, #f4f4f4);
+  color: var(--ion-color-medium);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  ion-icon { font-size: 13px; }
+
+  &--activo {
+    background: var(--ion-color-primary);
+    border-color: var(--ion-color-primary);
+    color: #fff;
+  }
+}
+
+// ── Perfil no encontrado ───────────────────────────────
+.cfg-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+  background: var(--ion-background-color, #fff);
+  border-radius: 16px;
+  border: 0.5px solid rgba(0,0,0,.08);
+
+  ion-icon { font-size: 48px; color: var(--ion-color-medium); opacity: .5; }
+  h3 { margin: 0; font-size: 16px; color: var(--ion-text-color); }
+  p { margin: 0; font-size: 13px; color: var(--ion-color-medium); }
+}
+
+// ── Badge ──────────────────────────────────────────────
+.cfg-badge {
+  font-size: 10px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+
+  &--blue { background: #e6f1fb; color: #185fa5; }
+}
+
+// ── Campo contraseña ───────────────────────────────────
+.cfg-pass-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cfg-pass-eye {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ion-color-medium);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  z-index: 2;
+}
+
+// ── Separador con label ────────────────────────────────
+.cfg-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 4px 0;
+
+  &::before, &::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: rgba(0,0,0,.1);
+  }
+
+  &__label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ion-color-medium);
+    white-space: nowrap;
+  }
+}
+
+// ── Botones ────────────────────────────────────────────
+.cfg-btn-primary {
+  --border-radius: 10px;
+  font-size: 13px;
+  height: 38px;
+}
+
+.cfg-logout-zone {
+  margin-top: 8px;
+}
+
+.cfg-btn-logout {
+  --border-radius: 12px;
+  font-size: 14px;
+}
+// ── Layout responsive ──────────────────────────────────
+
+.cfg-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cfg-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+// Cerrar sesión: en móvil abajo, en desktop dentro col derecha
+.cfg-logout-zone--desktop { display: none; }
+.cfg-logout-zone--mobile  { display: block; }
+
+// ── Desktop: 768px+ ────────────────────────────────────
+@media (min-width: 768px) {
+
+  .cfg-wrapper {
+    max-width: 900px;
+    padding: 32px 32px 48px;
+  }
+
+  // Hero más compacto horizontalmente
+  .cfg-hero {
+    padding: 24px 28px;
+
+    &__name { font-size: 20px; }
+  }
+
+  .cfg-avatar__initials {
+    width: 72px;
+    height: 72px;
+    font-size: 26px;
+  }
+
+  // Dos columnas iguales
+  .cfg-grid {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .cfg-col {
+    flex: 1;
+    min-width: 0;
+  }
+
+  // Las tarjetas llenan toda la altura de su columna
+  .cfg-card {
+    height: 100%;
+  }
+
+  // Cerrar sesión va dentro de la col derecha en desktop
+  .cfg-logout-zone--desktop { display: block; }
+  .cfg-logout-zone--mobile  { display: none; }
+}
+
+// ── Desktop grande: 1024px+ ────────────────────────────
+@media (min-width: 1024px) {
+
+  .cfg-wrapper {
+    max-width: 1000px;
+    padding: 40px 48px 64px;
+  }
+
+  .cfg-grid { gap: 28px; }
+
+  .cfg-hero {
+    padding: 28px 32px;
+    gap: 24px;
+  }
+}

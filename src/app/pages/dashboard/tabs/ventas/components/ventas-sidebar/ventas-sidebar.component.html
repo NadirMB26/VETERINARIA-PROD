@@ -1,0 +1,161 @@
+<div class="vs">
+
+  <!-- Búsqueda fija en el sidebar -->
+  <ion-searchbar
+    [ngModel]="busqueda"
+    (ionInput)="onBusqueda($event.target.value ?? '')"
+    placeholder="Buscar producto o servicio…"
+    class="vs__search">
+  </ion-searchbar>
+
+  <p class="vs__contador">{{ contadorResultados }} resultado(s)</p>
+
+  <!-- Toggles de condición -->
+  <div class="vs__grupo">
+    <div class="vs__titulo">Condición</div>
+
+    <label class="vs-toggle">
+      <span class="vs-toggle__icono"><ion-icon name="checkmark-circle-outline"></ion-icon></span>
+      <span class="vs-toggle__texto">
+        <strong>Disponibles</strong>
+        <span>Solo ítems con stock disponible</span>
+      </span>
+      <ion-toggle
+        [checked]="disponibilidadFiltro === 'disponible'"
+        (ionChange)="toggleDisponibilidad('disponible')"
+        color="primary"></ion-toggle>
+    </label>
+
+    <label class="vs-toggle">
+      <span class="vs-toggle__icono"><ion-icon name="flame-outline"></ion-icon></span>
+      <span class="vs-toggle__texto">
+        <strong>En oferta</strong>
+        <span>Con descuento vigente</span>
+      </span>
+      <ion-toggle
+        [checked]="soloOfertas"
+        (ionChange)="toggleOfertas($event.detail.checked)"
+        color="primary"></ion-toggle>
+    </label>
+  </div>
+
+  <!-- Categorías -->
+  <div class="vs__grupo">
+    <div class="vs__titulo">Categoría</div>
+    <div class="vs__lista">
+      <button
+        *ngFor="let c of categoriasVisibles"
+        type="button"
+        class="vs__item"
+        [class.vs__item--activo]="categoriaFiltro === c.id"
+        (click)="toggleCategoria(c.id)">
+        <ion-icon [name]="c.icon"></ion-icon>
+        {{ c.nombre }}
+        <span class="vs__item-check" *ngIf="categoriaFiltro === c.id">
+          <ion-icon name="checkmark"></ion-icon>
+        </span>
+      </button>
+      <button type="button" class="vs__mostrar" *ngIf="categorias.length > 8" (click)="mostrarTodas = !mostrarTodas">
+        {{ mostrarTodas ? 'Mostrar menos' : 'Mostrar más' }}
+      </button>
+      <button
+        type="button"
+        class="vs__item"
+        [class.vs__item--activo]="categoriaFiltro === null"
+        (click)="categoriaChange.emit(null)">
+        <ion-icon name="grid-outline"></ion-icon>
+        Todas
+      </button>
+    </div>
+  </div>
+
+  <!-- Tipo -->
+  <div class="vs__grupo">
+    <div class="vs__titulo">Tipo</div>
+    <div class="vs__lista">
+      <button
+        type="button"
+        class="vs__item"
+        [class.vs__item--activo]="tipoFiltro === 'producto'"
+        (click)="toggleTipo('producto')">
+        <ion-icon name="cube-outline"></ion-icon>
+        Productos
+      </button>
+      <button
+        type="button"
+        class="vs__item"
+        [class.vs__item--activo]="tipoFiltro === 'servicio'"
+        (click)="toggleTipo('servicio')">
+        <ion-icon name="fitness-outline"></ion-icon>
+        Servicios
+      </button>
+    </div>
+  </div>
+
+  <!-- Estado / disponibilidad -->
+  <div class="vs__grupo">
+    <div class="vs__titulo">Estado</div>
+    <div class="vs__lista">
+      <button
+        type="button"
+        class="vs__item"
+        [class.vs__item--activo]="disponibilidadFiltro === 'disponible'"
+        (click)="toggleDisponibilidad('disponible')">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        Disponible
+      </button>
+      <button
+        type="button"
+        class="vs__item"
+        [class.vs__item--activo]="disponibilidadFiltro === 'stock-bajo'"
+        (click)="toggleDisponibilidad('stock-bajo')">
+        <ion-icon name="warning-outline"></ion-icon>
+        Stock bajo
+      </button>
+      <button
+        type="button"
+        class="vs__item"
+        [class.vs__item--activo]="disponibilidadFiltro === 'agotado'"
+        (click)="toggleDisponibilidad('agotado')">
+        <ion-icon name="close-circle-outline"></ion-icon>
+        Agotado
+      </button>
+    </div>
+  </div>
+
+  <!-- Rango de precio -->
+  <div class="vs__grupo">
+    <div class="vs__titulo">Precio</div>
+    <div class="vs__precios">
+      <ion-input
+        type="text"
+        min="0"
+        placeholder="Mín"
+        inputmode="numeric"
+        [ngModel]="precioMin ?? ''"
+        (ngModelChange)="onPrecioMin($event)">
+      </ion-input>
+      <span class="vs__precios-sep">—</span>
+      <ion-input
+        type="text"
+        min="0"
+        placeholder="Máx"
+        inputmode="numeric"
+        [ngModel]="precioMax ?? ''"
+        (ngModelChange)="onPrecioMax($event)">
+      </ion-input>
+    </div>
+  </div>
+
+  <!-- Limpiar filtros -->
+  <button type="button" class="vs__limpiar" *ngIf="hayFiltros" (click)="limpiar()">
+    <ion-icon name="close-circle-outline"></ion-icon>
+    Limpiar filtros
+  </button>
+
+  <button type="button" class="vs__cerrar-mobile" (click)="cerrar.emit()">
+    <ion-icon name="close-outline"></ion-icon>
+    Cerrar
+  </button>
+
+</div>

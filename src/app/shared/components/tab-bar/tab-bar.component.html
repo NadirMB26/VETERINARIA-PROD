@@ -1,0 +1,14 @@
+<!-- tab-bar.component.html -->
+<!-- ✅ Solo aparece en Android -->
+<ion-tab-bar *ngIf="esAndroid" slot="bottom">
+  <ion-tab-button
+    *ngFor="let tab of tabs"
+    [tab]="tab.tab"
+    [href]="tab.href"
+    routerLinkActive="tab-selected">
+
+    <ion-icon [name]="tab.icon"></ion-icon>
+    <ion-label>{{ tab.label }}</ion-label>
+
+  </ion-tab-button>
+</ion-tab-bar>

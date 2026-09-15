@@ -1,0 +1,188 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="primary">
+    <ion-title>
+      <div class="modal-title">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <span>{{ soloLectura ? 'Registro clínico' : (esEdicion ? 'Corregir registro clínico' : 'Nuevo registro clínico') }}</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()" fill="clear" color="light">
+        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content ion-padding">
+
+  <!-- Loading skeleton -->
+  <ng-container *ngIf="cargando">
+    <ion-skeleton-text animated style="height:20px; width:40%; margin-bottom:8px"></ion-skeleton-text>
+    <ion-skeleton-text animated style="height:80px; margin-bottom:16px"></ion-skeleton-text>
+    <ion-skeleton-text animated style="height:20px; width:40%; margin-bottom:8px"></ion-skeleton-text>
+    <ion-skeleton-text animated style="height:80px; margin-bottom:16px"></ion-skeleton-text>
+  </ng-container>
+
+  <ng-container *ngIf="!cargando">
+
+    <!-- Tarjeta resumen de la cita -->
+    <div class="cita-resumen">
+      <div class="cita-resumen-row">
+        <ion-icon name="paw-outline" color="primary"></ion-icon>
+        <span class="cita-resumen-val">{{ cita.nombreMascota }}</span>
+        <span class="cita-resumen-sep">·</span>
+        <span class="cita-resumen-sub">{{ cita.tipo }}</span>
+        <ion-badge [color]="categoriaColor" class="badge-categoria">{{ categoriaLabel }}</ion-badge>
+      </div>
+      <div class="cita-resumen-row">
+        <ion-icon name="calendar-outline" color="medium"></ion-icon>
+        <span class="cita-resumen-sub">{{ cita.fecha }} &nbsp;{{ cita.horaInicio }} – {{ cita.horaFin }}</span>
+      </div>
+      <div class="cita-resumen-row">
+        <ion-icon name="person-outline" color="medium"></ion-icon>
+        <span class="cita-resumen-sub">{{ cita.nombreCliente }}</span>
+      </div>
+      <ion-badge color="success" class="badge-finalizada" *ngIf="cita.estado === 'finalizada'">Finalizada</ion-badge>
+      <ion-badge color="primary" class="badge-finalizada" *ngIf="cita.estado === 'en_proceso'">En proceso</ion-badge>
+    </div>
+
+    <!-- Aviso solo lectura (recepcionista/admin) -->
+    <div class="aviso-lectura" *ngIf="soloLectura">
+      <ion-icon name="eye-outline" color="medium"></ion-icon>
+      <span>Solo el veterinario puede registrar o corregir este contenido clínico.</span>
+    </div>
+
+    <!-- Aviso contenido legado -->
+    <div class="aviso-lectura" *ngIf="soloLegado && !soloLectura">
+      <ion-icon name="archive-outline" color="warning"></ion-icon>
+      <span>Diagnóstico anterior no migrado: al guardar se convertirá en el registro clínico de la cita.</span>
+    </div>
+
+    <ng-container *ngIf="!soloLectura || (anamnesis || diagnostico || tratamiento || medicamentos || observaciones || examenFisico)">
+
+      <!-- ── ANAMNESIS ── -->
+      <div class="form-group">
+        <label class="field-label">
+          Anamnesis <span class="required" *ngIf="!soloLectura && !esEdicion">*</span>
+        </label>
+        <textarea
+          class="custom-textarea"
+          rows="3"
+          placeholder="Describe los síntomas presentados..."
+          [(ngModel)]="anamnesis"
+          [readonly]="soloLectura">
+        </textarea>
+        <span class="campo-vacio" *ngIf="!soloLectura && !esEdicion && !anamnesis.trim()">Campo requerido</span>
+      </div>
+
+      <!-- ── EXAMEN FÍSICO (opcional) ── -->
+      <div class="form-group">
+        <label class="field-label">Examen físico</label>
+        <textarea
+          class="custom-textarea"
+          rows="2"
+          placeholder="Signos vitales y hallazgos del examen (opcional)..."
+          [(ngModel)]="examenFisico"
+          [readonly]="soloLectura">
+        </textarea>
+      </div>
+
+      <!-- ── DIAGNÓSTICO ── -->
+      <div class="form-group">
+        <label class="field-label">
+          Diagnóstico <span class="required" *ngIf="!soloLectura && !esEdicion">*</span>
+        </label>
+        <textarea
+          class="custom-textarea"
+          rows="3"
+          placeholder="Diagnóstico clínico..."
+          [(ngModel)]="diagnostico"
+          [readonly]="soloLectura">
+        </textarea>
+        <span class="campo-vacio" *ngIf="!soloLectura && !esEdicion && !diagnostico.trim()">Campo requerido</span>
+      </div>
+
+      <!-- ── TRATAMIENTO ── -->
+      <div class="form-group">
+        <label class="field-label">
+          Tratamiento <span class="required" *ngIf="!soloLectura && !esEdicion">*</span>
+        </label>
+        <textarea
+          class="custom-textarea"
+          rows="3"
+          placeholder="Tratamiento indicado..."
+          [(ngModel)]="tratamiento"
+          [readonly]="soloLectura">
+        </textarea>
+        <span class="campo-vacio" *ngIf="!soloLectura && !esEdicion && !tratamiento.trim()">Campo requerido</span>
+      </div>
+
+      <!-- ── MEDICAMENTOS ── -->
+      <div class="form-group">
+        <label class="field-label">Medicamentos</label>
+        <textarea
+          class="custom-textarea"
+          rows="2"
+          placeholder="Medicamentos recetados, dosis, frecuencia..."
+          [(ngModel)]="medicamentos"
+          [readonly]="soloLectura">
+        </textarea>
+      </div>
+
+      <!-- ── OBSERVACIONES ── -->
+      <div class="form-group">
+        <label class="field-label">Observaciones adicionales</label>
+        <textarea
+          class="custom-textarea"
+          rows="2"
+          placeholder="Próxima cita, cuidados en casa, alertas..."
+          [(ngModel)]="observaciones"
+          [readonly]="soloLectura">
+        </textarea>
+      </div>
+
+      <!-- ── MOTIVO DE LA CORRECCIÓN (obligatorio al corregir) ── -->
+      <div class="form-group" *ngIf="motivoRequerido">
+        <label class="field-label">
+          Motivo de la corrección <span class="required">*</span>
+        </label>
+        <textarea
+          class="custom-textarea"
+          rows="2"
+          placeholder="¿Por qué se corrige este registro?"
+          [(ngModel)]="motivo">
+        </textarea>
+        <span class="campo-vacio" *ngIf="!motivo.trim()">El motivo es obligatorio para corregir</span>
+      </div>
+
+    </ng-container>
+
+    <!-- Sin contenido (solo lectura) -->
+    <p class="hc-detalle__vacio" *ngIf="soloLectura && !anamnesis && !diagnostico && !tratamiento && !medicamentos && !observaciones && !examenFisico">
+      Esta cita no tiene registro clínico.
+    </p>
+
+  </ng-container>
+
+</ion-content>
+
+<ion-footer class="modal-footer-ion ion-no-border" *ngIf="!cargando">
+  <div class="modal-footer-custom">
+
+    <button class="btn-cancel-custom" (click)="cerrar()">
+      {{ soloLectura ? 'Cerrar' : 'Cancelar' }}
+    </button>
+
+    <button
+      class="btn-save-custom"
+      *ngIf="!soloLectura"
+      [disabled]="!formularioValido || guardando"
+      (click)="guardar()">
+      <ion-spinner *ngIf="guardando" name="crescent" style="width:16px;height:16px;margin-right:6px;"></ion-spinner>
+      <ion-icon *ngIf="!guardando" name="checkmark-outline"></ion-icon>
+      {{ guardando ? 'Guardando...' : (esEdicion ? 'Guardar corrección' : 'Guardar registro') }}
+    </button>
+
+  </div>
+</ion-footer>

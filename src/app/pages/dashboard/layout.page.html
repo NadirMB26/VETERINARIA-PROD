@@ -1,0 +1,15 @@
+<ion-app>  
+  <app-dashboard-header [rol]="rol"></app-dashboard-header>
+  <app-side-menu
+    [nombreUsuario]="nombreUsuario"
+    [fotoUrl]="fotoUrl"
+    [rol]="rol"
+    [uid]="uid"
+    [menuItems]="menuItems"
+    (logoutEvent)="logout()"
+    (irConfiguracion)="irAConfiguracion()">
+  </app-side-menu>
+
+  <ion-page id="dashboard-content"></ion-page>
+  <ion-router-outlet></ion-router-outlet>
+</ion-app>

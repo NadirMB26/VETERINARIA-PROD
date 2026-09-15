@@ -1,0 +1,88 @@
+<ion-content class="login-content" [fullscreen]="true">
+
+  <!-- Fondo decorativo -->
+  <div class="bg-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+
+  <div class="login-wrapper">
+
+    <!-- Hero -->
+    <div class="hero-section">
+      <div class="paw-ring">
+        <ion-icon
+          *ngIf="configuracion?.logoTipo !== 'imagen'"
+          [name]="configuracion?.logoIcono || 'paw'"
+          class="paw-icon"
+          [style.color]="configuracion?.logoColor || '#ffffff'">
+        </ion-icon>
+        <img
+          *ngIf="configuracion?.logoTipo === 'imagen' && configuracion?.logoImagen"
+          [src]="configuracion?.logoImagen"
+          alt="Logo"
+          class="paw-ring__img" />
+      </div>
+      <h1 class="brand-name">{{ configuracion?.nombre || 'Canes' }}</h1>
+      <p class="brand-sub">{{ configuracion?.subnombre || 'Clínica Veterinaria' }}</p>
+    </div>
+
+    <!-- Card form -->
+    <div class="form-card">
+
+      <h2 class="form-title">Bienvenido</h2>
+      <p class="form-subtitle">Inicia sesión para continuar</p>
+
+      <!-- Email -->
+      <div class="field-group" [class.field-error]="!!error">
+        <label class="field-label">Correo electrónico</label>
+        <div class="field-wrap">
+          <ion-icon name="mail-outline" class="field-icon"></ion-icon>
+          <ion-input
+            type="email"
+            [(ngModel)]="email"
+            placeholder="correo@ejemplo.com"
+            class="field-input"
+            [clearInput]="true"
+          ></ion-input>
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="field-group" [class.field-error]="!!error">
+        <label class="field-label">Contraseña</label>
+        <div class="field-wrap">
+          <ion-icon name="lock-closed-outline" class="field-icon"></ion-icon>
+          <ion-input
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            placeholder="••••••••"
+            class="field-input"
+          ></ion-input>
+          <ion-icon
+            [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"
+            class="field-icon-right"
+            (click)="showPassword = !showPassword"
+          ></ion-icon>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div class="error-msg" *ngIf="error">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>{{ error }}</span>
+      </div>
+
+      <!-- Botón login -->
+      <button class="btn-login" (click)="login()" [class.loading]="cargando">
+        <ion-spinner *ngIf="cargando" name="crescent"></ion-spinner>
+        <span *ngIf="!cargando">Iniciar sesión</span>
+      </button>
+
+    </div>
+
+
+  </div>
+
+</ion-content>

@@ -1,0 +1,529 @@
+<div class="cal-wrap" [class.sidebar-open]="sidebarVisible">
+
+  <div class="sidebar-overlay" (click)="toggleSidebar()"></div>
+
+  <div class="sidebar">
+
+    <div class="mini-month">
+      <div class="mini-month-header">
+        <span class="mini-month-label">{{ miniMonthLabel }}</span>
+        <div class="mini-nav">
+          <button (click)="shiftMini(-1)" aria-label="Mes anterior">‹</button>
+          <button (click)="shiftMini(1)"  aria-label="Mes siguiente">›</button>
+        </div>
+      </div>
+      <div class="mini-grid">
+        <div class="dow" *ngFor="let d of DAYS">{{ d[0] }}</div>
+        <div
+          *ngFor="let day of miniDays"
+          class="mini-day"
+          [class.today]="day.isToday"
+          [class.selected]="day.isSelected"
+          [class.other-month]="day.otherMonth"
+          [class.has-citas]="miniCitas(day.dateStr) > 0"
+          role="button"
+          tabindex="0"
+          (click)="jumpToDate(day.dateStr)"
+          (keydown.enter)="jumpToDate(day.dateStr)">
+          {{ day.num }}
+          <span class="mini-dot" *ngIf="miniCitas(day.dateStr) > 0"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section" *ngIf="mostrarFiltroVet">
+      <label class="sidebar-label">
+        <ion-icon name="medkit-outline" class="sidebar-label-icon"></ion-icon>
+        Veterinario
+      </label>
+
+      <!-- Indicador de carga de horarios -->
+      <div class="horario-loading" *ngIf="cargandoHorarios">
+        <ion-spinner name="dots"></ion-spinner>
+        <span>Cargando horarios…</span>
+      </div>
+
+      <div class="filter-list">
+        <div
+          class="filter-item"
+          [class.active]="filtroVeterinario === ''"
+          (click)="setFiltroVeterinario('')">
+          <div class="filter-dot all-dot"></div>
+          <span>Todos</span>
+          <span class="filter-count">{{ citasFiltradas.length }}</span>
+        </div>
+        <div
+          class="filter-item"
+          *ngFor="let vet of veterinarios"
+          [class.active]="filtroVeterinario === (vet.uid ?? vet.idVeterinario)"
+          (click)="setFiltroVeterinario(vet.uid ?? vet.idVeterinario)">
+          <div class="filter-dot" [style.background]="getVetColor(vet)"></div>
+          <span class="filter-name">{{ vet.Nombre }} {{ vet.Apellido }}</span>
+          <span class="filter-count">{{ getCitasPorVet(vet.uid ?? vet.idVeterinario).length }}</span>
+        </div>
+        <div class="filter-item placeholder" *ngIf="veterinarios.length === 0">
+          <ion-skeleton-text [animated]="true" style="width:80%"></ion-skeleton-text>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <label class="sidebar-label">
+        <ion-icon name="pricetag-outline" class="sidebar-label-icon"></ion-icon>
+        Tipo de cita
+      </label>
+      <div class="filter-list">
+        <div
+          class="filter-item"
+          [class.active]="filtroTipo === ''"
+          (click)="setFiltroTipo('')">
+          <div class="filter-dot all-dot"></div>
+          <span>Todos</span>
+        </div>
+        <div
+          class="filter-item tipo-filter"
+          *ngFor="let t of TIPOS_LEYENDA"
+          [class.active]="filtroTipo === t.value"
+          (click)="setFiltroTipo(t.value)">
+          <div class="leyenda-dot" [style.background]="t.bg" [style.border-left-color]="t.border"></div>
+          <span>{{ t.label }}</span>
+          <span class="filter-count">{{ getCitasPorTipo(t.value).length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <label class="sidebar-label">
+        <ion-icon name="paw-outline" class="sidebar-label-icon"></ion-icon>
+        Mascota
+      </label>
+      <div class="filter-list">
+        <div
+          class="filter-item"
+          [class.active]="filtroMascota === ''"
+          (click)="setFiltroMascota('')">
+          <div class="filter-dot all-dot"></div>
+          <span>Todas</span>
+        </div>
+        <div
+          class="filter-item"
+          *ngFor="let m of mascotasUnicas"
+          [class.active]="filtroMascota === m.id"
+          (click)="setFiltroMascota(m.id)">
+          <div class="filter-dot mascota-dot"></div>
+          <span class="filter-name">{{ m.nombre }}</span>
+          <span class="filter-count">{{ m.count }}</span>
+        </div>
+        <div class="filter-item placeholder" *ngIf="mascotasUnicas.length === 0">
+          <span class="filter-empty">Sin citas registradas</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- Filtro por estado -->
+    <div class="sidebar-section">
+      <label class="sidebar-label">
+        <ion-icon name="checkbox-outline" class="sidebar-label-icon"></ion-icon>
+        Estado
+      </label>
+      <div class="filter-list">
+        <div
+          class="filter-item"
+          [class.active]="filtroEstado === ''"
+          (click)="setFiltroEstado('')">
+          <div class="filter-dot all-dot"></div>
+          <span>Todos</span>
+          <span class="filter-count">{{ citasFiltradas.length }}</span>
+        </div>
+        <div
+          class="filter-item estado-filter"
+          *ngFor="let e of ESTADOS_FILTRO"
+          [class.active]="filtroEstado === e.value"
+          (click)="setFiltroEstado(e.value)">
+          <div class="leyenda-dot" [style.border-left-color]="e.color"></div>
+          <span>{{ e.label }}</span>
+          <span class="filter-count">{{ getCitasPorEstado(e.value).length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="filtros-activos" *ngIf="filtroVeterinario || filtroTipo || filtroMascota || filtroEstado">
+      <span class="filtros-badge">
+        {{ citasFiltradas.length }} cita{{ citasFiltradas.length !== 1 ? 's' : '' }} visible{{ citasFiltradas.length !== 1 ? 's' : '' }}
+      </span>
+      <button class="limpiar-btn" (click)="limpiarFiltros()">✕ Limpiar</button>
+    </div>
+
+  </div><!-- /sidebar -->
+
+
+  <div class="main-cal">
+
+    <div class="cal-header">
+      <div class="cal-nav">
+        <button class="nav-btn sidebar-toggle" (click)="toggleSidebar()" aria-label="Filtros">
+          <ion-icon name="options-outline"></ion-icon>
+        </button>
+        <button class="nav-btn" (click)="shiftWeek(-1)" aria-label="Semana anterior">&#8249;</button>
+        <button class="nav-btn" (click)="shiftWeek(1)"  aria-label="Semana siguiente">&#8250;</button>
+        <button class="nav-btn today-btn" (click)="goToday()">Hoy</button>
+      </div>
+      <h2 class="week-label">{{ weekLabel }}</h2>
+
+      <div class="header-filtros" *ngIf="filtroVeterinario || filtroTipo || filtroMascota || filtroEstado">
+        <span class="header-chip" *ngIf="filtroVeterinario">
+          <span class="hc-dot" [style.background]="getVetColorById(filtroVeterinario)"></span>
+          {{ getNombreVetById(filtroVeterinario) }}
+          <button (click)="setFiltroVeterinario('')">✕</button>
+        </span>
+        <span class="header-chip tipo-chip-header" *ngIf="filtroTipo">
+          {{ filtroTipo }}
+          <button (click)="setFiltroTipo('')">✕</button>
+        </span>
+        <span class="header-chip mascota-chip-header" *ngIf="filtroMascota">
+          🐾 {{ getNombreMascota(filtroMascota) }}
+          <button (click)="setFiltroMascota('')">✕</button>
+        </span>
+        <span class="header-chip estado-chip-header" *ngIf="filtroEstado">
+          <span class="hc-dot estado-dot"></span>
+          {{ etiquetaEstadoFiltro(filtroEstado) }}
+          <button (click)="setFiltroEstado('')">✕</button>
+        </span>
+      </div>
+
+      <div class="view-btns">
+        <button class="view-btn" [class.active]="vistaActual === 'semana'" (click)="cambiarVista('semana')">Semana</button>
+        <button class="view-btn" [class.active]="vistaActual === 'dia'"    (click)="cambiarVista('dia')">Día</button>
+      </div>
+    </div><!-- /cal-header -->
+
+    <div class="cal-leyenda">
+      <span class="leyenda-item leyenda-pendiente">Pendiente</span>
+      <span class="leyenda-item leyenda-proceso">En proceso</span>
+      <span class="leyenda-item leyenda-finalizada">Finalizada</span>
+      <span class="leyenda-item leyenda-cancelada">Cancelada / No asistió</span>
+    </div>
+
+
+    <div class="cal-body">
+
+      <div class="week-grid-scroll">
+
+        <!-- ══ VISTA SEMANA ══ -->
+        <div class="week-grid" *ngIf="vistaActual === 'semana'">
+
+          <div class="time-col">
+            <div class="time-col-spacer"></div>
+            <div
+              class="time-slot-label"
+              *ngFor="let h of horasGrid"
+              [class.half-hour]="h.endsWith(':30')">
+              {{ formatHoraLabel(h) }}
+            </div>
+          </div>
+
+          <div
+            class="day-col"
+            *ngFor="let day of weekDays"
+            [class.today-col]="day.isToday">
+
+            <div
+              class="day-col-header"
+              [class.today]="day.isToday"
+              role="button"
+              tabindex="0"
+              (click)="openNew(day.dateStr, '09:00')"
+              (keydown.enter)="openNew(day.dateStr, '09:00')">
+              <span class="dow">{{ day.dow }}</span>
+              <span class="daynum">{{ day.num }}</span>
+              <span class="day-cita-count" *ngIf="getCitasActivasDelDia(day.dateStr).length > 0">
+                {{ getCitasActivasDelDia(day.dateStr).length }}
+              </span>
+              <span class="day-add" title="Nueva cita">+</span>
+            </div>
+
+            <div class="time-cells">
+
+              <!-- Línea "ahora" -->
+              <div
+                class="now-line"
+                *ngIf="mostrarLineaAhora(day.dateStr)"
+                [style.top.px]="lineaAhoraTop">
+              </div>
+
+              <!-- ── Celdas de fondo con estado de horario ── -->
+              <div
+                class="time-cell"
+                *ngFor="let h of horasGrid"
+                [class.half-hour]="h.endsWith(':30')"
+                [class.slot-bloqueado]="getEstadoSlot(day.dateStr, h) === 'bloqueado'"
+                [class.slot-libre]="getEstadoSlot(day.dateStr, h) === 'libre'"
+                [class.slot-sin-filtro]="getEstadoSlot(day.dateStr, h) === 'sin-filtro'"
+                (click)="slotEsClickeable(day.dateStr, h) && openNew(day.dateStr, h)">
+
+                <!-- Candado sutil en slots fuera del horario (solo en horas en punto) -->
+                <ion-icon
+                  *ngIf="getEstadoSlot(day.dateStr, h) === 'bloqueado' && !h.endsWith(':30')"
+                  name="lock-closed-outline"
+                  class="slot-lock-icon">
+                </ion-icon>
+
+              </div>
+
+              <!-- Bloques de cita: agrupados por solape real -->
+              <ng-container *ngFor="let grupo of getGruposDelDia(day.dateStr)">
+                <ng-container *ngIf="grupo.citas.length === 1; else grupoMulti">
+
+                  <!-- Una sola cita -->
+                  <div
+                    class="cita-block"
+                    [ngClass]="[
+                      getClaseTipo(grupo.citas[0].tipo),
+                      getCbSize(grupo.citas[0].horaInicio, grupo.citas[0].horaFin),
+                      getClaseEstadoCita(grupo.citas[0].estado)
+                    ]"
+                    [class.dimmed]="isCitaDimmed(grupo.citas[0])"
+                    [class.cb-conflicto]="citaTieneConflicto(grupo.citas[0], day.dateStr)"
+                    [style.top.px]="grupo.top"
+                    [style.height.px]="grupo.height"
+                    (click)="$event.stopPropagation(); showDetail(grupo.citas[0])">
+                    <div class="cita-vet-bar" [style.background]="getVetColorByCita(grupo.citas[0])"></div>
+                    <div class="cb-time">
+                      <span class="cb-hora">{{ formatHora12Short(grupo.citas[0].horaInicio) }}</span>
+                      <span class="cb-ampm">{{ getAmPm(grupo.citas[0].horaInicio) }}</span>
+                    </div>
+                    <div class="cb-divider"></div>
+                    <div class="cb-info">
+                      <div class="cb-mascota">{{ grupo.citas[0].nombreMascota }}</div>
+                      <div class="cb-tipo">{{ grupo.citas[0].tipo }}</div>
+                      <div class="cb-horario">
+                        {{ formatHora12Short(grupo.citas[0].horaInicio) }}{{ getAmPm(grupo.citas[0].horaInicio) }}
+                        – {{ formatHora12Short(grupo.citas[0].horaFin) }}{{ getAmPm(grupo.citas[0].horaFin) }}
+                      </div>
+                      <div class="cb-vet" *ngIf="!filtroVeterinario">{{ nombreProfesional(grupo.citas[0]) }}</div>
+                    </div>
+                  </div>
+
+                </ng-container>
+
+                <!-- Citas solapadas → bloque colapsado -->
+                <ng-template #grupoMulti>
+                  <div
+                    class="cita-block cita-multi-slot"
+                    [style.top.px]="grupo.top"
+                    [style.height.px]="grupo.height"
+                    (click)="$event.stopPropagation(); abrirSlotPopover($event, grupo.citas, day.dateStr, grupo.inicio)">
+                    <div class="multi-slot-dots">
+                      <div
+                        class="ms-dot"
+                        *ngFor="let c of grupo.citas.slice(0, 3)"
+                        [style.background]="getVetColorByCita(c)">
+                      </div>
+                    </div>
+                    <div class="cb-time">
+                      <span class="cb-hora">{{ formatHora12Short(grupo.inicio) }}</span>
+                      <span class="cb-ampm">{{ getAmPm(grupo.inicio) }}</span>
+                    </div>
+                    <div class="cb-divider"></div>
+                    <div class="cb-info">
+                      <div class="cb-mascota">{{ grupo.citas.length }} citas</div>
+                      <div class="cb-tipo">Toca para ver</div>
+                    </div>
+                  </div>
+                </ng-template>
+
+              </ng-container>
+
+            </div><!-- /time-cells -->
+          </div><!-- /day-col -->
+
+        </div><!-- /week-grid semana -->
+
+
+        <!-- ══ VISTA DÍA ══ -->
+        <div class="week-grid" *ngIf="vistaActual === 'dia'">
+
+          <div class="time-col">
+            <div class="time-col-spacer"></div>
+            <div
+              class="time-slot-label"
+              *ngFor="let h of horasGrid"
+              [class.half-hour]="h.endsWith(':30')">
+              {{ formatHoraLabel(h) }}
+            </div>
+          </div>
+
+          <div class="day-col dia-unico" [class.today-col]="diaSeleccionado.isToday">
+            <div
+              class="day-col-header"
+              [class.today]="diaSeleccionado.isToday"
+              role="button"
+              tabindex="0"
+              (click)="openNew(diaSeleccionado.dateStr, '09:00')"
+              (keydown.enter)="openNew(diaSeleccionado.dateStr, '09:00')">
+              <span class="dow">{{ diaSeleccionado.dow }}</span>
+              <span class="daynum">{{ diaSeleccionado.num }}</span>
+              <span class="day-cita-count" *ngIf="getCitasActivasDelDia(diaSeleccionado.dateStr).length > 0">
+                {{ getCitasActivasDelDia(diaSeleccionado.dateStr).length }}
+              </span>
+              <span class="day-add" title="Nueva cita">+</span>
+            </div>
+
+            <div class="time-cells">
+
+              <!-- Línea "ahora" -->
+              <div
+                class="now-line"
+                *ngIf="mostrarLineaAhora(diaSeleccionado.dateStr)"
+                [style.top.px]="lineaAhoraTop">
+              </div>
+
+              <!-- ── Celdas de fondo con estado de horario ── -->
+              <div
+                class="time-cell"
+                *ngFor="let h of horasGrid"
+                [class.half-hour]="h.endsWith(':30')"
+                [class.slot-bloqueado]="getEstadoSlot(diaSeleccionado.dateStr, h) === 'bloqueado'"
+                [class.slot-libre]="getEstadoSlot(diaSeleccionado.dateStr, h) === 'libre'"
+                [class.slot-sin-filtro]="getEstadoSlot(diaSeleccionado.dateStr, h) === 'sin-filtro'"
+                (click)="slotEsClickeable(diaSeleccionado.dateStr, h) && openNew(diaSeleccionado.dateStr, h)">
+
+                <ion-icon
+                  *ngIf="getEstadoSlot(diaSeleccionado.dateStr, h) === 'bloqueado' && !h.endsWith(':30')"
+                  name="lock-closed-outline"
+                  class="slot-lock-icon">
+                </ion-icon>
+
+              </div>
+
+              <!-- Bloques de cita: agrupados por solape real -->
+              <ng-container *ngFor="let grupo of getGruposDelDia(diaSeleccionado.dateStr)">
+                <ng-container *ngIf="grupo.citas.length === 1; else grupoMultiDia">
+
+                  <!-- Una sola cita -->
+                  <div
+                    class="cita-block"
+                    [ngClass]="[
+                      getClaseTipo(grupo.citas[0].tipo),
+                      getCbSize(grupo.citas[0].horaInicio, grupo.citas[0].horaFin),
+                      getClaseEstadoCita(grupo.citas[0].estado)
+                    ]"
+                    [class.dimmed]="isCitaDimmed(grupo.citas[0])"
+                    [class.cb-conflicto]="citaTieneConflicto(grupo.citas[0], diaSeleccionado.dateStr)"
+                    [style.top.px]="grupo.top"
+                    [style.height.px]="grupo.height"
+                    (click)="$event.stopPropagation(); showDetail(grupo.citas[0])">
+                    <div class="cita-vet-bar" [style.background]="getVetColorByCita(grupo.citas[0])"></div>
+                    <div class="cb-time">
+                      <span class="cb-hora">{{ formatHora12Short(grupo.citas[0].horaInicio) }}</span>
+                      <span class="cb-ampm">{{ getAmPm(grupo.citas[0].horaInicio) }}</span>
+                    </div>
+                    <div class="cb-divider"></div>
+                    <div class="cb-info">
+                      <div class="cb-mascota">{{ grupo.citas[0].nombreMascota }}</div>
+                      <div class="cb-tipo">{{ grupo.citas[0].tipo }}</div>
+                      <div class="cb-horario">
+                        {{ formatHora12Short(grupo.citas[0].horaInicio) }}{{ getAmPm(grupo.citas[0].horaInicio) }}
+                        – {{ formatHora12Short(grupo.citas[0].horaFin) }}{{ getAmPm(grupo.citas[0].horaFin) }}
+                      </div>
+                      <div class="cb-vet">{{ nombreProfesional(grupo.citas[0]) }}</div>
+                    </div>
+                  </div>
+
+                </ng-container>
+
+                <!-- Citas solapadas → bloque colapsado -->
+                <ng-template #grupoMultiDia>
+                  <div
+                    class="cita-block cita-multi-slot"
+                    [style.top.px]="grupo.top"
+                    [style.height.px]="grupo.height"
+                    (click)="$event.stopPropagation(); abrirSlotPopover($event, grupo.citas, diaSeleccionado.dateStr, grupo.inicio)">
+                    <div class="multi-slot-dots">
+                      <div
+                        class="ms-dot"
+                        *ngFor="let c of grupo.citas.slice(0, 3)"
+                        [style.background]="getVetColorByCita(c)">
+                      </div>
+                    </div>
+                    <div class="cb-time">
+                      <span class="cb-hora">{{ formatHora12Short(grupo.inicio) }}</span>
+                      <span class="cb-ampm">{{ getAmPm(grupo.inicio) }}</span>
+                    </div>
+                    <div class="cb-divider"></div>
+                    <div class="cb-info">
+                      <div class="cb-mascota">{{ grupo.citas.length }} citas</div>
+                      <div class="cb-tipo">Toca para ver</div>
+                    </div>
+                  </div>
+                </ng-template>
+
+              </ng-container>
+
+            </div><!-- /time-cells -->
+          </div><!-- /day-col dia-unico -->
+
+        </div><!-- /week-grid dia -->
+
+      </div><!-- /week-grid-scroll -->
+
+
+      <!-- ══ COLA DE CITAS DE HOY ══ -->
+      <div class="today-queue">
+
+        <div class="today-queue-header">
+          <span class="today-queue-title">
+            <span class="tq-dot"></span>
+            Citas de hoy
+          </span>
+          <span class="today-queue-count">
+            {{ getCitasActivasDelDia(todayStr).length }}
+            cita{{ getCitasActivasDelDia(todayStr).length !== 1 ? 's' : '' }}
+          </span>
+        </div>
+
+        <div class="today-queue-list" *ngIf="getCitasDelDia(todayStr).length > 0">
+          <div
+            class="queue-card"
+            *ngFor="let cita of getCitasDelDia(todayStr)"
+            [class.proxima]="esProximaCita(cita)"
+            [ngClass]="'estado-' + cita.estado"
+            (click)="showDetail(cita)">
+
+            <div class="qc-time">
+              <span class="qc-hora">{{ formatHora12Short(cita.horaInicio) }}</span>
+              <span class="qc-ampm">{{ getAmPm(cita.horaInicio) }}</span>
+            </div>
+
+            <div class="qc-divider"></div>
+
+            <div class="qc-info">
+              <div class="qc-mascota">{{ cita.nombreMascota }}</div>
+              <div class="qc-tipo">{{ cita.tipo }}</div>
+              <div class="qc-vet">{{ nombreProfesional(cita) }}</div>
+            </div>
+
+            <span class="qc-badge" [ngClass]="'qc-badge--' + cita.estado">{{ estadoCitaLabel(cita.estado) }}</span>
+
+          </div>
+        </div>
+
+        <div class="today-queue-empty" *ngIf="getCitasDelDia(todayStr).length === 0">
+          <span class="tq-empty-icon">📭</span>
+          Sin citas programadas para hoy
+        </div>
+
+      </div><!-- /today-queue -->
+
+    </div><!-- /cal-body -->
+  </div><!-- /main-cal -->
+
+</div><!-- /cal-wrap -->

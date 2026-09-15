@@ -1,0 +1,576 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Ventas</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ventas-content">
+
+  <!-- Barra sticky: cliente de la factura siempre visible (solo mobile) -->
+  <div class="factura-sticky">
+    <div class="factura-banner" *ngIf="carrito.cliente(); else sinFactura">
+      <div class="factura-banner__info">
+        <ion-icon name="person-circle-outline"></ion-icon>
+        <div class="factura-banner__texto">
+          <span class="factura-banner__label">Facturando a</span>
+          <strong class="factura-banner__nombre">
+            {{ carrito.cliente().Nombre }} {{ carrito.cliente().Apellido }}
+          </strong>
+        </div>
+      </div>
+      <div class="factura-banner__acciones">
+        <ion-button size="small" fill="outline" (click)="seleccionarCliente()">
+          Cambiar
+        </ion-button>
+        <ion-button size="small" fill="clear" color="danger" (click)="cerrarFactura()">
+          Cerrar
+        </ion-button>
+      </div>
+    </div>
+    <ng-template #sinFactura>
+      <button type="button" class="factura-banner factura-banner--vacio" (click)="seleccionarCliente()">
+        <ion-icon name="person-add-outline"></ion-icon>
+        <span>Selecciona el cliente para iniciar la factura</span>
+      </button>
+    </ng-template>
+  </div>
+
+  <!-- Layout: sidebar (cliente + filtros) + main (productos) -->
+  <div class="ventas-layout" [class.ventas-layout--sidebar-open]="sidebarOpen">
+
+    <!-- Sidebar izquierdo -->
+    <aside class="ventas-sidebar">
+      <app-cliente-actual-panel
+        [cliente]="carrito.cliente()"
+        [cantidadItems]="carrito.itemCount()"
+        (seleccionar)="seleccionarCliente()"
+        (cambiar)="seleccionarCliente()"
+        (cerrar)="cerrarFactura()">
+      </app-cliente-actual-panel>
+
+      <app-ventas-sidebar
+        [busqueda]="busqueda"
+        [tipoFiltro]="tipoFiltro"
+        [categoriaFiltro]="categoriaFiltro"
+        [soloOfertas]="soloOfertas"
+        [disponibilidadFiltro]="disponibilidadFiltro"
+        [precioMin]="precioMin"
+        [precioMax]="precioMax"
+        [contadorResultados]="contadorResultados"
+        (busquedaChange)="busqueda = $event"
+        (tipoChange)="tipoFiltro = $event"
+        (categoriaChange)="categoriaFiltro = $event"
+        (ofertasChange)="soloOfertas = $event"
+        (disponibilidadChange)="disponibilidadFiltro = $event"
+        (precioChange)="onPrecioChange($event)"
+        (cerrar)="sidebarOpen = false">
+      </app-ventas-sidebar>
+    </aside>
+
+    <!-- Contenido principal -->
+    <div class="ventas-main">
+
+      <!-- Banner rotativo de ofertas (configurable por el admin) -->
+      <div class="ventas-banner" *ngIf="(banners$ | async)?.length">
+        <app-hero-banner [slides]="(banners$ | async) ?? []"></app-hero-banner>
+      </div>
+
+      <!-- Ofertas vigentes -->
+      <section class="ventas-ofertas" *ngIf="ofertasVigentes.length > 0">
+        <div class="ventas-ofertas__head">
+          <div class="ventas-ofertas__titulo">
+            <ion-icon name="flame-outline"></ion-icon>
+            Ofertas de la semana
+          </div>
+          <button type="button" class="ventas-ofertas__ver-todas" (click)="toggleOfertas()">
+            Ver todas las ofertas
+          </button>
+        </div>
+        <div class="ventas-ofertas__grid">
+          <div class="ventas-ofertas__card" *ngFor="let p of ofertasVigentes">
+            <app-product-card
+              [producto]="p"
+              [deshabilitado]="!puedeVender(p)"
+              (agregar)="agregarAlCarrito($event)">
+            </app-product-card>
+          </div>
+        </div>
+      </section>
+
+      <!-- Toolbar: contador + botón Filtros (mobile) -->
+      <div class="ventas-toolbar">
+        <p class="ventas-contador">{{ contadorResultados }} resultado(s)</p>
+        <button type="button" class="ventas-filtros-btn" (click)="sidebarOpen = true">
+          <ion-icon name="options-outline"></ion-icon>
+          Filtros
+          <ion-badge *ngIf="filtrosActivos > 0" color="primary">{{ filtrosActivos }}</ion-badge>
+        </button>
+      </div>
+
+      <!-- Catálogo -->
+      <ion-grid class="ventas-grid" *ngIf="contadorResultados > 0">
+    <ion-row>
+      <ion-col
+        size="12"
+        size-sm="6"
+        size-md="6"
+        size-lg="4"
+        size-xl="3"
+        *ngFor="let p of filtrados">
+        <app-product-card
+          [producto]="p"
+          [deshabilitado]="!puedeVender(p)"
+          (agregar)="agregarAlCarrito($event)">
+        </app-product-card>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+  <div class="empty-state" *ngIf="productos.length > 0 && contadorResultados === 0">
+    <ion-icon name="search-outline"></ion-icon>
+    <h3>Sin resultados</h3>
+    <p>No se encontraron productos con ese filtro.</p>
+  </div>
+
+  <div class="empty-state" *ngIf="productos.length === 0">
+    <ion-icon name="pricetags-outline"></ion-icon>
+    <h3>Catálogo vacío</h3>
+    <p>Agrega productos o servicios desde el módulo de gestión del catálogo.</p>
+    <ion-button (click)="irAGestion()">Ir a gestión de catálogo</ion-button>
+  </div>
+
+    </div><!-- /.ventas-main -->
+  </div><!-- /.ventas-layout -->
+
+  <!-- FAB carrito -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button (click)="abrirCarrito()">
+      <ion-icon name="cart-outline"></ion-icon>
+    </ion-fab-button>
+    <ion-badge class="ventas-fab-badge" *ngIf="carrito.itemCount() > 0">
+      {{ carrito.itemCount() }}
+    </ion-badge>
+  </ion-fab>
+
+  <!-- ── Drawer: carrito + checkout ── -->
+  <ion-modal
+    [isOpen]="drawerOpen"
+    (didDismiss)="onCerrarDrawer()"
+    side="end"
+    [initialBreakpoint]="1"
+    cssClass="ventas-drawer">
+    <ng-template>
+      <ion-header class="cart-header">
+        <ion-toolbar>
+          <div class="cart-header__inner">
+            <div class="cart-header__info">
+              <div class="cart-header__logo">
+                <ion-icon [name]="ventaRegistrada ? 'checkmark-circle-outline' : 'cart-outline'"></ion-icon>
+              </div>
+              <div class="cart-header__texto">
+                <span class="cart-header__titulo">
+                  {{ ventaRegistrada ? 'Venta registrada' : 'Carrito de venta' }}
+                </span>
+                <span class="cart-header__sub" *ngIf="ventaRegistrada">
+                  Factura No. {{ ventaRegistrada.idVenta.slice(0, 8).toUpperCase() }}
+                </span>
+                <span class="cart-header__sub" *ngIf="!ventaRegistrada && carrito.cliente()">
+                  {{ carrito.cliente().Nombre }} {{ carrito.cliente().Apellido }}
+                </span>
+                <span class="cart-header__sub" *ngIf="!ventaRegistrada && !carrito.cliente()">Sin cliente</span>
+              </div>
+            </div>
+            <div class="cart-header__derecha">
+              <div class="cart-header__total" *ngIf="!ventaRegistrada && carrito.items().length > 0">
+                <span>Total</span>
+                <strong>{{ carrito.total() | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+              </div>
+              <button type="button" class="cart-header__cerrar" (click)="onCerrarDrawer()">
+                <ion-icon name="close"></ion-icon>
+              </button>
+            </div>
+          </div>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="ventas-drawer-content">
+
+        <!-- Panel de venta registrada + factura PDF -->
+        <div class="venta-ok" *ngIf="ventaRegistrada">
+          <div class="venta-ok__icono">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+          </div>
+          <h3 class="venta-ok__titulo">Venta registrada</h3>
+          <p class="venta-ok__num">Factura No. {{ ventaRegistrada.idVenta.slice(0, 8).toUpperCase() }}</p>
+          <div class="venta-ok__cliente" *ngIf="ventaRegistrada.nombreCliente">
+            <ion-icon name="person-outline"></ion-icon>
+            {{ ventaRegistrada.nombreCliente }}
+          </div>
+          <div class="venta-ok__total">
+            <span>Total pagado</span>
+            <strong>{{ ventaRegistrada.total | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+          </div>
+          <ion-button
+            expand="block"
+            class="venta-ok__btn"
+            [disabled]="!facturaLista"
+            (click)="descargarFactura()">
+            <ion-spinner *ngIf="generandoFactura" name="crescent" slot="start"></ion-spinner>
+            <ion-icon *ngIf="facturaLista" name="download-outline" slot="start"></ion-icon>
+            {{ generandoFactura ? 'Generando factura…' : 'Descargar factura (PDF)' }}
+          </ion-button>
+          <ion-button expand="block" fill="outline" (click)="nuevaVenta()">
+            Nueva venta
+          </ion-button>
+        </div>
+
+        <ng-container *ngIf="carrito.items().length > 0">
+
+          <!-- Ítems -->
+          <section class="cart-seccion">
+            <div class="cart-seccion__titulo">
+              <ion-icon name="bag-handle-outline"></ion-icon>
+              Productos ({{ carrito.itemCount() }})
+            </div>
+            <div class="cart-items">
+              <div class="cart-item" *ngFor="let item of carrito.items()">
+                <div class="cart-item__icono">
+                  <ion-icon [name]="iconoCategoria(item.producto)"></ion-icon>
+                </div>
+                <div class="cart-item__cuerpo">
+                  <div class="cart-item__info">
+                    <span class="cart-item__nombre">{{ item.producto.nombre }}</span>
+                    <span class="cart-item__detalle">
+                      {{ item.producto.precio | currency:'COP':'symbol-narrow':'1.0-0' }} × {{ item.cantidad }}
+                      <span *ngIf="item.producto.tipo === 'producto'" class="cart-item__limite">
+                        (máx {{ carrito.maxCantidad(item.producto) }})
+                      </span>
+                    </span>
+                  </div>
+                  <div class="cart-item__acciones">
+                    <div class="cart-stepper">
+                      <button type="button" (click)="cambiarCantidad(item.producto.idProducto, -1)">
+                        <ion-icon name="remove"></ion-icon>
+                      </button>
+                      <span>{{ item.cantidad }}</span>
+                      <button type="button" (click)="cambiarCantidad(item.producto.idProducto, +1)">
+                        <ion-icon name="add"></ion-icon>
+                      </button>
+                    </div>
+                    <span class="cart-item__subtotal">{{ item.producto.precio * item.cantidad | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                    <button type="button" class="cart-item__quitar" (click)="carrito.quitar(item.producto.idProducto)">
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Resumen -->
+          <section class="cart-seccion">
+            <div class="cart-seccion__titulo">
+              <ion-icon name="receipt-outline"></ion-icon>
+              Resumen
+            </div>
+            <div class="cart-resumen">
+              <div class="cart-resumen__fila">
+                <span>Subtotal</span>
+                <span>{{ carrito.subtotal() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+              <div class="cart-resumen__fila" *ngIf="carrito.saldoAplicado() > 0">
+                <span>Saldo a favor aplicado</span>
+                <span class="cart-resumen__descuento">− {{ carrito.saldoAplicado() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+              <div class="cart-resumen__fila cart-resumen__fila--total">
+                <span>Total a pagar</span>
+                <span>{{ carrito.total() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            </div>
+
+            <div class="cart-avance" *ngIf="sumaPagos > 0 || carrito.saldoAplicado() > 0">
+              <div class="cart-avance__info">
+                <span>Pagado {{ pctPagado }}%</span>
+                <span class="cart-avance__falta" *ngIf="saldoPendiente > 0">Faltan {{ saldoPendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                <span class="cart-avance__ok" *ngIf="pagadoCompleto">¡Pagado!</span>
+              </div>
+              <div class="cart-avance__barra">
+                <div
+                  class="cart-avance__relleno"
+                  [class.cart-avance__relleno--ok]="pagadoCompleto"
+                  [style.width.%]="pctPagado">
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Checkout -->
+          <section class="cart-checkout">
+
+            <div class="cart-checkout__titulo">
+              <ion-icon name="card-outline"></ion-icon>
+              Datos de la venta
+            </div>
+
+            <div class="cart-checkout__campo">
+              <label class="cart-checkout__label">Cliente</label>
+              <div class="cart-checkout__cliente-fijo">
+                <ion-icon name="person-outline"></ion-icon>
+                <span>{{ carrito.cliente().Nombre }} {{ carrito.cliente().Apellido }}</span>
+                <button type="button" (click)="seleccionarCliente()">Cambiar</button>
+              </div>
+            </div>
+
+            <div
+              class="cart-checkout__saldo"
+              [class.cart-checkout__saldo--vacio]="carrito.saldoCliente() <= 0"
+              *ngIf="carrito.cliente()">
+              <div class="cart-checkout__saldo-info">
+                <ion-icon name="wallet-outline"></ion-icon>
+                <div>
+                  <span class="cart-checkout__saldo-titulo">Saldo a favor</span>
+                  <span class="cart-checkout__saldo-monto">{{ carrito.saldoCliente() | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                </div>
+              </div>
+              <div class="cart-saldo-opciones">
+                <button
+                  type="button"
+                  class="cart-saldo-opcion"
+                  [class.cart-saldo-opcion--activo]="!carrito.usarSaldo()"
+                  [disabled]="carrito.saldoCliente() <= 0"
+                  (click)="carrito.toggleUsarSaldo(false)">
+                  No usar saldo
+                </button>
+                <button
+                  type="button"
+                  class="cart-saldo-opcion"
+                  [class.cart-saldo-opcion--activo]="carrito.usarSaldo()"
+                  [disabled]="carrito.saldoCliente() <= 0"
+                  (click)="carrito.toggleUsarSaldo(true)">
+                  Usar saldo a favor
+                </button>
+              </div>
+              <div class="cart-checkout__saldo-detalle" *ngIf="carrito.usarSaldo()">
+                Se aplicarán
+                <strong>{{ carrito.saldoAplicado() | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+                a esta compra · Total a pagar:
+                <strong>{{ carrito.total() | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+              </div>
+            </div>
+
+            <div class="cart-checkout__campo" *ngIf="carrito.cliente()">
+              <label class="cart-checkout__label">Mascota (opcional)</label>
+              <ion-select
+                [(ngModel)]="mascotaId"
+                placeholder="Sin mascota"
+                interface="action-sheet"
+                class="cart-checkout__select">
+                <ion-select-option *ngFor="let m of mascotas" [value]="m.idMascota">
+                  {{ m.nombre }} · {{ m.especie | titlecase }}
+                </ion-select-option>
+              </ion-select>
+            </div>
+
+            <!-- Pagos múltiples -->
+            <div class="cart-checkout__campo">
+              <label class="cart-checkout__label">Métodos de pago</label>
+
+              <div class="cart-pagos">
+                <div class="cart-pago" *ngFor="let pago of pagos; let i = index; trackBy: trackByPago">
+
+                  <div class="cart-pago__metodos">
+                    <button
+                      *ngFor="let m of metodosCheckout"
+                      type="button"
+                      class="cart-pago__metodo"
+                      [class.cart-pago__metodo--activo]="pago.metodoPago === m.id"
+                      (click)="setMetodoPago(i, m.id)">
+                      <ion-icon [name]="m.icon"></ion-icon>
+                      <span>{{ m.nombre }}</span>
+                    </button>
+                  </div>
+
+                  <div class="cart-pago__fila">
+                    <!-- Efectivo: monto recibido + vuelto a entregar -->
+                    <ng-container *ngIf="pago.metodoPago === 'efectivo'; else montoManual">
+                      <div class="cart-pago__recibido">
+                        <span class="cart-pago__moneda">$</span>
+                        <ion-input
+                          type="text"
+                          min="0"
+                          placeholder="Monto recibido"
+                          inputmode="numeric"
+                          [ngModel]="pago.recibidoStr"
+                          (ngModelChange)="onRecibidoChange(i, $event)">
+                        </ion-input>
+                      </div>
+                      <div class="cart-pago__vuelto" [class.cart-pago__vuelto--ok]="vueltoDe(pago) > 0">
+                        <span>Vuelto</span>
+                        <strong>{{ vueltoDe(pago) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+                      </div>
+                    </ng-container>
+                    <ng-template #montoManual>
+                      <div class="cart-pago__monto" *ngIf="pago.metodoPago !== 'credito'">
+                        <span class="cart-pago__moneda">$</span>
+                        <ion-input
+                          type="text"
+                          min="0"
+                          placeholder="0"
+                          inputmode="numeric"
+                          [ngModel]="pago.montoStr"
+                          (ngModelChange)="setMonto(i, $event)">
+                        </ion-input>
+                      </div>
+                    </ng-template>
+                    <button
+                      type="button"
+                      class="cart-pago__todo"
+                      *ngIf="pago.metodoPago !== 'credito'"
+                      (click)="pagarTodo(i)">
+                      Pagar todo
+                    </button>
+                    <button
+                      type="button"
+                      class="cart-pago__quitar"
+                      (click)="quitarPago(i)"
+                      *ngIf="pagos.length > 1 || pagos[0].montoStr !== '' || pagos[0].soportePago || pagos[0].recibidoStr">
+                      <ion-icon name="trash-outline"></ion-icon>
+                    </button>
+                  </div>
+
+                  <div class="cart-pago__credito" *ngIf="pago.metodoPago === 'credito'">
+                    <ion-icon name="hourglass-outline"></ion-icon>
+                    <span>
+                      El cliente quedará debiendo
+                      <strong>{{ saldoPendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+                      a este establecimiento.
+                    </span>
+                  </div>
+
+                  <div class="cart-pago__vuelto-destino" *ngIf="pago.metodoPago === 'efectivo' && vueltoDe(pago) > 0">
+                    <span class="cart-pago__vuelto-label">
+                      Destino del vuelto · {{ vueltoDe(pago) | currency:'COP':'symbol-narrow':'1.0-0' }}
+                    </span>
+                    <div class="cart-saldo-opciones">
+                      <button
+                        type="button"
+                        class="cart-saldo-opcion"
+                        [class.cart-saldo-opcion--activo]="pago.vueltoDestino !== 'saldo'"
+                        (click)="setVueltoDestino(i, 'efectivo')">
+                        <ion-icon name="cash-outline"></ion-icon>
+                        Entregar en efectivo
+                      </button>
+                      <button
+                        type="button"
+                        class="cart-saldo-opcion"
+                        [class.cart-saldo-opcion--activo]="pago.vueltoDestino === 'saldo'"
+                        (click)="setVueltoDestino(i, 'saldo')">
+                        <ion-icon name="wallet-outline"></ion-icon>
+                        Abonar a saldo a favor
+                      </button>
+                    </div>
+                    <span class="cart-checkout__hint" *ngIf="pago.vueltoDestino === 'saldo'">
+                      Se guardarán
+                      <strong>{{ vueltoDe(pago) | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+                      como saldo a favor del cliente.
+                    </span>
+                  </div>
+
+                  <span class="cart-checkout__hint" *ngIf="pago.metodoPago === 'efectivo'">
+                    Ingresa el efectivo recibido; el monto aplicado y el vuelto se ajustan automáticamente.
+                  </span>
+
+                  <div class="cart-checkout__campo" *ngIf="requiereSoporteDe(pago)">
+                    <label class="cart-checkout__label">Soporte de pago *</label>
+                    <div class="cart-soporte" *ngIf="pago.soportePago">
+                      <img [src]="pago.soportePago" alt="Soporte de pago" />
+                      <button type="button" class="cart-soporte__quitar" (click)="quitarSoporte(i)">
+                        <ion-icon name="close"></ion-icon>
+                      </button>
+                    </div>
+                    <label class="cart-soporte-upload" *ngIf="!pago.soportePago">
+                      <ion-icon name="cloud-upload-outline"></ion-icon>
+                      Adjuntar comprobante
+                      <input
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        (change)="onSoporteSeleccionado($event, i)" />
+                    </label>
+                    <span class="cart-checkout__hint">PNG, JPG o WEBP · máx 300 KB</span>
+                  </div>
+
+                </div>
+              </div>
+
+              <button
+                type="button"
+                class="cart-pagos__agregar"
+                (click)="agregarPago()"
+                *ngIf="pagos.length < 3">
+                <ion-icon name="add-circle-outline"></ion-icon>
+                Agregar método de pago
+              </button>
+            </div>
+
+            <div class="cart-checkout__aviso" *ngIf="saldoPendiente > 0">
+              <ion-icon name="hourglass-outline"></ion-icon>
+              <span>
+                El cliente queda debiendo
+                <strong>{{ saldoPendiente | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+                a este establecimiento.
+              </span>
+            </div>
+
+            <div class="cart-checkout__aviso cart-checkout__aviso--vuelto" *ngIf="haySobrepago">
+              <ion-icon name="wallet-outline"></ion-icon>
+              <span>
+                El excedente de
+                <strong>{{ excedentePago | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+                se guardará como saldo a favor del cliente.
+              </span>
+            </div>
+
+          </section>
+
+        </ng-container>
+
+        <div class="empty-state" *ngIf="carrito.items().length === 0 && !ventaRegistrada">
+          <ion-icon name="cart-outline"></ion-icon>
+          <h3>Carrito vacío</h3>
+          <p>Agrega productos o servicios desde el catálogo.</p>
+        </div>
+
+      </ion-content>
+
+      <ion-footer class="cart-footer" *ngIf="carrito.items().length > 0">
+        <div class="cart-footer__resumen">
+          <div class="cart-footer__total">
+            <span>Total</span>
+            <strong>{{ carrito.total() | currency:'COP':'symbol-narrow':'1.0-0' }}</strong>
+          </div>
+          <span class="cart-footer__falta" *ngIf="saldoPendiente > 0">
+            Faltan {{ saldoPendiente | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </span>
+          <span class="cart-footer__ok" *ngIf="pagadoCompleto && sumaPagos > 0">
+            Pago completo
+          </span>
+        </div>
+        <ion-button
+          expand="block"
+          class="cart-checkout__registrar"
+          [class.cart-checkout__registrar--credito]="saldoPendiente > 0"
+          [disabled]="!checkoutValido || registrando"
+          (click)="registrarVenta()">
+          <ion-spinner *ngIf="registrando" name="crescent" slot="start"></ion-spinner>
+          <span *ngIf="registrando">Registrando…</span>
+          <span *ngIf="!registrando && saldoPendiente > 0">
+            Registrar y dejar debiendo {{ saldoPendiente | currency:'COP':'symbol-narrow':'1.0-0' }}
+          </span>
+          <span *ngIf="!registrando && saldoPendiente <= 0">Registrar venta</span>
+        </ion-button>
+      </ion-footer>
+
+    </ng-template>
+  </ion-modal>
+
+</ion-content>

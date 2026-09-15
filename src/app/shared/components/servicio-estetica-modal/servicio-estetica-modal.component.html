@@ -1,0 +1,172 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar color="secondary">
+    <ion-title>
+      <div class="sem-title">
+        <ion-icon name="cut-outline"></ion-icon>
+        <span>Servicio de estética</span>
+      </div>
+    </ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cerrar()" fill="clear" color="light">
+        <ion-icon name="close-circle-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="sem-content ion-padding">
+
+  <!-- Ficha de la mascota -->
+  <div class="sem-mascota">
+    <div class="sem-mascota__foto" *ngIf="mascota?.fotoUrl; else inicialPet">
+      <img [src]="mascota!.fotoUrl" alt="{{ cita.nombreMascota }}" />
+    </div>
+    <ng-template #inicialPet>
+      <div class="sem-mascota__foto sem-mascota__foto--placeholder">
+        <ion-icon name="paw-outline"></ion-icon>
+      </div>
+    </ng-template>
+    <div class="sem-mascota__info">
+      <span class="sem-mascota__nombre">{{ cita.nombreMascota }}</span>
+      <span class="sem-mascota__sub" *ngIf="mascota">
+        {{ mascota.especie }}<ng-container *ngIf="mascota.raza"> · {{ mascota.raza }}</ng-container>
+      </span>
+      <span class="sem-mascota__sub">{{ cita.nombreCliente }}</span>
+    </div>
+  </div>
+
+  <!-- Resumen de la cita -->
+  <div class="sem-resumen">
+    <div class="sem-fila">
+      <ion-icon name="calendar-outline" color="medium"></ion-icon>
+      <span class="sem-sub">{{ cita.fecha }} &nbsp;{{ cita.horaInicio }} – {{ cita.horaFin }}</span>
+    </div>
+    <div class="sem-fila">
+      <ion-icon name="sparkles-outline" color="medium"></ion-icon>
+      <span class="sem-sub">{{ labelServicio }}</span>
+      <ion-badge color="secondary" class="sem-badge-estado" *ngIf="atendida">Atendida</ion-badge>
+      <ion-badge color="warning" class="sem-badge-estado" *ngIf="enProceso">En proceso</ion-badge>
+      <ion-badge color="success" class="sem-badge-estado" *ngIf="cita.escaladoAVeterinario">Escalada a veterinario</ion-badge>
+    </div>
+    <div class="sem-fila" *ngIf="nombreGroomer">
+      <ion-icon name="person-outline" color="medium"></ion-icon>
+      <span class="sem-sub">{{ nombreGroomer }}</span>
+    </div>
+  </div>
+
+  <!-- Servicios agendados + checklist -->
+  <div class="sem-bloque" *ngIf="items.length">
+    <label class="sem-label">Servicios agendados</label>
+    <div class="sem-item" *ngFor="let it of items">
+      <span>{{ it.cantidad }} × {{ it.nombre }}</span>
+      <strong>${{ it.subtotal.toLocaleString('es-CO') }}</strong>
+    </div>
+    <div class="sem-total" *ngIf="items.length > 1">
+      <span>Total</span>
+      <strong>${{ totalServicios.toLocaleString('es-CO') }}</strong>
+    </div>
+  </div>
+
+  <div class="sem-bloque" *ngIf="checklist.length">
+    <label class="sem-label">Qué incluye (marca lo realizado)</label>
+    <button
+      type="button"
+      class="sem-paso"
+      *ngFor="let paso of checklist"
+      [class.sem-paso--done]="paso.done"
+      (click)="togglePaso(paso)">
+      <ion-icon [name]="paso.done ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+      <span>{{ paso.label }}</span>
+    </button>
+  </div>
+
+  <!-- Estado de la cuenta por cobrar (solo lectura) -->
+  <div class="sem-bloque" *ngIf="venta">
+    <label class="sem-label">Cuenta por cobrar</label>
+    <div class="sem-venta">
+      <ion-badge [color]="colorVenta">{{ estadoVenta }}</ion-badge>
+      <span class="sem-venta__saldo" *ngIf="venta.estadoPago === 'pendiente'">
+        Saldo: ${{ saldoPendiente.toLocaleString('es-CO') }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Observaciones del cliente (al agendar) -->
+  <div class="sem-bloque" *ngIf="cita.observacionesCliente">
+    <label class="sem-label">Observaciones del cliente</label>
+    <div class="sem-caja sem-caja--leer">{{ cita.observacionesCliente }}</div>
+  </div>
+
+  <!-- Notas de recepción (antes del servicio) -->
+  <div class="sem-bloque" *ngIf="cita.notasRecepcion">
+    <label class="sem-label">Notas de recepción</label>
+    <div class="sem-caja sem-caja--leer">{{ cita.notasRecepcion }}</div>
+  </div>
+
+  <!-- Historial de estética previo (sin datos clínicos) -->
+  <app-historico-estetica-mini
+    [idMascota]="cita.idMascota"
+    [idCitaActual]="cita.idCita">
+  </app-historico-estetica-mini>
+
+  <!-- Aviso si ya fue atendida -->
+  <div class="sem-aviso" *ngIf="atendida">
+    <ion-icon name="checkmark-done-outline" color="success"></ion-icon>
+    <span>Servicio ya finalizado. Las notas quedaron registradas.</span>
+  </div>
+
+  <!-- Aviso solo lectura (expediente) -->
+  <div class="sem-aviso sem-aviso--lectura" *ngIf="!atendida && !habilitarAcciones">
+    <ion-icon name="eye-outline" color="medium"></ion-icon>
+    <span>Solo el groomer asignado puede atender este servicio.</span>
+  </div>
+
+  <!-- Hallazgos del groomer -->
+  <div class="sem-bloque" *ngIf="!atendida && habilitarAcciones">
+    <label class="sem-label">Hallazgos del servicio (opcional)</label>
+    <div class="sem-hallazgos">
+      <ion-input [(ngModel)]="hallazgos.piel" placeholder="Estado de la piel" class="sem-input"></ion-input>
+      <ion-input [(ngModel)]="hallazgos.comportamiento" placeholder="Comportamiento" class="sem-input"></ion-input>
+      <label class="sem-check">
+        <ion-checkbox [(ngModel)]="hallazgos.parasitos"></ion-checkbox>
+        <span>Se detectaron parásitos</span>
+      </label>
+      <label class="sem-check">
+        <ion-checkbox [(ngModel)]="hallazgos.nudos"></ion-checkbox>
+        <span>Tenía nudos</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Notas del servicio (groomer) -->
+  <div class="sem-bloque" style="padding-bottom: 70px;">
+    <label class="sem-label">Notas del servicio</label>
+    <textarea
+      class="sem-textarea"
+      rows="4"
+      placeholder="Describe el servicio realizado u observaciones (opcional)..."
+      [(ngModel)]="notasServicio"
+      [readonly]="atendida || guardando || !habilitarAcciones">
+    </textarea>
+    <span class="sem-hint">Esta nota nunca contiene diagnóstico: si detectas algo médico, usa "Escalar a veterinario".</span>
+  </div>
+
+</ion-content>
+
+<ion-footer class="sem-footer ion-no-border" *ngIf="habilitarAcciones && !atendida">
+  <div class="sem-footer-inner">
+    <button class="sem-btn sem-btn--ghost" (click)="escalar()" [disabled]="guardando">
+      <ion-icon name="medkit-outline"></ion-icon>
+      Escalar a veterinario
+    </button>
+    <button class="sem-btn sem-btn--iniciar" *ngIf="puedeIniciar" (click)="iniciarServicio()" [disabled]="guardando">
+      <ion-icon name="play-outline"></ion-icon>
+      Iniciar servicio
+    </button>
+    <button class="sem-btn sem-btn--primary" *ngIf="!puedeIniciar" (click)="guardarServicio()" [disabled]="guardando">
+      <ion-spinner *ngIf="guardando" name="crescent" style="width:16px;height:16px;margin-right:6px;"></ion-spinner>
+      <ion-icon *ngIf="!guardando" name="checkmark-outline"></ion-icon>
+      Finalizar servicio
+    </button>
+  </div>
+</ion-footer>

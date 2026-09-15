@@ -1,0 +1,168 @@
+.cal-card {
+  background: var(--app-surface);
+  border-radius: var(--app-radius-xl);
+  border: 0.5px solid var(--app-border);
+  box-shadow: var(--app-shadow-sm);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+}
+
+.cal-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cal-card__titulo {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--app-text-1);
+  margin: 0;
+}
+
+.cal-card__subtitulo {
+  font-size: 11px;
+  color: var(--app-text-3);
+  margin: 2px 0 0;
+  text-transform: capitalize;
+}
+
+.cal-card__nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  button {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: var(--app-radius-sm);
+    background: var(--app-surface-2);
+    color: var(--app-text-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background var(--app-transition);
+
+    &:hover:not(:disabled) { background: var(--app-primary-tint); color: var(--app-primary-dark); }
+
+    ion-icon { font-size: 14px; }
+  }
+
+  .cal-card__hoy {
+    width: auto;
+    padding: 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--app-primary-dark);
+
+    &:disabled { opacity: .4; cursor: default; }
+  }
+}
+
+.cal-card__semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+
+  span {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: var(--app-text-3);
+    padding-bottom: 4px;
+  }
+}
+
+.cal-card__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.cal-card__dia {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--app-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--app-surface-2);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-text-1);
+
+  &--vacio {
+    background: transparent;
+  }
+
+  &--hoy {
+    background: var(--app-primary);
+    color: #fff;
+    box-shadow: var(--app-shadow-primary);
+  }
+}
+
+.cal-card__num {
+  position: relative;
+  z-index: 1;
+}
+
+.cal-card__punto {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--app-info);
+}
+
+.cal-card__cantidad {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 3px;
+  border-radius: var(--app-radius-full);
+  background: var(--app-info);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cal-card__leyenda {
+  display: flex;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 6px;
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--app-text-3);
+  }
+}
+
+.cal-card__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--app-info);
+
+  &--hoy {
+    background: var(--app-primary);
+  }
+}

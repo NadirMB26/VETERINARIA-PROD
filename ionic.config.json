@@ -1,0 +1,7 @@
+{
+  "name": "veterinaria-canes",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

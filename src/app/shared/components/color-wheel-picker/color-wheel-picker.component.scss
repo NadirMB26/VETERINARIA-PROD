@@ -1,0 +1,155 @@
+// Círculo cromático: anillo de matiz (conic-gradient) + cuadro SV con gradientes.
+.cwp {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 4px 0;
+  user-select: none;
+
+  &__rueda {
+    width: 240px;
+    height: 240px;
+  }
+
+  &__anillo {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    // Anillo de matiz completo (rojo → … → rojo), empezando arriba.
+    background: conic-gradient(
+      from 90deg,
+      #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000
+    );
+    box-shadow: 0 2px 12px rgba(0,0,0,.15);
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  // Marcador del matiz (rota sobre el centro; el punto queda en el borde del anillo).
+  &__marcador {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  &__marcador-punto {
+    position: absolute;
+    top: -7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #111827;
+    box-shadow: 0 1px 4px rgba(0,0,0,.35);
+  }
+
+  // Cuadro de saturación/valor, centrado dentro del anillo.
+  &__box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 150px;
+    height: 150px;
+    border-radius: 34%;
+    border: 8px solid #fff;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0,0,0,.20);
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  &__box-grad {
+    position: absolute;
+    inset: 0;
+
+    &--vertical { z-index: 2; }
+  }
+
+  &__punto {
+    position: absolute;
+    z-index: 3;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #111827;
+    box-shadow: 0 1px 4px rgba(0,0,0,.35);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  // Preview actual + anterior.
+  &__previews {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  &__preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  &__preview-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--app-text-3);
+  }
+
+  &__swatch {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--app-border);
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+  }
+
+  &__hex {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--app-text-1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  // Inputs H/S/V.
+  &__inputs {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  &__input {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+
+    span {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--app-text-3);
+    }
+
+    ion-input {
+      --background: var(--app-surface-2);
+      --padding-start: 6px;
+      --padding-end: 6px;
+      width: 64px;
+      text-align: center;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+  }
+}

@@ -1,0 +1,236 @@
+// ── Contenido ──────────────────────────────────────
+.mc-content {
+  --background: var(--app-page);
+}
+
+// ── Resumen ────────────────────────────────────────
+.mc-resumen {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+
+  &__card {
+    border-radius: var(--app-radius-xl);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 0.5px solid var(--app-border);
+
+    ion-icon { font-size: 26px; }
+
+    div {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    &--favor {
+      background: var(--app-success-light);
+
+      ion-icon { color: var(--app-success); }
+      .mc-resumen__valor { color: var(--app-success); }
+    }
+
+    &--deuda {
+      background: var(--app-danger-light);
+
+      ion-icon { color: var(--app-danger); }
+      .mc-resumen__valor { color: var(--app-danger); }
+    }
+  }
+
+  &__label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--app-text-2);
+  }
+
+  &__valor {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--app-text-1);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+// ── Secciones ──────────────────────────────────────
+.mc-seccion {
+  padding: 0 16px 20px;
+
+  &__titulo {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--app-text-2);
+    margin: 8px 0 10px;
+  }
+}
+
+// Deudas
+.mc-deuda {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--app-surface);
+  border-radius: var(--app-radius-md);
+  border: 0.5px solid var(--app-border);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__fecha {
+    font-size: 12px;
+    color: var(--app-text-3);
+  }
+
+  &__detalle {
+    font-size: 13px;
+    color: var(--app-text-2);
+
+    strong { color: var(--app-danger); }
+  }
+
+  &__arrow {
+    color: var(--app-text-3);
+    font-size: 16px;
+  }
+}
+
+// ── Tabla ──────────────────────────────────────────
+.table-container {
+  margin: 0;
+}
+
+.mc-total {
+  font-weight: 700;
+  color: var(--app-primary-dark);
+}
+
+// ── Detalle modal ──────────────────────────────────
+.mc-detalle {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  &__info {
+    background: var(--app-surface);
+    border-radius: var(--app-radius-lg);
+    border: 0.5px solid var(--app-border);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  &__fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--app-text-2);
+
+    span:last-child { color: var(--app-text-1); }
+  }
+
+  &__titulo {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--app-text-2);
+    margin-top: 6px;
+  }
+
+  &__total {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--app-primary-dark);
+    border-top: 0.5px solid var(--app-border);
+    padding-top: 10px;
+  }
+}
+
+.mc-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--app-surface);
+  border-radius: var(--app-radius-md);
+  border: 0.5px solid var(--app-border);
+  padding: 10px 12px;
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__nombre {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--app-text-1);
+  }
+
+  &__detalle {
+    font-size: 12px;
+    color: var(--app-text-3);
+  }
+
+  &__subtotal {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--app-text-1);
+    flex-shrink: 0;
+  }
+}
+
+.mc-abono {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--app-success-light);
+  border-radius: var(--app-radius-md);
+  padding: 10px 12px;
+
+  &__monto {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--app-success);
+  }
+
+  &__fecha {
+    font-size: 12px;
+    color: var(--app-text-2);
+  }
+}
+
+// ── Desktop ────────────────────────────────────────
+@media (min-width: 1024px) {
+  .mc-resumen {
+    padding: 18px 24px;
+  }
+
+  .mc-seccion {
+    padding: 0 24px 24px;
+  }
+}

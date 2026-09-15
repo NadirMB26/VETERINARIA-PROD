@@ -1,0 +1,40 @@
+<div class="cal-card">
+  <div class="cal-card__head">
+    <div>
+      <h3 class="cal-card__titulo">Agenda del mes</h3>
+      <p class="cal-card__subtitulo">{{ etiquetaMes }}</p>
+    </div>
+    <div class="cal-card__nav">
+      <button type="button" (click)="mesAnterior()" aria-label="Mes anterior">
+        <ion-icon name="chevron-back-outline"></ion-icon>
+      </button>
+      <button type="button" class="cal-card__hoy" (click)="volverHoy()" [disabled]="esMesActual()">Hoy</button>
+      <button type="button" (click)="mesSiguiente()" aria-label="Mes siguiente">
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="cal-card__semana">
+    <span *ngFor="let d of diasSemana">{{ d }}</span>
+  </div>
+
+  <div class="cal-card__grid">
+    <div
+      *ngFor="let dia of celdas"
+      class="cal-card__dia"
+      [class.cal-card__dia--hoy]="dia && esHoy(dia)"
+      [class.cal-card__dia--vacio]="!dia">
+      <ng-container *ngIf="dia">
+        <span class="cal-card__num">{{ dia.getDate() }}</span>
+        <span class="cal-card__punto" *ngIf="cantidadDe(dia) > 0"></span>
+        <span class="cal-card__cantidad" *ngIf="cantidadDe(dia) > 1">{{ cantidadDe(dia) }}</span>
+      </ng-container>
+    </div>
+  </div>
+
+  <div class="cal-card__leyenda">
+    <span><i class="cal-card__dot"></i> Con citas</span>
+    <span><i class="cal-card__dot cal-card__dot--hoy"></i> Hoy</span>
+  </div>
+</div>

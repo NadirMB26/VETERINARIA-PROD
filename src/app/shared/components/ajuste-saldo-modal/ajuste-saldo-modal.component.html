@@ -1,0 +1,74 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Ajuste de saldo a favor</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()" color="light">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="asm-content">
+  <div class="asm-wrapper">
+
+    <div class="asm-field">
+      <label class="asm-label">Cliente *</label>
+      <ion-button expand="block" fill="outline" class="asm-cliente" (click)="seleccionarCliente()">
+        <ion-icon name="person-outline" slot="start"></ion-icon>
+        {{ clienteSeleccionado
+          ? (clienteSeleccionado.Nombre + ' ' + clienteSeleccionado.Apellido)
+          : 'Seleccionar cliente' }}
+      </ion-button>
+      <span class="asm-hint" *ngIf="clienteSeleccionado">
+        Saldo a favor actual: {{ saldoFavorActual | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </span>
+    </div>
+
+    <div class="asm-field" *ngIf="clienteSeleccionado">
+      <label class="asm-label">Tipo de movimiento *</label>
+      <ion-segment [(ngModel)]="direccion" class="asm-segment">
+        <ion-segment-button value="sumar">
+          <ion-icon name="add-circle-outline"></ion-icon>
+          Sumar
+        </ion-segment-button>
+        <ion-segment-button value="restar">
+          <ion-icon name="remove-circle-outline"></ion-icon>
+          Restar
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+
+    <div class="asm-field" *ngIf="clienteSeleccionado">
+      <label class="asm-label">Monto *</label>
+      <ion-input
+        [(ngModel)]="monto"
+        type="number"
+        min="0"
+        step="500"
+        placeholder="0"
+        class="asm-input">
+      </ion-input>
+      <span class="asm-hint" *ngIf="direccion === 'restar'">Máximo {{ saldoFavorActual | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+    </div>
+
+    <div class="asm-field" *ngIf="clienteSeleccionado">
+      <label class="asm-label">Motivo (opcional)</label>
+      <ion-textarea
+        [(ngModel)]="nota"
+        rows="2"
+        placeholder="Ej: Abono en efectivo por caja, nota de crédito…"
+        class="asm-input asm-input--area">
+      </ion-textarea>
+    </div>
+
+    <div class="asm-footer" *ngIf="clienteSeleccionado">
+      <ion-button
+        class="asm-btn"
+        [disabled]="!formValido || guardando"
+        (click)="guardar()">
+        <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
+        {{ guardando ? 'Guardando…' : 'Aplicar ajuste' }}
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>

@@ -1,0 +1,57 @@
+<!-- src/app/shared/components/cliente-selector/cliente-selector.component.html -->
+<ion-header class="cs-header">
+  <ion-toolbar>
+    <ion-title>Buscar cliente</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="seleccionar(null)" fill="clear">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<div class="cs-search">
+  <ion-searchbar
+    [(ngModel)]="busqueda"
+    (ionInput)="filtrar()"
+    placeholder="Buscar por nombre, correo o teléfono"
+    debounce="200"
+    autofocus
+    class="cs-searchbar">
+  </ion-searchbar>
+</div>
+
+<div class="cs-count" *ngIf="!cargando">
+  {{ filtrados.length }} cliente{{ filtrados.length === 1 ? '' : 's' }}
+</div>
+
+<div class="cs-list">
+
+  <div class="cs-estado" *ngIf="cargando">
+    <ion-spinner name="crescent"></ion-spinner>
+    <span>Cargando clientes...</span>
+  </div>
+
+  <div class="cs-estado" *ngIf="!cargando && filtrados.length === 0">
+    <ion-icon name="search-outline"></ion-icon>
+    <span>Sin resultados</span>
+    <small>Prueba con otro nombre o teléfono</small>
+  </div>
+
+  <button
+    type="button"
+    class="cs-item"
+    *ngFor="let cliente of filtrados"
+    (click)="seleccionar(cliente)">
+    <div class="cs-avatar">
+      {{ iniciales(cliente) }}
+    </div>
+    <div class="cs-info">
+      <strong class="cs-nombre">{{ cliente.Nombre }} {{ cliente.Apellido }}</strong>
+      <span class="cs-detalle" *ngIf="cliente.Correo">{{ cliente.Correo }}</span>
+      <span class="cs-detalle" *ngIf="cliente.Telefono">{{ cliente.Telefono }}</span>
+    </div>
+    <ion-icon name="chevron-forward" class="cs-chevron"></ion-icon>
+  </button>
+
+</div>

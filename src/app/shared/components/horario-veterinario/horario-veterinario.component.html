@@ -1,0 +1,118 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="hv-toolbar">
+
+    <!-- Si es modal: botón cerrar. Si es página: back button -->
+    <ion-buttons slot="start">
+      <ion-button *ngIf="esModal" (click)="cerrarModal()" fill="clear">
+        <ion-icon slot="icon-only" name="close-outline"></ion-icon>
+      </ion-button>
+      <ion-back-button *ngIf="!esModal" defaultHref="/admin/veterinarios" text=""></ion-back-button>
+    </ion-buttons>
+
+    <ion-title class="hv-title">
+      <span class="hv-title-main">Horarios</span>
+      <span class="hv-title-sub" *ngIf="nombreVet">{{ nombreVet }}</span>
+    </ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="copiarSemanaLaboral()" fill="clear" class="hv-copy-btn">
+        <ion-icon name="copy-outline" slot="start"></ion-icon>
+        Lun–Vie
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="hv-content">
+
+  <!-- Skeleton -->
+  <ng-container *ngIf="cargando">
+    <div class="hv-skeleton-wrap">
+      <ion-skeleton-text *ngFor="let i of [1,2,3,4,5]" animated
+        style="height:80px; border-radius:12px; margin-bottom:12px">
+      </ion-skeleton-text>
+    </div>
+  </ng-container>
+
+  <!-- Días -->
+  <div class="hv-dias-wrap" *ngIf="!cargando">
+    <div
+      *ngFor="let dia of dias"
+      class="hv-dia-card"
+      [class.hv-dia-activo]="dia.activo"
+      [class.hv-dia-inactivo]="!dia.activo">
+
+      <!-- Cabecera -->
+      <div class="hv-dia-header">
+        <div class="hv-dia-info">
+          <span class="hv-dia-label">{{ dia.label }}</span>
+          <span class="hv-dia-preview">{{ getSlotsPreview(dia) }}</span>
+        </div>
+        <ion-toggle [(ngModel)]="dia.activo" class="hv-toggle"
+          [color]="dia.activo ? 'primary' : 'medium'">
+        </ion-toggle>
+      </div>
+
+      <!-- Cuerpo -->
+      <div class="hv-dia-body" *ngIf="dia.activo">
+
+        <!-- Presets rápidos -->
+        <div class="hv-presets">
+          <span class="hv-presets-label">Turno rápido</span>
+          <div class="hv-preset-btns">
+            <button class="hv-preset-btn" [class.hv-preset-on]="tienePreset(dia,'manana')"
+              (click)="togglePreset(dia,'manana')">
+              <ion-icon name="sunny-outline"></ion-icon>
+              <span>Mañana</span>
+              <small>8 AM – 12 PM</small>
+            </button>
+            <button class="hv-preset-btn" [class.hv-preset-on]="tienePreset(dia,'tarde')"
+              (click)="togglePreset(dia,'tarde')">
+              <ion-icon name="partly-sunny-outline"></ion-icon>
+              <span>Tarde</span>
+              <small>1 PM – 6 PM</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Separador -->
+        <div class="hv-sep"><span>o selecciona bloques exactos</span></div>
+
+        <!-- Grilla de chips -->
+        <div class="hv-slots-grid">
+          <div
+            *ngFor="let h of horasDisponibles"
+            class="hv-slot-chip"
+            [class.active]="isSlotSeleccionado(dia, h)"
+            (click)="toggleSlot(dia, h)">
+            {{ formatHora12Slot(h) }}
+          </div>
+        </div>
+
+        <!-- Resumen de turnos resultantes -->
+        <div class="hv-turnos-resumen" *ngIf="dia.turnos.length > 0">
+          <span *ngFor="let t of dia.turnos" class="hv-turno-tag">
+            <ion-icon [name]="t.preset === 'manana' ? 'sunny-outline'
+                             : t.preset === 'tarde'  ? 'partly-sunny-outline'
+                             : 'time-outline'">
+            </ion-icon>
+            {{ formatHora12Slot(t.inicio) }} – {{ formatHora12Slot(t.fin) }}
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</ion-content>
+
+<ion-footer class="hv-footer ion-no-border">
+  <ion-toolbar>
+    <ion-button expand="block" class="hv-save-btn"
+      [disabled]="cargando"
+      (click)="guardar()">
+      <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+      Guardar horarios
+    </ion-button>
+  </ion-toolbar>
+</ion-footer>

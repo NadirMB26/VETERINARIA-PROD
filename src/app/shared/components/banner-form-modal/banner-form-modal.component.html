@@ -1,0 +1,61 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>{{ esEdicion ? 'Editar banner' : 'Nuevo banner' }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="cancelar()" color="light">Cerrar</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="bf-content">
+  <div class="bf-wrapper">
+
+    <div class="bf-preview" *ngIf="fotoPreview">
+      <img [src]="fotoPreview" alt="Vista previa del banner" />
+    </div>
+
+    <div class="bf-field">
+      <label class="bf-label">Imagen *</label>
+      <label class="bf-upload">
+        <ion-icon name="cloud-upload-outline"></ion-icon>
+        {{ fotoPreview ? 'Cambiar imagen' : 'Seleccionar imagen' }}
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="onImagenSeleccionado($event)" />
+      </label>
+      <button type="button" class="bf-quitar" *ngIf="fotoPreview" (click)="quitarImagen()">
+        <ion-icon name="trash-outline"></ion-icon>
+        Quitar imagen
+      </button>
+      <span class="bf-hint">PNG, JPG o WEBP · máximo 600 KB · formato panorámico recomendado (16:5)</span>
+    </div>
+
+    <div class="bf-field">
+      <label class="bf-label">Título (opcional)</label>
+      <ion-input [(ngModel)]="titulo" type="text" placeholder="Ej: Semana de vacunación" class="bf-input"></ion-input>
+    </div>
+
+    <div class="bf-field">
+      <label class="bf-label">Enlace (opcional)</label>
+      <ion-input [(ngModel)]="link" type="text" placeholder="Ej: /layout/productos" class="bf-input"></ion-input>
+      <span class="bf-hint">Ruta interna de la app a la que se navega al tocar el banner</span>
+    </div>
+
+    <div class="bf-field">
+      <ion-toggle [(ngModel)]="activo" color="success">Banner activo</ion-toggle>
+    </div>
+
+    <div class="bf-footer">
+      <ion-button
+        expand="block"
+        color="primary"
+        [disabled]="!formValido || guardando"
+        (click)="guardar()">
+        <ion-spinner *ngIf="guardando" name="crescent" slot="start"></ion-spinner>
+        {{ guardando ? 'Guardando…' : (esEdicion ? 'Guardar cambios' : 'Crear banner') }}
+      </ion-button>
+    </div>
+
+  </div>
+</ion-content>
