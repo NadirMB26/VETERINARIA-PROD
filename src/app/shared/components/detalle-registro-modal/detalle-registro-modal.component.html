@@ -64,6 +64,20 @@
     <div class="drm-caja">{{ registro.observaciones }}</div>
   </ng-container>
 
+  <ng-container *ngIf="serviciosRealizados.length">
+    <p class="drm-label">Servicios realizados</p>
+    <div class="drm-caja">
+      <div class="drm-fila" *ngFor="let s of serviciosRealizados">
+        <span class="drm-sub">{{ s.cantidad }} × {{ s.nombre }}</span>
+        <span class="drm-sep">·</span>
+        <span class="drm-sub">{{ formatoMoneda(s.subtotal) }}</span>
+      </div>
+      <div class="drm-fila">
+        <strong>Total: {{ formatoMoneda(totalServicios) }}</strong>
+      </div>
+    </div>
+  </ng-container>
+
   <div class="drm-corregido" *ngIf="registro.motivoUltimaCorreccion">
     <ion-icon name="create-outline"></ion-icon>
     <span>Última corrección: {{ registro.motivoUltimaCorreccion }}</span>

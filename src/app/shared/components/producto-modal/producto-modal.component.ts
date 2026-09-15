@@ -5,6 +5,7 @@ import { UtilidadesService } from 'src/app/core/services/utilidades.service';
 import {
   Producto,
   CategoriaProducto,
+  CategoriaInfo,
   CATEGORIAS_PRODUCTO,
   calcularDescuento,
   calcularPrecioPromocion,
@@ -79,6 +80,27 @@ export class ProductoModalComponent implements OnInit {
     return this.tipo === 'servicio';
   }
 
+  /**
+   * Categorías ofrecidas: un servicio solo puede ser médico (`servicios`) o
+   * de estética (`estetica`); un producto puede ser cualquiera.
+   */
+  get categoriasDisponibles(): CategoriaInfo[] {
+    if (this.tipo !== 'servicio') return this.categorias;
+    return this.categorias.filter(c => c.id === 'servicios' || c.id === 'estetica');
+  }
+
+  /**
+   * Normaliza la categoría de un servicio: los registros viejos guardados con
+   * categoría de producto (p. ej. "medicamentos") pasan a `servicios`, para que
+   * aparezcan al agendar citas.
+   */
+  private normalizarCategoriaServicio() {
+    if (this.tipo !== 'servicio') return;
+    if (this.categoria !== 'servicios' && this.categoria !== 'estetica') {
+      this.categoria = 'servicios';
+    }
+  }
+
   /** Servicio de estética: usa tipo de servicio (baño, corte...). */
   get esServicioEstetica(): boolean {
     return this.esServicio && this.categoria === 'estetica';
@@ -102,7 +124,10 @@ export class ProductoModalComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.tipoFijo) this.tipo = this.tipoFijo;
-    if (!this.producto) return;
+    if (!this.producto) {
+      this.normalizarCategoriaServicio();
+      return;
+    }
     this.nombre = this.producto.nombre;
     this.categoria = this.producto.categoria;
     this.tipo = this.producto.tipo;
@@ -128,6 +153,7 @@ export class ProductoModalComponent implements OnInit {
     this.tipoServicioEstetica = this.producto.tipoServicioEstetica ?? '';
     this.duracionMin = this.producto.duracionMin ?? 0;
     this.incluye = [...(this.producto.incluye ?? [])];
+    this.normalizarCategoriaServicio();
   }
 
   get formValido(): boolean {
@@ -214,6 +240,11 @@ export class ProductoModalComponent implements OnInit {
 
   async guardar() {
     if (!this.formValido || this.guardando) return;
+
+    if (this.tipo === 'servicio' && this.categoria !== 'servicios' && this.categoria !== 'estetica') {
+      await this.util.showToast('Selecciona la categoría "Servicios Médicos" o "Estética"', 'warning');
+      return;
+    }
 
     const sku = this.sku.trim();
     if (sku) {

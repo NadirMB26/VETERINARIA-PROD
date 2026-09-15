@@ -68,15 +68,26 @@ export class AuthService {
   }
 
   async getRol(uid: string): Promise<string | null> {
-    const colecciones = ['administradores', 'clientes', 'recepcionistas', 'veterinarios', 'groomers'];
-    const roles = ['administrador', 'cliente', 'recepcionista', 'veterinario', 'groomer'];
+    // `clientes` se consulta al final: un groomer no puede leer esa colección
+    // (las reglas solo permiten staff o al propio cliente) y leerla antes
+    // abortaba el login con `permission-denied`.
+    const colecciones = ['administradores', 'recepcionistas', 'veterinarios', 'groomers', 'clientes'];
+    const roles = ['administrador', 'recepcionista', 'veterinario', 'groomer', 'cliente'];
 
     for (let i = 0; i < colecciones.length; i++) {
-      const snap = await getDoc(doc(this.firestore, colecciones[i], uid));
-      if (snap.exists()) {
-        const data = snap.data() as any;
-        if (data?.estado === 'inactivo') throw new Error('inactivo');
-        return roles[i];
+      try {
+        const snap = await getDoc(doc(this.firestore, colecciones[i], uid));
+        if (snap.exists()) {
+          const data = snap.data() as any;
+          if (data?.estado === 'inactivo') throw new Error('inactivo');
+          return roles[i];
+        }
+      } catch (err: any) {
+        // Cuenta deshabilitada: siempre corta el login.
+        if (err?.message === 'inactivo') throw err;
+        // Colección sin permiso de lectura (p. ej. groomer → clientes): se salta.
+        if (err?.code === 'permission-denied') continue;
+        throw err;
       }
     }
     return null;

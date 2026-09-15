@@ -78,7 +78,14 @@ service cloud.firestore {
     // ── Usuarios por rol ────────────────────────────────
     match /administradores/{uid} {
       allow read: if isSignedIn();
-      allow write: if esAdmin();
+      allow create, delete: if esAdmin();
+      // Un administrador solo edita su propio perfil (Configuración). A otro
+      // administrador únicamente se le puede cambiar el estado (pausar/activar),
+      // nunca sus datos: evita que un admin modifique a otro o bloquee el sistema.
+      allow update: if esAdmin() && (
+        (request.auth.uid == uid && soloCamposDePerfil())
+        || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['estado'])
+      );
     }
     match /recepcionistas/{uid} {
       allow read: if isSignedIn();
@@ -99,7 +106,9 @@ service cloud.firestore {
         || (esGroomer() && request.auth.uid == uid && soloCamposDePerfil());
     }
     match /clientes/{uid} {
-      allow read: if esStaff() || (esCliente() && request.auth.uid == uid);
+      // El groomer también lee clientes: lo necesita para resolver su rol al
+      // iniciar sesión y para consultar la ficha del dueño de sus citas.
+      allow read: if esStaff() || esGroomer() || (esCliente() && request.auth.uid == uid);
       allow create: if esAdmin() || esRecepcionista();
       allow update: if esAdmin() || esRecepcionista()
         || (esCliente() && request.auth.uid == uid && soloCamposDePerfil());
@@ -206,7 +215,9 @@ service cloud.firestore {
 
     // ── Registros clínicos (Fase 1) ─────────────────────
     match /registrosClinicos/{idRegistro} {
-      allow read: if esStaff()
+      // El groomer lee el historial clínico de la mascota (solo lectura:
+      // las reglas de create/update siguen siendo exclusivas del veterinario).
+      allow read: if esStaff() || esGroomer()
         || (esCliente() && resource.data.idCliente == request.auth.uid);
       // Solo el veterinario crea/corrige contenido clínico.
       allow create: if esVeterinario();

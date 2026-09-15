@@ -11,10 +11,12 @@ import { Injectable, inject } from '@angular/core';
 import {
   Firestore,
   collection,
+  deleteField,
   doc,
   getDoc,
   getDocs,
   query,
+  setDoc,
   where,
   runTransaction,
   updateDoc,
@@ -41,20 +43,17 @@ export class CitaVentaService {
   private ventasRef = collection(this.firestore, 'ventas');
 
   /**
-   * @description Crea la cita y su venta/cuenta por cobrar en una sola
-   * transacción. Los ítems se re-precian desde el catálogo (fuente de verdad)
-   * y, si son productos, se valida y descuenta stock.
+   * @description Crea la cita y, si tiene servicios, su venta/cuenta por cobrar
+   * en una sola transacción. Los ítems se re-precian desde el catálogo (fuente
+   * de verdad) y, si son productos, se valida y descuenta stock. Una cita sin
+   * servicios se guarda sola, sin venta.
    *
-   * @returns Ids de cita y venta, y el total calculado.
+   * @returns Ids de cita y venta (`idVenta` vacío si no hubo servicios), y el total.
    */
   async crearCitaConVenta(
     cita: Omit<Cita, 'idCita' | 'idVenta' | 'fechaRegistro'>,
     items: ItemVenta[],
   ): Promise<{ idCita: string; idVenta: string; total: number }> {
-    if (!items.length) {
-      throw new Error('La cita debe tener al menos un servicio');
-    }
-
     // Validación de solape antes de escribir (la UI ya la hace; defensa extra).
     const esEstetica = cita.categoria === 'ESTETICA';
     const campo: 'idGroomer' | 'idVeterinario' = esEstetica ? 'idGroomer' : 'idVeterinario';
@@ -77,6 +76,18 @@ export class CitaVentaService {
     }
 
     const citaRef = doc(this.citasRef);
+
+    // Cita sin servicios: se guarda sola y no genera cuenta por cobrar.
+    if (!items.length) {
+      await setDoc(citaRef, limpiarUndefined({
+        ...cita,
+        itemsServicio: [],
+        totalEstimado: 0,
+        fechaRegistro: new Date().toISOString(),
+      }));
+      return { idCita: citaRef.id, idVenta: '', total: 0 };
+    }
+
     const ventaRef = doc(this.ventasRef);
 
     return runTransaction(this.firestore, async (tx) => {
@@ -138,8 +149,9 @@ export class CitaVentaService {
         idGroomer: cita.idGroomer,
         origen: 'cita',
         fecha: cita.fecha,
-        metodoPago: 'efectivo',
-        // Una cita sin costo nace pagada y no aparece en Cobranza.
+        // La cita nace a crédito (se paga después en Cobranza); sin costo,
+        // nace pagada y no aparece en Cobranza.
+        metodoPago: total > 0 ? 'credito' : 'efectivo',
         estadoPago: total > 0 ? 'pendiente' : 'pagado',
         items: itemsFinales,
         subtotal,
@@ -204,10 +216,35 @@ export class CitaVentaService {
         items: itemsFinales,
         subtotal,
         total,
+        metodoPago: total > 0 ? 'credito' : 'efectivo',
         estadoPago: total > 0 ? 'pendiente' : 'pagado',
       });
 
       return total;
+    });
+  }
+
+  /**
+   * @description Quita los servicios de una cita al editarla sin ninguno.
+   * Anula la venta vinculada si sigue pendiente y sin abonos; si ya tiene
+   * abonos, exige revisión manual (no se toca la cuenta por cobrar).
+   */
+  async quitarVentaDeCita(idCita: string): Promise<void> {
+    const venta = await this.getVentaPorCitaOnce(idCita);
+
+    if (venta) {
+      if (venta.estadoPago !== 'pendiente' || (venta.abonado ?? 0) > 0) {
+        throw new Error(
+          'No se pueden quitar los servicios: la cuenta por cobrar ya tiene abonos o no está pendiente'
+        );
+      }
+      await updateDoc(doc(this.firestore, 'ventas', venta.idVenta), { estadoPago: 'anulada' });
+    }
+
+    await updateDoc(doc(this.firestore, 'citas', idCita), {
+      itemsServicio: [],
+      totalEstimado: 0,
+      idVenta: deleteField(),
     });
   }
 

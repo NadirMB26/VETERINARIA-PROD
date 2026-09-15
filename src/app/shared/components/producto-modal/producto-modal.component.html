@@ -37,8 +37,9 @@
       <div class="pm-field">
         <label class="pm-label">Categoría</label>
         <ion-select [(ngModel)]="categoria" interface="action-sheet" class="pm-input">
-          <ion-select-option *ngFor="let c of categorias" [value]="c.id">{{ c.nombre }}</ion-select-option>
+          <ion-select-option *ngFor="let c of categoriasDisponibles" [value]="c.id">{{ c.nombre }}</ion-select-option>
         </ion-select>
+        <span class="pm-hint" *ngIf="esServicio">Define si el servicio aparece en citas médicas o de estética.</span>
       </div>
       <div class="pm-field" *ngIf="!tipoBloqueado">
         <label class="pm-label">Tipo</label>

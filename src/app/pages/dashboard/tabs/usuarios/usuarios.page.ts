@@ -258,6 +258,12 @@ export class UsuariosPage implements OnInit {
   }
 
   puedeEditarUsuario(usuario: any): boolean {
+    // Los administradores no se editan entre sí: evita bloqueos de la cuenta.
+    // Cada admin edita su propio perfil desde Configuración.
+    if (usuario.rol === 'administrador') {
+      return false;
+    }
+
     if (usuario.uid === this.authService.getUidActual()) {
       return false;
     }
@@ -278,6 +284,14 @@ export class UsuariosPage implements OnInit {
   }
 
   async validarEdicion(usuario: any) {
+    if (usuario.rol === 'administrador') {
+      this.util.showToast(
+        'Los administradores no se editan entre sí. Edita tu perfil en Configuración.',
+        'warning'
+      );
+      return;
+    }
+
     if (!this.puedeEditarUsuario(usuario)) {
       this.util.showToast(
         'No tienes permisos para editar este usuario.',

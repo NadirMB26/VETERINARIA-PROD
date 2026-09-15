@@ -28,7 +28,6 @@ import { Producto } from 'src/app/core/models/producto.model';
 import { ProductoService } from 'src/app/core/services/producto.service';
 import { CitaVentaService } from 'src/app/core/services/cita-venta.service';
 import { ItemVenta, Venta, saldoVenta } from 'src/app/core/models/venta.model';
-import { ConfirmacionVentaModalComponent } from 'src/app/shared/components/confirmacion-venta-modal/confirmacion-venta-modal.component';
 import { MascotaDetalleComponent } from 'src/app/shared/components/mascota-detalle/mascota-detalle.component';
 import { infoTipoCita } from 'src/app/core/models/catalogo-citas.model';
 
@@ -119,19 +118,24 @@ export class CitaPage implements OnInit, OnDestroy {
   }
 
   // ── Servicios de la cita ─────────────────────────────────
-  /** Categoría del catálogo según el canal elegido. */
-  get categoriaServicioCanal(): 'estetica' | 'servicios' {
-    return this.canal === 'estetica' ? 'estetica' : 'servicios';
+  /**
+   * Un servicio es de estética si su categoría lo indica o si tiene tipo de
+   * servicio estético; el resto aplica al canal médico. Así los servicios
+   * guardados con categorías viejas también aparecen al agendar.
+   */
+  private esServicioEstetica(p: Producto): boolean {
+    return p.categoria === 'estetica' || !!p.tipoServicioEstetica;
   }
 
   /** Servicios activos que aplican al canal/tipo elegido. */
   get serviciosDisponibles(): Producto[] {
     return this.serviciosCatalogo.filter(p => {
-      if (p.estado !== 'activo' || p.tipo !== 'servicio') return false;
-      if (p.categoria !== this.categoriaServicioCanal) return false;
+      if (p.estado !== 'activo') return false;
       if (this.canal === 'estetica') {
+        if (!this.esServicioEstetica(p)) return false;
         return !p.tipoServicioEstetica || !this.tipoServicio || p.tipoServicioEstetica === this.tipoServicio;
       }
+      if (this.esServicioEstetica(p)) return false;
       return !p.tipoCita || !this.tipo || p.tipoCita === this.tipo;
     });
   }
@@ -571,12 +575,11 @@ export class CitaPage implements OnInit, OnDestroy {
     const esEstetica = this.tipo === 'Estética';
     const asignadoOk = esEstetica ? !!this.idGroomer : !!this.idVeterinario;
     const servicioOk = esEstetica ? !!this.tipoServicio : true;
-    // Toda cita debe estar ligada al menos a un servicio del catálogo.
-    const serviciosOk = this.seleccionServicios.length > 0;
+    // Los servicios de la cita son opcionales: la cita puede no generar venta.
     // Bloqueo por especialidad: si el vet elegido no cubre el tipo, no se guarda.
     const tipoCubierto = !this.tipo || esEstetica || !this.veterinarioIncompatible;
     this.formularioEsValido = !!(
-      this.idCliente && this.idMascota && asignadoOk && servicioOk && serviciosOk &&
+      this.idCliente && this.idMascota && asignadoOk && servicioOk &&
       this.fecha && !this.esFechaPasada &&
       this.horaInicio && this.tipo && tipoCubierto
     );
@@ -766,9 +769,13 @@ export class CitaPage implements OnInit, OnDestroy {
     );
 
     // Catálogo de servicios para ligar la cita a una o más cuentas por cobrar.
+    // Incluye documentos legados sin `tipo` cuya categoría sea de servicio.
     this.subs.push(
       this.productoSvc.getTodos().subscribe(productos => {
-        this.serviciosCatalogo = productos.filter(p => p.tipo === 'servicio');
+        this.serviciosCatalogo = productos.filter(p =>
+          p.tipo === 'servicio'
+          || (!p.tipo && (p.categoria === 'servicios' || p.categoria === 'estetica'))
+        );
       })
     );
   }
@@ -806,10 +813,6 @@ export class CitaPage implements OnInit, OnDestroy {
   async guardar() {
     if (!this.formularioEsValido) {
       await this.util.showToast('Completa todos los campos requeridos', 'warning');
-      return;
-    }
-    if (this.seleccionServicios.length === 0) {
-      await this.util.showToast('Agrega al menos un servicio a la cita', 'warning');
       return;
     }
     if (this.esFechaPasada) {
@@ -866,16 +869,25 @@ export class CitaPage implements OnInit, OnDestroy {
       if (this.modo === 'crear') {
         const res = await this.citaVentaSvc.crearCitaConVenta(payload, items);
         this.closeModal();
-        await this.util.showToast('Cita registrada y cuenta por cobrar generada', 'success');
-        await this.mostrarConfirmacionVenta(res.idVenta, res.idCita);
+        await this.util.showToast(
+          res.idVenta
+            ? 'Cita registrada. La cuenta quedó pendiente en Cobranza.'
+            : 'Cita registrada correctamente',
+          'success'
+        );
       } else {
         const citaAnterior = this.todasCitas.find(c => c.idCita === this.idCita) ?? this.citaDetalle;
         const itemsAnteriores = citaAnterior?.itemsServicio ?? [];
         const firma = (lista: ItemVenta[]) =>
           JSON.stringify(lista.map(i => [i.idProducto, i.cantidad]).sort());
         if (this.idCita && firma(itemsAnteriores) !== firma(items)) {
-          // Solo se edita la venta si sigue pendiente y sin abonos.
-          await this.citaVentaSvc.actualizarVentaDeCita(this.idCita, items);
+          if (items.length) {
+            // Solo se edita la venta si sigue pendiente y sin abonos.
+            await this.citaVentaSvc.actualizarVentaDeCita(this.idCita, items);
+          } else {
+            // Se quitaron todos los servicios: se anula la cuenta por cobrar.
+            await this.citaVentaSvc.quitarVentaDeCita(this.idCita);
+          }
         }
         await this.citaSvc.actualizarCita(this.idCita, payload);
         await this.util.showToast('Cita actualizada correctamente', 'success');
@@ -887,23 +899,6 @@ export class CitaPage implements OnInit, OnDestroy {
     } finally {
       await loading.dismiss();
     }
-  }
-
-  /** Abre la confirmación de venta generada al agendar (cobro opcional). */
-  private async mostrarConfirmacionVenta(idVenta: string, idCita: string) {
-    const venta = await this.citaVentaSvc.getVentaPorCitaOnce(idCita);
-    if (!venta) return;
-
-    const modal = await this.modalCtrl.create({
-      component: ConfirmacionVentaModalComponent,
-      componentProps: { venta, idCita },
-      breakpoints: [0, 0.85, 1],
-      initialBreakpoint: 0.85,
-      backdropDismiss: false,
-      cssClass: 'modal-confirmacion-venta',
-    });
-    await modal.present();
-    await modal.onWillDismiss();
   }
 
   /** Categoría clínica derivada del tipo de cita (catálogo F0). */

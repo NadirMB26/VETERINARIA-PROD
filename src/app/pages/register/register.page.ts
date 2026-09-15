@@ -176,6 +176,12 @@ async guardarEdicion() {
     }
   }
 
+  // Defensa en profundidad: un administrador no edita la cuenta de otro.
+  if (this.role === 'administrador' && this.uidEditar !== this.authService.getUidActual()) {
+    await this.mostrarToast('No puedes editar la cuenta de otro administrador', 'warning');
+    return;
+  }
+
   this.guardando = true;
 
   try {

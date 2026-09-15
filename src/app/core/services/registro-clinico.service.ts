@@ -29,6 +29,7 @@ import {
   EdicionRegistro,
   NuevoRegistroClinico,
 } from '../models/registro-clinico.model';
+import { limpiarUndefined } from '../utils/firestore.util';
 
 @Injectable({ providedIn: 'root' })
 export class RegistroClinicoService {
@@ -114,11 +115,11 @@ export class RegistroClinicoService {
    */
   async crear(registro: NuevoRegistroClinico): Promise<string> {
     const ahora = new Date().toISOString();
-    const ref = await addDoc(this.regCol(), {
+    const ref = await addDoc(this.regCol(), limpiarUndefined({
       ...registro,
       fechaRegistro: registro.fechaRegistro ?? ahora,
       fechaActualizacion: ahora,
-    });
+    }));
     return ref.id;
   }
 

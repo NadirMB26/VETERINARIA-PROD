@@ -300,14 +300,14 @@
         </div>
       </div>
 
-      <!-- Card 3.5: Servicios de la cita (obligatorio) -->
+      <!-- Card 3.5: Servicios de la cita (opcional) -->
       <div class="form-card">
         <p class="form-card-label">
           <ion-icon name="pricetags-outline"></ion-icon>
-          Servicios de la cita <span class="required">*</span>
+          Servicios de la cita <span class="opcional">(opcional)</span>
         </p>
         <span class="field-hint" style="display:block; margin-bottom: 8px;">
-          Toda cita queda ligada a uno o más servicios del catálogo y genera su cuenta por cobrar.
+          Puedes agendar sin servicios. Si agregas uno o más, se genera su cuenta por cobrar.
         </span>
 
         <div class="servicios-lista" *ngIf="serviciosDisponibles.length; else sinServicios">
@@ -338,7 +338,7 @@
         <ng-template #sinServicios>
           <div class="slots-aviso slots-aviso-warning">
             <ion-icon name="alert-circle-outline"></ion-icon>
-            <span>No hay servicios activos para este tipo. Regístralos en el catálogo de Servicios.</span>
+            <span>No hay servicios disponibles para este tipo. Puedes agendar sin servicios o registrarlos en el catálogo.</span>
           </div>
         </ng-template>
 

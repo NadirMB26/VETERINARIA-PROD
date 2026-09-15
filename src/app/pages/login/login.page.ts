@@ -90,6 +90,7 @@ export class LoginPage implements OnInit, OnDestroy {
       'auth/invalid-email':     'El correo no es válido',
       'auth/too-many-requests': 'Demasiados intentos. Espera un momento',
       'auth/user-disabled':     'Esta cuenta ha sido deshabilitada',
+      'permission-denied':      'No se pudo verificar tu perfil. Contacta al administrador',
     };
     return errores[code] ?? 'Correo o contraseña incorrectos';
   }

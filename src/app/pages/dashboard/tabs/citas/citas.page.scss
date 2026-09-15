@@ -71,6 +71,13 @@ ion-fab-button {
     font-size: 14px;
     color: var(--app-primary);
   }
+
+  .opcional {
+    font-weight: 600;
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--app-text-3);
+  }
 }
 
 // ── Quick tip ─────────────────────────────────────────────────────
@@ -671,7 +678,7 @@ ion-badge {
   );
   border: 1.5px solid var(--app-border);
 }
-/* Est�tica (Fase 2) */
+/* Est�tica (Fase 2) */
 .tipo-chip.c-estetica.active {
   background: #fae8ff;
   color: #86198f;
@@ -680,7 +687,7 @@ ion-badge {
   box-shadow: 0 2px 8px rgba(217,70,239,0.2);
 }
 
-/* Canal profesional (Vet / Est�tica) */
+/* Canal profesional (Vet / Est�tica) */
 .canal-chips {
   display: flex;
   gap: 8px;

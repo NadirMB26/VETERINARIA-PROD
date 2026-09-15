@@ -87,6 +87,23 @@ export class DetalleRegistroModalComponent {
     return this.cita?.fecha ?? (iso ? this.formatearFecha(iso) : '');
   }
 
+  /** Servicios de la cita que originó el registro (histórico de lo realizado). */
+  get serviciosRealizados(): { nombre: string; cantidad: number; subtotal: number }[] {
+    return (this.cita?.itemsServicio ?? []).map(i => ({
+      nombre: i.nombre,
+      cantidad: i.cantidad,
+      subtotal: i.subtotal,
+    }));
+  }
+
+  get totalServicios(): number {
+    return this.serviciosRealizados.reduce((acc, s) => acc + s.subtotal, 0);
+  }
+
+  formatoMoneda(valor: number): string {
+    return `$${Number(valor || 0).toLocaleString('es-CO')}`;
+  }
+
   formatearFecha(iso: string): string {
     if (!iso) return '';
     return new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -147,6 +164,13 @@ export class DetalleRegistroModalComponent {
         { text: r.medicamentos || 'Ninguno' },
         { text: 'Observaciones:', bold: true, margin: [0, 10, 0, 2] },
         { text: r.observaciones || 'Ninguna' },
+        ...(this.serviciosRealizados.length ? [
+          { text: '\nServicios realizados', style: 'sectionHeader' },
+          ...this.serviciosRealizados.map(s => ({
+            text: `${s.cantidad} × ${s.nombre} — ${this.formatoMoneda(s.subtotal)}`,
+          })),
+          { text: `Total: ${this.formatoMoneda(this.totalServicios)}`, bold: true, margin: [0, 4, 0, 0] },
+        ] : []),
         ...(r.motivoUltimaCorreccion ? [
           { text: '\nÚltima corrección:', bold: true, margin: [0, 10, 0, 2] },
           { text: r.motivoUltimaCorreccion },
@@ -177,6 +201,14 @@ export class DetalleRegistroModalComponent {
       `Tratamiento: ${r.tratamiento || '—'}`,
       r.medicamentos ? `Medicamentos: ${r.medicamentos}` : null,
       r.observaciones ? `Observaciones: ${r.observaciones}` : null,
+      ...(this.serviciosRealizados.length
+        ? [
+            '',
+            'Servicios realizados:',
+            ...this.serviciosRealizados.map(s => `- ${s.cantidad} × ${s.nombre} — ${this.formatoMoneda(s.subtotal)}`),
+            `Total: ${this.formatoMoneda(this.totalServicios)}`,
+          ]
+        : []),
       r.motivoUltimaCorreccion ? `Última corrección: ${r.motivoUltimaCorreccion}` : null,
     ].filter(Boolean).join('\n');
 
